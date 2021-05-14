@@ -18,7 +18,7 @@ public class HttpRequestTest {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void helloRouteShouldReturnDefaultMessage() throws Exception {
+    public void helloRouteShouldReturnDefaultMessage() {
         assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/api/hello", String.class)).contains("Hello world");
     }
 }
