@@ -1,6 +1,6 @@
 package com.qelery.mealmojo.api.security;
 
-import com.qelery.mealmojo.api.model.user.User;
+import com.qelery.mealmojo.api.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

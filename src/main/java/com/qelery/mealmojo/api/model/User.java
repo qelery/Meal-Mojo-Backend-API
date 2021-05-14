@@ -1,7 +1,6 @@
-package com.qelery.mealmojo.api.model.user;
+package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.qelery.mealmojo.api.model.Address;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,10 +9,10 @@ import javax.persistence.*;
 
 @Entity
 @Getter @Setter @NoArgsConstructor
-public class Customer implements User {
+public class User {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique=true, nullable=false)
@@ -23,21 +22,22 @@ public class Customer implements User {
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="address_id")
-    private Address address;
+    @OneToOne
+    @JoinColumn(name="customer_profile_id")
+    private CustomerProfile customerProfile;
 
-    private String firstName;
-    private String lastName;
+    @OneToOne
+    @JoinColumn(name="merchant_profile_id")
+    private MerchantProfile merchantProfile;
+
 
     @Override
     public String toString() {
-        return "Customer{" +
+        return "User{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", address=" + address +
+                ", customerProfile=" + customerProfile +
+                ", merchantProfile=" + merchantProfile +
                 '}';
     }
 }
