@@ -1,13 +1,13 @@
-package com.qelery.mealmojoapibackend;
+package com.qelery.mealmojo.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MealMojoApiBackendApplication {
+public class MealMojoApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MealMojoApiBackendApplication.class, args);
+        SpringApplication.run(MealMojoApiApplication.class, args);
     }
 
 }
