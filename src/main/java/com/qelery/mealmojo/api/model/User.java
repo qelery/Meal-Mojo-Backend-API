@@ -8,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
+@Table(name="users")
 @Getter @Setter @NoArgsConstructor
 public class User {
 
@@ -30,6 +31,12 @@ public class User {
     @JoinColumn(name="merchant_profile_id")
     private MerchantProfile merchantProfile;
 
+    public User(String email, String password, CustomerProfile customerProfile, MerchantProfile merchantProfile) {
+        this.email = email;
+        this.password = password;
+        this.customerProfile = customerProfile;
+        this.merchantProfile = merchantProfile;
+    }
 
     @Override
     public String toString() {

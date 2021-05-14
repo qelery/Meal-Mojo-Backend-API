@@ -1,12 +1,16 @@
 package com.qelery.mealmojo.api.service;
 
+import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.model.User;
 import com.qelery.mealmojo.api.model.login.LoginRequest;
+import com.qelery.mealmojo.api.model.login.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,16 +37,21 @@ public class UserService {
         this.authenticationManager = authenticationManager;
     }
 
-    public ResponseEntity<?> createUser(User user) {
-        return ResponseEntity.ok("");
+    public ResponseEntity<String> createUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new EmailExistsException(user.getEmail());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userRepository.save(user);
+            String message = "Successfully registered new user with email address " + user.getEmail();
+            return ResponseEntity.status(201).body(message);
+        }
     }
 
-
-    public ResponseEntity<?> loginUser(LoginRequest loginRequest) {
-        return ResponseEntity.ok("");
-    }
-
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public ResponseEntity<LoginResponse> loginUser(LoginRequest loginRequest) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+        final String JWT = jwtUtils.generateToken(userDetails);
+        return ResponseEntity.ok(new LoginResponse(JWT));
     }
 }
