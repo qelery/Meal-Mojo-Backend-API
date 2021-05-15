@@ -65,11 +65,6 @@ public class RestaurantService {
 
     public Restaurant getRestaurantByUser(Long restaurantId, Long userId) {
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, userId);
-        System.out.println("\n\n\n\n\n HDDEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \n\n\n\n\n");
-        System.out.println(userId);
-        System.out.println("\n\n\n\n\n DDDDDDDDDDDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \n\n\n\n\n");
-        System.out.println(optionalRestaurant);
-        System.out.println("\n\n\n\n\n HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \n\n\n\n\n");
         return optionalRestaurant.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
     }
 
@@ -78,20 +73,12 @@ public class RestaurantService {
         return restaurantRepository.save(restaurant);
     }
 
-    public Restaurant updateRestaurantBasicInfo(Long restaurantId, Restaurant restaurant) {
+    public Restaurant updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
         Restaurant oldRestaurant = getRestaurantByUser(restaurantId, getUser().getId());
-
-        oldRestaurant.setBusinessName(restaurant.getBusinessName());
-        oldRestaurant.setDescription(restaurant.getBusinessName());
-        oldRestaurant.setTimeZone(restaurant.getTimeZone());
-        oldRestaurant.setDeliveryAvailable(restaurant.getDeliveryAvailable());
-        oldRestaurant.setDeliveryFee(restaurant.getDeliveryFee());
-        oldRestaurant.setDeliveryEtaMinutes(restaurant.getDeliveryEtaMinutes());
-        oldRestaurant.setPickupEtaMinutes(restaurant.getPickupEtaMinutes());
-        oldRestaurant.setCuisineSet(restaurant.getCuisineSet());
+        propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
         return restaurantRepository.save(oldRestaurant);
     }
-
+    
     public Restaurant updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
         Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
 
@@ -112,7 +99,6 @@ public class RestaurantService {
 
         Address oldAddress = restaurant.getAddress();
         propertyCopier.copyNonNull(newAddress, oldAddress);
-        System.out.println(oldAddress);
         addressRepository.save(oldAddress);
 
         return restaurantRepository.save(restaurant);
@@ -140,13 +126,8 @@ public class RestaurantService {
 
     public MenuItem updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
         MenuItem oldMenuItem = getMenuItemByRestaurant(restaurantId, menuItemId); // handles RestaurantNotFound and MenuItemNotFound exceptions
-        oldMenuItem.setName(newMenuItem.getName());
-        oldMenuItem.setDescription(newMenuItem.getDescription());
-        oldMenuItem.setPrice(newMenuItem.getPrice());
-        oldMenuItem.setImageUrl(newMenuItem.getImageUrl());
-        oldMenuItem.setAvailable(newMenuItem.getAvailable());
-        oldMenuItem.setCategory(newMenuItem.getCategory());
-        return new MenuItem();
+        propertyCopier.copyNonNull(newMenuItem, oldMenuItem);
+        return menuItemRepository.save(oldMenuItem);
     }
 
     private User getUser() {

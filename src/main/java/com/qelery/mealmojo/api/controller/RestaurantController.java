@@ -46,10 +46,10 @@ public class RestaurantController {
         return restaurantService.createRestaurant(restaurant);
     }
 
-    @PatchMapping("/restaurants/{restaurantId}/basicinfo")
-    public Restaurant updateRestaurantBasicInfo(@PathVariable Long restaurantId,
+    @PatchMapping("/restaurants/{restaurantId}")
+    public Restaurant updateRestaurant(@PathVariable Long restaurantId,
                                                 @RequestBody Restaurant restaurant) {
-        return restaurantService.updateRestaurantBasicInfo(restaurantId, restaurant);
+        return restaurantService.updateRestaurant(restaurantId, restaurant);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/hours")

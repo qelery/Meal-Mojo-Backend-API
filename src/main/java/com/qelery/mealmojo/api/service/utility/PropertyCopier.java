@@ -11,8 +11,8 @@ import java.util.Set;
 @Service
 public class PropertyCopier {
 
-    public void copyNonNull(Object src, Object target) {
-        BeanUtils.copyProperties(src, target, getNullPropertyNames(src));
+    public void copyNonNull(Object source, Object target) {
+        BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
     }
 
     private String[] getNullPropertyNames (Object source) {
