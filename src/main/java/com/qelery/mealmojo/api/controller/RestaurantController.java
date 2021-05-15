@@ -65,11 +65,6 @@ public class RestaurantController {
         return restaurantService.updateRestaurantAddress(restaurantId, address);
     }
 
-    @DeleteMapping("/restaurants/{restaurantId}")
-    public ResponseEntity<String> deleteRestaurant(@PathVariable Long restaurantId) {
-        return restaurantService.deleteRestaurant(restaurantId);
-    }
-
 
     // Menu Item endpoints
 

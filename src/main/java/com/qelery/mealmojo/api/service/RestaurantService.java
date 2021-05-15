@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.service;
 
+import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.repository.AddressRepository;
@@ -109,33 +110,35 @@ public class RestaurantService {
         oldAddress.setZipcode(newAddress.getZipcode());
         oldAddress.setLatitude(newAddress.getLatitude());
         oldAddress.setLongitude(newAddress.getLongitude());
+        oldAddress.setStateAbbreviation(newAddress.getStateAbbreviation());
         addressRepository.save(oldAddress);
 
         return restaurantProfileRepository.save(restaurantProfile);
     }
 
-
-    public ResponseEntity<String> deleteRestaurant(Long restaurantId) {
-        return ResponseEntity.ok("");
-    }
-
     public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {
-        return new ArrayList<>();
+        RestaurantProfile restaurantProfile = getRestaurant(restaurantId); // handles RestaurantNotFoundException
+        return restaurantProfile.getMenuItems();
     }
 
-    public MenuItem getMenuItemByRestaurant(Long restaurantId, Long menuitemsId) {
+    public MenuItem getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
+        RestaurantProfile restaurantProfile = getRestaurant(restaurantId);
+        Optional<MenuItem> optionalMenuItem = restaurantProfile.getMenuItems()
+                .stream()
+                .filter(menuItem -> menuItem.getId().equals(menuItemId))
+                .findFirst();
+        return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+    }
+
+    public MenuItem createMenuItem(Long restaurantId, Long menuItemId) {
         return new MenuItem();
     }
 
-    public MenuItem createMenuItem(Long restaurantId, Long menuitemsId) {
+    public MenuItem updateMenuItem(Long restaurantId, Long menuItemId) {
         return new MenuItem();
     }
 
-    public MenuItem updateMenuItem(Long restaurantId, Long menuitemsId) {
-        return new MenuItem();
-    }
-
-    public MenuItem changeMenuItemAvailability(Long restaurantId, Long menuitemsId) {
+    public MenuItem changeMenuItemAvailability(Long restaurantId, Long menuItemId) {
         return new MenuItem();
     }
 
