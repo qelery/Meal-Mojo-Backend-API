@@ -1,10 +1,9 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
-import com.qelery.mealmojo.api.model.MenuItem;
-import com.qelery.mealmojo.api.model.RestaurantProfile;
-import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
+import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
 import com.qelery.mealmojo.api.repository.RestaurantProfileRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,29 +19,41 @@ import java.util.Optional;
 public class RestaurantService {
 
     private final RestaurantProfileRepository restaurantProfileRepository;
+    private final OperatingHoursRepository operatingHoursRepository;
     private final MenuItemRepository menuItemRepository;
-    private final DistanceCalculationService distanceCalculationService;
+    private final LocationService locationService;
+
 
     @Autowired
     public RestaurantService(RestaurantProfileRepository restaurantProfileRepository,
+                             OperatingHoursRepository operatingHoursRepository,
                              MenuItemRepository menuItemRepository,
-                             DistanceCalculationService distanceCalculationService) {
+                             LocationService locationService) {
         this.restaurantProfileRepository = restaurantProfileRepository;
+        this.operatingHoursRepository = operatingHoursRepository;
         this.menuItemRepository = menuItemRepository;
-        this.distanceCalculationService = distanceCalculationService;
+        this.locationService = locationService;
     }
-
-
-//    public List<RestaurantProfile> getRestaurants(double latitude, double longitude, int maxDistance) {
-//        return distanceCalculationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
-//    }
 
     public List<RestaurantProfile> getRestaurants() {
         return restaurantProfileRepository.findAll();
     }
 
+//    public List<RestaurantProfile> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
+//        return distanceCalculationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
+//    }
+
     public RestaurantProfile getRestaurant(Long restaurantId) {
         Optional<RestaurantProfile> restaurantProfile = restaurantProfileRepository.findById(restaurantId);
+        if (restaurantProfile.isPresent()) {
+            return restaurantProfile.get();
+        } else {
+            throw new RestaurantNotFoundException(restaurantId);
+        }
+    }
+
+    public RestaurantProfile getRestaurantByUser(Long restaurantId, Long userId) {
+        Optional<RestaurantProfile> restaurantProfile = restaurantProfileRepository.findByIdAndUserId(restaurantId, userId);
         if (restaurantProfile.isPresent()) {
             return restaurantProfile.get();
         } else {
@@ -55,8 +66,9 @@ public class RestaurantService {
         return restaurantProfileRepository.save(restaurantProfile);
     }
 
-    public RestaurantProfile updateRestaurant(RestaurantProfile restaurantProfile, Long restaurantId) {
-        RestaurantProfile oldRestaurantProfile = this.getRestaurant(restaurantId);
+    public RestaurantProfile updateRestaurantBasicInfo(Long restaurantId, RestaurantProfile restaurantProfile) {
+        RestaurantProfile oldRestaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
+
         oldRestaurantProfile.setBusinessName(restaurantProfile.getBusinessName());
         oldRestaurantProfile.setDescription(restaurantProfile.getBusinessName());
         oldRestaurantProfile.setTimeZone(restaurantProfile.getTimeZone());
@@ -65,8 +77,39 @@ public class RestaurantService {
         oldRestaurantProfile.setDeliveryEtaMinutes(restaurantProfile.getDeliveryEtaMinutes());
         oldRestaurantProfile.setPickupEtaMinutes(restaurantProfile.getPickupEtaMinutes());
         oldRestaurantProfile.setCuisineSet(restaurantProfile.getCuisineSet());
-        return restaurantProfile;
+        return restaurantProfileRepository.save(oldRestaurantProfile);
     }
+
+    public RestaurantProfile updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
+        RestaurantProfile restaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
+
+        for (OperatingHours newHours: newHoursList) {
+            Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantProfileIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
+            if (hours.isPresent()) {
+                OperatingHours oldHours = hours.get();
+                oldHours.setOpenTime(newHours.getOpenTime());
+                oldHours.setCloseTime(newHours.getCloseTime());
+                operatingHoursRepository.save(oldHours);
+            }
+        }
+        return restaurantProfileRepository.save(restaurantProfile);
+    }
+
+    public RestaurantProfile updateRestaurantAddress(Long restaurantId, Address newAddress) {
+        RestaurantProfile restaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
+        Address oldAddress = restaurantProfile.getAddress();
+
+        oldAddress.setStreet1(newAddress.getStreet1());
+        oldAddress.setStreet2(newAddress.getStreet2());
+        oldAddress.setCity(newAddress.getCity());
+        oldAddress.setZipcode(newAddress.getZipcode());
+        oldAddress.setLatitude(newAddress.getLatitude());
+        oldAddress.setLongitude(newAddress.getLongitude());
+        add
+
+        return restaurantProfileRepository.save(restaurantProfile);
+    }
+
 
     public ResponseEntity<String> deleteRestaurant(Long restaurantId) {
         return ResponseEntity.ok("");

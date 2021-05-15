@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.controller;
 
 import com.qelery.mealmojo.api.model.MenuItem;
+import com.qelery.mealmojo.api.model.OperatingHours;
 import com.qelery.mealmojo.api.model.RestaurantProfile;
 import com.qelery.mealmojo.api.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +46,16 @@ public class RestaurantController {
         return restaurantService.createRestaurant(restaurantProfile);
     }
 
-    @PutMapping("/restaurants/{restaurantId}")
-    public RestaurantProfile updateRestaurant(@RequestBody RestaurantProfile restaurantProfile,
-                                              @PathVariable Long restaurantId) {
-        return restaurantService.updateRestaurant(restaurantProfile, restaurantId);
+    @PatchMapping("/restaurants/{restaurantId}/basicinfo")
+    public RestaurantProfile updateRestaurantBasicInfo(@PathVariable Long restaurantId,
+                                                       @RequestBody RestaurantProfile restaurantProfile) {
+        return restaurantService.updateRestaurantBasicInfo(restaurantId, restaurantProfile);
+    }
+
+    @PatchMapping("/restaurants/{restaurantId}/hours")
+    public RestaurantProfile updateRestaurantHours(@PathVariable Long restaurantId,
+                                                   @RequestBody List<OperatingHours> hoursList) {
+        return restaurantService.updateRestaurantHours(restaurantId, hoursList);
     }
 
     @DeleteMapping("/restaurants/{restaurantId}")
@@ -64,27 +71,30 @@ public class RestaurantController {
         return restaurantService.getMenuItemsByRestaurant(restaurantId);
     }
 
-    @GetMapping("/restaurants/{restaurantId}/menuitems/{menuitemsId}")
+    @GetMapping("/restaurants/{restaurantId}/menuitems/{menuitemId}")
     public MenuItem getMenuItemByRestaurant(@PathVariable Long restaurantId,
-                                            @PathVariable Long menuitemsId) {
-        return restaurantService.getMenuItemByRestaurant(restaurantId, menuitemsId);
+                                            @PathVariable Long menuitemId) {
+        return restaurantService.getMenuItemByRestaurant(restaurantId, menuitemId);
     }
 
-    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuitemsId}")
+    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuitemId}")
     public MenuItem createMenuItem(@PathVariable Long restaurantId,
-                                   @PathVariable Long menuitemsId) {
-        return restaurantService.createMenuItem(restaurantId, menuitemsId);
+                                   @PathVariable Long menuitemId,
+                                   @RequestBody MenuItem menuItem) {
+        return restaurantService.createMenuItem(restaurantId, menuitemId, menuItem);
     }
 
-    @PutMapping("/restaurants/{restaurantId}/menuitems/{menuitemsId}")
+    @PutMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}")
     public MenuItem updateMenuItem(@PathVariable Long restaurantId,
-                                   @PathVariable Long menuitemsId) {
-        return restaurantService.updateMenuItem(restaurantId, menuitemsId);
+                                   @PathVariable Long menuItemId,
+                                   @RequestBody MenuItem menuItem) {
+        return restaurantService.updateMenuItem(restaurantId, menuItemId, menuItem);
     }
 
-    @PatchMapping("/restaurants/{restaurantId}/menuitems/{menuitemsId}")
+    @PatchMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}")
     public MenuItem changeMenuItemAvailability(@PathVariable Long restaurantId,
-                                            @PathVariable Long menuitemsId) {
-        return restaurantService.changeMenuItemAvailability(restaurantId, menuitemsId);
+                                               @PathVariable Long menuItemId,
+                                               @RequestParam Boolean available) {
+        return restaurantService.changeMenuItemAvailability(restaurantId, menuItemId, available);
     }
 }

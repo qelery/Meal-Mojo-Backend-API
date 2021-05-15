@@ -33,6 +33,7 @@ public class Order {
 
     @Column
     @Enumerated(EnumType.STRING)
+    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private DeliveryMethod deliveryMethod;
 
     @OneToMany(mappedBy="order")

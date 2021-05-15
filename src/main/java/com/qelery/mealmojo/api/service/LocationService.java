@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class DistanceCalculationService {
+public class LocationService {
 
     public List<RestaurantProfile> findRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
         return new ArrayList<>();
     }
 }
+
+
