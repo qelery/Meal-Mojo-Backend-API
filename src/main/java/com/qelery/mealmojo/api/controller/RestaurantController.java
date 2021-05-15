@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.controller;
 
+import com.qelery.mealmojo.api.model.Address;
 import com.qelery.mealmojo.api.model.MenuItem;
 import com.qelery.mealmojo.api.model.OperatingHours;
 import com.qelery.mealmojo.api.model.RestaurantProfile;
@@ -56,6 +57,12 @@ public class RestaurantController {
     public RestaurantProfile updateRestaurantHours(@PathVariable Long restaurantId,
                                                    @RequestBody List<OperatingHours> hoursList) {
         return restaurantService.updateRestaurantHours(restaurantId, hoursList);
+    }
+
+    @PatchMapping("/restaurants/{restaurantId}/address")
+    public RestaurantProfile updateRestaurantAddress(@PathVariable Long restaurantId,
+                                                   @RequestBody Address address) {
+        return restaurantService.updateRestaurantAddress(restaurantId, address);
     }
 
     @DeleteMapping("/restaurants/{restaurantId}")

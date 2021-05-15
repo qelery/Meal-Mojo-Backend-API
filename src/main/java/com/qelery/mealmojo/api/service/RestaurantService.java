@@ -2,6 +2,7 @@ package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
+import com.qelery.mealmojo.api.repository.AddressRepository;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
 import com.qelery.mealmojo.api.repository.RestaurantProfileRepository;
@@ -20,6 +21,7 @@ public class RestaurantService {
 
     private final RestaurantProfileRepository restaurantProfileRepository;
     private final OperatingHoursRepository operatingHoursRepository;
+    private final AddressRepository addressRepository;
     private final MenuItemRepository menuItemRepository;
     private final LocationService locationService;
 
@@ -27,10 +29,12 @@ public class RestaurantService {
     @Autowired
     public RestaurantService(RestaurantProfileRepository restaurantProfileRepository,
                              OperatingHoursRepository operatingHoursRepository,
+                             AddressRepository addressRepository,
                              MenuItemRepository menuItemRepository,
                              LocationService locationService) {
         this.restaurantProfileRepository = restaurantProfileRepository;
         this.operatingHoursRepository = operatingHoursRepository;
+        this.addressRepository = addressRepository;
         this.menuItemRepository = menuItemRepository;
         this.locationService = locationService;
     }
@@ -105,7 +109,7 @@ public class RestaurantService {
         oldAddress.setZipcode(newAddress.getZipcode());
         oldAddress.setLatitude(newAddress.getLatitude());
         oldAddress.setLongitude(newAddress.getLongitude());
-        add
+        addressRepository.save(oldAddress);
 
         return restaurantProfileRepository.save(restaurantProfile);
     }
