@@ -21,40 +21,39 @@ public class OrderController {
 
 
     @GetMapping(value="/orders", params="restaurantId, userId")
-    public List<Order> getOrders(@RequestParam Long restaurantId,
-                                 @RequestParam Long userId) {
+    public List<Order> getOrders(@RequestParam(required=false) Long restaurantId,
+                                 @RequestParam(required=false) Long userId) {
         return this.orderService.getOrders(restaurantId, userId);
     }
 
-    @GetMapping(value="/orders", params="restaurantId")
-    public List<Order> getOrdersByRestaurant(@RequestParam Long restaurantId) {
+    @GetMapping(value="/restaurants/{restaurantId}/orders")
+    public List<Order> getOrdersByRestaurant(@PathVariable Long restaurantId) {
         return this.orderService.getOrdersByRestaurant(restaurantId);
     }
 
-    @GetMapping(value="/orders", params="userId")
-    public List<Order> getOrdersByUser(@RequestParam Long userId) {
-        return this.orderService.getOrdersByUser(userId);
+    @GetMapping("/restaurants/{restaurantId}/orders/{orderId}")
+    public Order getOrderByRestaurant(@PathVariable Long restaurantId,
+                          @PathVariable Long orderId) {
+        return this.orderService.getOrderByRestaurant(restaurantId, orderId);
     }
 
-    @GetMapping("/orders/{orderId}")
-    public Order getOrder(@PathVariable Long orderId) {
-        return this.orderService.getOrder(orderId);
-    }
-
-    @PostMapping("/orders")
-    public Order createOrder(@RequestBody Order order) {
-        return this.orderService.createOrder(order);
-    }
-
-    @PutMapping("/orders/{orderId}")
-    public Order updateOrder(@PathVariable Long orderId,
+    @PostMapping("/restaurants/{restaurantId}/orders")
+    public Order createOrder(@PathVariable Long restaurantId,
                              @RequestBody Order order) {
-        return this.orderService.updateOrder(order);
+        return this.orderService.createOrder(restaurantId, order);
     }
 
-    @PatchMapping("/orders/{orderId}")
-    public ResponseEntity<String> changeOrderCompletionStatus(@PathVariable Long orderId,
-                                                      @RequestBody Boolean completionStatus) {
-        return this.orderService.changeOrderCompletionStatus(orderId, completionStatus);
+    @PutMapping("/restaurants/{restaurantId}/orders/{orderId}")
+    public Order updateOrder(@PathVariable Long restaurantId,
+                             @PathVariable Long orderId,
+                             @RequestBody Order order) {
+        return this.orderService.updateOrder(restaurantId, orderId, order);
+    }
+
+    @PatchMapping("/restaurants/{restaurantId}/orders/{orderId}")
+    public ResponseEntity<String> changeOrderCompletionStatus(@PathVariable Long restaurantId,
+                                                              @PathVariable Long orderId,
+                                                              @RequestBody Boolean completionStatus) {
+        return this.orderService.changeOrderCompletionStatus(restaurantId, orderId, completionStatus);
     }
 }

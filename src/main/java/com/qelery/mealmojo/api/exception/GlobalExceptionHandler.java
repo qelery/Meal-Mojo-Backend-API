@@ -21,6 +21,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(MenuItemNotFoundException.class)
+    public ResponseEntity<String> handleException(OrderNotFoundException ex)  {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(EmailExistsException.class)
     public ResponseEntity<String> handleException(EmailExistsException ex)  {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
