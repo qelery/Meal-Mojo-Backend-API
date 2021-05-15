@@ -13,7 +13,7 @@ import java.util.Set;
 @Entity
 @Getter @Setter @ToString
 @NoArgsConstructor @AllArgsConstructor
-public class MerchantProfile {
+public class RestaurantProfile {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -33,16 +33,16 @@ public class MerchantProfile {
     @JoinColumn(name="address_id")
     private Address address;
 
-    @OneToMany(mappedBy="merchantProfile")
+    @OneToMany(mappedBy="restaurantProfile")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OperatingHours> operatingHoursList;
 
-    @OneToMany(mappedBy="merchantProfile")
+    @OneToMany(mappedBy="restaurantProfile")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<MenuItem> menuItems;
 
     @ElementCollection(targetClass=Cuisine.class)
-    @CollectionTable(name="merchant_profile_cuisine", joinColumns=@JoinColumn(name="merchant_profile_id"))
+    @CollectionTable(name="restaurant_profile_cuisine", joinColumns=@JoinColumn(name="restaurant_profile_id"))
     @Column(name="cuisine")
     @Enumerated(EnumType.STRING)
     private final Set<Cuisine> cuisineSet = new HashSet<>();

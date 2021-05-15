@@ -27,8 +27,8 @@ public class User {
     private CustomerProfile customerProfile;
 
     @OneToOne
-    @JoinColumn(name="merchant_profile_id")
-    private MerchantProfile merchantProfile;
+    @JoinColumn(name="restaurant_profile_id")
+    private RestaurantProfile restaurantProfile;
 
     public User(String email, String password) {
         this.email = email;
