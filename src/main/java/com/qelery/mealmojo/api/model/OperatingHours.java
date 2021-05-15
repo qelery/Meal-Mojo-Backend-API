@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Time;
 import java.time.DayOfWeek;
+import java.time.LocalTime;
 
 @Entity
 @Getter @Setter @NoArgsConstructor
@@ -22,8 +22,8 @@ public class OperatingHours {
     private DayOfWeek dayOfWeek;
 
     @Column
-    private Time openTime;
-    private Time closeTime;
+    private LocalTime openTime;
+    private LocalTime closeTime;
 
     @JsonIgnore
     @ManyToOne
