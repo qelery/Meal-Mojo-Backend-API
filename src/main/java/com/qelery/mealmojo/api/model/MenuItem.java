@@ -19,7 +19,7 @@ public class MenuItem {
     private String description;
     private Double price;
     private String imageUrl;
-    private Boolean available;
+    private Boolean available = true;
     private String category;
 
     @JsonIgnore

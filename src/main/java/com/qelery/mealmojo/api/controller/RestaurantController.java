@@ -25,16 +25,16 @@ public class RestaurantController {
 
     // Restaurant endpoints
 
-//    @GetMapping("/restaurants")
-//    public List<RestaurantProfile> getRestaurants(@RequestParam double latitude,
-//                                                  @RequestParam double longitude,
-//                                                  @RequestParam(defaultValue="15") int maxDistance) {
-//        return restaurantService.getRestaurants(latitude, longitude, maxDistance);
-//    }
-
     @GetMapping("/restaurants")
     public List<RestaurantProfile> getRestaurants() {
         return restaurantService.getRestaurants();
+    }
+
+    @GetMapping("/restaurants")
+    public List<RestaurantProfile> getRestaurantsWithinDistance(@RequestParam double latitude,
+                                                  @RequestParam double longitude,
+                                                  @RequestParam(defaultValue="15") int maxDistance) {
+        return restaurantService.getRestaurantsWithinDistance(latitude, longitude, maxDistance);
     }
 
     @GetMapping("/restaurants/{restaurantId}")
@@ -79,11 +79,10 @@ public class RestaurantController {
         return restaurantService.getMenuItemByRestaurant(restaurantId, menuitemId);
     }
 
-    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuitemId}")
+    @PostMapping("/restaurants/{restaurantId}/menuitems")
     public MenuItem createMenuItem(@PathVariable Long restaurantId,
-                                   @PathVariable Long menuitemId,
                                    @RequestBody MenuItem menuItem) {
-        return restaurantService.createMenuItem(restaurantId, menuitemId, menuItem);
+        return restaurantService.createMenuItem(restaurantId, menuItem);
     }
 
     @PutMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}")
@@ -91,12 +90,5 @@ public class RestaurantController {
                                    @PathVariable Long menuItemId,
                                    @RequestBody MenuItem menuItem) {
         return restaurantService.updateMenuItem(restaurantId, menuItemId, menuItem);
-    }
-
-    @PatchMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}")
-    public MenuItem changeMenuItemAvailability(@PathVariable Long restaurantId,
-                                               @PathVariable Long menuItemId,
-                                               @RequestParam Boolean available) {
-        return restaurantService.changeMenuItemAvailability(restaurantId, menuItemId, available);
     }
 }

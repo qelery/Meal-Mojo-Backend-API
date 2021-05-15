@@ -9,11 +9,9 @@ import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
 import com.qelery.mealmojo.api.repository.RestaurantProfileRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,9 +42,9 @@ public class RestaurantService {
         return restaurantProfileRepository.findAll();
     }
 
-//    public List<RestaurantProfile> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
-//        return distanceCalculationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
-//    }
+    public List<RestaurantProfile> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
+        return locationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
+    }
 
     public RestaurantProfile getRestaurant(Long restaurantId) {
         Optional<RestaurantProfile> restaurantProfile = restaurantProfileRepository.findById(restaurantId);
@@ -58,12 +56,8 @@ public class RestaurantService {
     }
 
     public RestaurantProfile getRestaurantByUser(Long restaurantId, Long userId) {
-        Optional<RestaurantProfile> restaurantProfile = restaurantProfileRepository.findByIdAndUserId(restaurantId, userId);
-        if (restaurantProfile.isPresent()) {
-            return restaurantProfile.get();
-        } else {
-            throw new RestaurantNotFoundException(restaurantId);
-        }
+        Optional<RestaurantProfile> optionalRestaurantProfile = restaurantProfileRepository.findByIdAndUserId(restaurantId, userId);
+        return optionalRestaurantProfile.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
     }
 
     public RestaurantProfile createRestaurant(RestaurantProfile restaurantProfile) {
@@ -130,15 +124,20 @@ public class RestaurantService {
         return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
     }
 
-    public MenuItem createMenuItem(Long restaurantId, Long menuItemId) {
-        return new MenuItem();
+    public MenuItem createMenuItem(Long restaurantId, MenuItem menuItem) {
+        RestaurantProfile restaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
+        menuItem.setRestaurantProfile(restaurantProfile);
+        return menuItemRepository.save(menuItem);
     }
 
-    public MenuItem updateMenuItem(Long restaurantId, Long menuItemId) {
-        return new MenuItem();
-    }
-
-    public MenuItem changeMenuItemAvailability(Long restaurantId, Long menuItemId) {
+    public MenuItem updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
+        MenuItem oldMenuItem = getMenuItemByRestaurant(restaurantId, menuItemId); // handles RestaurantNotFound and MenuItemNotFound exceptions
+        oldMenuItem.setName(newMenuItem.getName());
+        oldMenuItem.setDescription(newMenuItem.getDescription());
+        oldMenuItem.setPrice(newMenuItem.getPrice());
+        oldMenuItem.setImageUrl(newMenuItem.getImageUrl());
+        oldMenuItem.setAvailable(newMenuItem.getAvailable());
+        oldMenuItem.setCategory(newMenuItem.getCategory());
         return new MenuItem();
     }
 
