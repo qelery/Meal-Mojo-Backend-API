@@ -1,14 +1,13 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @ToString
+@NoArgsConstructor @AllArgsConstructor
 public class MenuItem {
 
     @Id
@@ -28,17 +27,4 @@ public class MenuItem {
     @JoinColumn(name="merchant_profile_id")
     private MerchantProfile merchantProfile;
 
-    @Override
-    public String toString() {
-        return "MenuItem{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", price=" + price +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", available=" + available +
-                ", category='" + category + '\'' +
-                ", merchantProfile=" + merchantProfile +
-                '}';
-    }
 }

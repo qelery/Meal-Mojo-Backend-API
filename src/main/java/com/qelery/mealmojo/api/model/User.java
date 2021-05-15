@@ -1,15 +1,14 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name="users")
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @ToString(exclude={"password"})
+@NoArgsConstructor @AllArgsConstructor
 public class User {
 
     @Id
@@ -31,20 +30,8 @@ public class User {
     @JoinColumn(name="merchant_profile_id")
     private MerchantProfile merchantProfile;
 
-    public User(String email, String password, CustomerProfile customerProfile, MerchantProfile merchantProfile) {
+    public User(String email, String password) {
         this.email = email;
         this.password = password;
-        this.customerProfile = customerProfile;
-        this.merchantProfile = merchantProfile;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", customerProfile=" + customerProfile +
-                ", merchantProfile=" + merchantProfile +
-                '}';
     }
 }

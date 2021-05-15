@@ -1,8 +1,6 @@
 package com.qelery.mealmojo.api.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import com.qelery.mealmojo.api.model.enums.Cuisine;
@@ -13,7 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @ToString
+@NoArgsConstructor @AllArgsConstructor
 public class MerchantProfile {
 
     @Id
@@ -48,22 +47,4 @@ public class MerchantProfile {
     @Enumerated(EnumType.STRING)
     private final Set<Cuisine> cuisineSet = new HashSet<>();
 
-    @Override
-    public String toString() {
-        return "MerchantProfile{" +
-                "id=" + id +
-                ", business_name='" + business_name + '\'' +
-                ", description='" + description + '\'' +
-                ", timeZone='" + timeZone + '\'' +
-                ", logoImageUrl='" + logoImageUrl + '\'' +
-                ", deliveryAvailable=" + deliveryAvailable +
-                ", deliveryFee=" + deliveryFee +
-                ", deliveryEtaMinutes=" + deliveryEtaMinutes +
-                ", pickupEtaMinutes=" + pickupEtaMinutes +
-                ", address=" + address +
-                ", operatingHoursList=" + operatingHoursList +
-                ", menuItems=" + menuItems +
-                ", cuisineSet=" + cuisineSet +
-                '}';
-    }
 }

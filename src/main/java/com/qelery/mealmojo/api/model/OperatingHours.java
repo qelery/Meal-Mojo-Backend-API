@@ -1,16 +1,15 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @ToString
+@NoArgsConstructor @AllArgsConstructor
 public class OperatingHours {
 
     @Id
@@ -30,14 +29,4 @@ public class OperatingHours {
     @JoinColumn(name="merchant_profile_id")
     private MerchantProfile merchantProfile;
 
-    @Override
-    public String toString() {
-        return "OperatingHours{" +
-                "id=" + id +
-                ", dayOfWeek=" + dayOfWeek +
-                ", openTime=" + openTime +
-                ", closeTime=" + closeTime +
-                ", merchantProfile=" + merchantProfile +
-                '}';
-    }
 }

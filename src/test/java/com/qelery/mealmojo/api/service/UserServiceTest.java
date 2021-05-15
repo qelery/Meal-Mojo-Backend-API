@@ -39,7 +39,7 @@ class UserServiceTest {
     @DisplayName("Should save new user to database and return 201 response")
     void createUser() {
         UserService userService = new UserService(userRepository, userDetailsService, passwordEncoder, jwtUtils, authenticationManager);
-        User user = new User("test@test.com", "password", null, null);
+        User user = new User("test@test.com", "password");
 
         String message = "Successfully registered new user with email address " + user.getEmail();
         ResponseEntity<String> expectedResponse = ResponseEntity.status(201).body(message);

@@ -2,9 +2,7 @@ package com.qelery.mealmojo.api.model;
 
 import com.qelery.mealmojo.api.model.enums.DeliveryMethod;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -14,7 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(name="orders")
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @ToString
+@NoArgsConstructor @AllArgsConstructor
 public class Order {
 
     @Id
@@ -38,26 +37,4 @@ public class Order {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OrderLine> orderLines;
 
-    public Order(LocalDateTime dateTime, Double tip, Boolean complete, PaymentMethod paymentMethod,
-                 DeliveryMethod deliveryMethod, List<OrderLine> orderLines) {
-        this.dateTime = dateTime;
-        this.tip = tip;
-        this.complete = complete;
-        this.paymentMethod = paymentMethod;
-        this.deliveryMethod = deliveryMethod;
-        this.orderLines = orderLines;
-    }
-
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id=" + id +
-                ", dateTime=" + dateTime +
-                ", tip=" + tip +
-                ", complete=" + complete +
-                ", paymentMethod=" + paymentMethod +
-                ", deliveryMethod=" + deliveryMethod +
-                ", orderLines=" + orderLines +
-                '}';
-    }
 }

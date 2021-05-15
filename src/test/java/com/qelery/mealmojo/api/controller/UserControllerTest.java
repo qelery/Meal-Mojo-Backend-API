@@ -13,15 +13,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(controllers=UserController.class)
@@ -40,7 +34,7 @@ class UserControllerTest {
 
     @Test
     void registerAcceptsUserObject() throws Exception {
-        User userObject = new User("testuser93014@gmail.com", "password", null, null);
+        User userObject = new User("testuser93014@gmail.com", "password");
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register")
                 .content(asJsonString(userObject))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -49,7 +43,7 @@ class UserControllerTest {
 
     @Test
     void registerReturns400WhenNonNullableValuesAreNull() throws Exception {
-        User userObject = new User(null, "password", null, null);
+        User userObject = new User(null, "password");
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register")
                 .content(asJsonString(userObject))
                 .contentType(MediaType.APPLICATION_JSON))

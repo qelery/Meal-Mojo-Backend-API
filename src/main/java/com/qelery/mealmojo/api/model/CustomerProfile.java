@@ -3,11 +3,13 @@ package com.qelery.mealmojo.api.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter
+@ToString @NoArgsConstructor
 public class CustomerProfile {
 
     @Id
@@ -22,13 +24,4 @@ public class CustomerProfile {
     @JoinColumn(name="address_id")
     private Address address;
 
-    @Override
-    public String toString() {
-        return "CustomerProfile{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", address=" + address +
-                '}';
-    }
 }

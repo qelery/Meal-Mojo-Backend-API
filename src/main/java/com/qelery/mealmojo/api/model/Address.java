@@ -1,14 +1,13 @@
 package com.qelery.mealmojo.api.model;
 
 import com.qelery.mealmojo.api.model.enums.StateAbbreviation;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter @ToString
+@NoArgsConstructor @AllArgsConstructor
 public class Address {
 
     @Id
@@ -24,15 +23,4 @@ public class Address {
     @Enumerated(EnumType.STRING)
     private StateAbbreviation stateAbbreviation;
 
-    @Override
-    public String toString() {
-        return "Address{" +
-                "id=" + id +
-                ", street1='" + street1 + '\'' +
-                ", street2='" + street2 + '\'' +
-                ", city='" + city + '\'' +
-                ", zipcode='" + zipcode + '\'' +
-                ", stateAbbreviation=" + stateAbbreviation +
-                '}';
-    }
 }
