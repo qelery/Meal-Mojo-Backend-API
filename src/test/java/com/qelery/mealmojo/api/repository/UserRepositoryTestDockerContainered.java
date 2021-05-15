@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.repository;
 
 import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.singletons.DockerContaineredDatabaseTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should save user information to database")
     void savesUserToDatabase() {
-        User expectedUserObject = new User("testuser46782@gmail.com", "password");
+        User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
         User actualUserObject = userRepository.save(expectedUserObject);
 
         assertEquals(expectedUserObject.getEmail(), actualUserObject.getEmail());
@@ -33,9 +34,9 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should only save user to database if email address is unique")
     void onlySavesUniqueEmail() {
-        User user = new User("testuser793140@gmail.com", "password");
-        User userWithNonUniqueEmail = new User("testuser793140@gmail.com", "password");
-        User userWithDifferentEmail = new User("differentEmail@gmail.com", "password");
+        User user = new User("testuser793140@gmail.com", "password", Role.CUSTOMER);
+        User userWithNonUniqueEmail = new User("testuser793140@gmail.com", "password", Role.CUSTOMER);
+        User userWithDifferentEmail = new User("differentEmail@gmail.com", "password", Role.CUSTOMER);
 
         userRepository.save(user);
         userRepository.save(userWithDifferentEmail);
@@ -46,9 +47,9 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should only save user to database if the email and password are not null")
     void onlySavesUsersWithEmailsAndPasswords() {
-        User userWithNullEmail = new User(null, "password");
-        User userWithNullPassword = new User("testuser7301985@gmail.com", null);
-        User userWithAllRequiredFields = new User("testuser389210@gmail.com", "password");
+        User userWithNullEmail = new User(null, "password", Role.CUSTOMER);
+        User userWithNullPassword = new User("testuser7301985@gmail.com", null, Role.CUSTOMER);
+        User userWithAllRequiredFields = new User("testuser389210@gmail.com", "password", Role.CUSTOMER);
 
         userRepository.save(userWithAllRequiredFields);
 
@@ -59,7 +60,7 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should find user in database given an email address")
     void findByEmail() {
-        User expectedUserObject = new User("testuser46782@gmail.com", "password");
+        User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
         userRepository.save(expectedUserObject);
         User actualUserObject = userRepository.findByEmail(expectedUserObject.getEmail());
 
@@ -72,7 +73,7 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should check if user with given email address exists in database")
     void existsByEmail() {
-        User expectedUserObject = new User("testuser46782@gmail.com", "password");
+        User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
         userRepository.save(expectedUserObject);
 
         assertTrue(userRepository.existsByEmail(expectedUserObject.getEmail()));

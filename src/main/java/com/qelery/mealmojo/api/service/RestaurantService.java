@@ -6,84 +6,97 @@ import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.repository.AddressRepository;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
-import com.qelery.mealmojo.api.repository.RestaurantProfileRepository;
+import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
+import com.qelery.mealmojo.api.service.utility.PropertyCopier;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class RestaurantService {
 
-    private final RestaurantProfileRepository restaurantProfileRepository;
+    private final RestaurantRepository restaurantRepository;
     private final OperatingHoursRepository operatingHoursRepository;
     private final AddressRepository addressRepository;
     private final MenuItemRepository menuItemRepository;
     private final LocationService locationService;
-
+    private final PropertyCopier propertyCopier;
 
     @Autowired
-    public RestaurantService(RestaurantProfileRepository restaurantProfileRepository,
+    public RestaurantService(RestaurantRepository restaurantRepository,
                              OperatingHoursRepository operatingHoursRepository,
                              AddressRepository addressRepository,
                              MenuItemRepository menuItemRepository,
-                             LocationService locationService) {
-        this.restaurantProfileRepository = restaurantProfileRepository;
+                             LocationService locationService,
+                             PropertyCopier propertyCopier) {
+        this.restaurantRepository = restaurantRepository;
         this.operatingHoursRepository = operatingHoursRepository;
         this.addressRepository = addressRepository;
         this.menuItemRepository = menuItemRepository;
         this.locationService = locationService;
+        this.propertyCopier = propertyCopier;
     }
 
-    public List<RestaurantProfile> getRestaurants() {
-        return restaurantProfileRepository.findAll();
+    public List<Restaurant> getRestaurants() {
+        return restaurantRepository.findAll();
     }
 
-    public List<RestaurantProfile> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
+    public List<Restaurant> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
         return locationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
     }
 
-    public RestaurantProfile getRestaurant(Long restaurantId) {
-        Optional<RestaurantProfile> restaurantProfile = restaurantProfileRepository.findById(restaurantId);
-        if (restaurantProfile.isPresent()) {
-            return restaurantProfile.get();
+    public Restaurant getRestaurant(Long restaurantId) {
+        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
+        if (restaurant.isPresent()) {
+            return restaurant.get();
         } else {
             throw new RestaurantNotFoundException(restaurantId);
         }
     }
 
-    public RestaurantProfile getRestaurantByUser(Long restaurantId, Long userId) {
-        Optional<RestaurantProfile> optionalRestaurantProfile = restaurantProfileRepository.findByIdAndUserId(restaurantId, userId);
-        return optionalRestaurantProfile.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
+    public Restaurant getRestaurantByUser(Long restaurantId, Long userId) {
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, userId);
+        System.out.println("\n\n\n\n\n HDDEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \n\n\n\n\n");
+        System.out.println(userId);
+        System.out.println("\n\n\n\n\n DDDDDDDDDDDDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \n\n\n\n\n");
+        System.out.println(optionalRestaurant);
+        System.out.println("\n\n\n\n\n HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE \n\n\n\n\n");
+        return optionalRestaurant.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
     }
 
-    public RestaurantProfile createRestaurant(RestaurantProfile restaurantProfile) {
-        restaurantProfile.setUser(getUser());
-        return restaurantProfileRepository.save(restaurantProfile);
+    public Restaurant createRestaurant(Restaurant restaurant) {
+        restaurant.setUser(getUser());
+        return restaurantRepository.save(restaurant);
     }
 
-    public RestaurantProfile updateRestaurantBasicInfo(Long restaurantId, RestaurantProfile restaurantProfile) {
-        RestaurantProfile oldRestaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
+    public Restaurant updateRestaurantBasicInfo(Long restaurantId, Restaurant restaurant) {
+        Restaurant oldRestaurant = getRestaurantByUser(restaurantId, getUser().getId());
 
-        oldRestaurantProfile.setBusinessName(restaurantProfile.getBusinessName());
-        oldRestaurantProfile.setDescription(restaurantProfile.getBusinessName());
-        oldRestaurantProfile.setTimeZone(restaurantProfile.getTimeZone());
-        oldRestaurantProfile.setDeliveryAvailable(restaurantProfile.getDeliveryAvailable());
-        oldRestaurantProfile.setDeliveryFee(restaurantProfile.getDeliveryFee());
-        oldRestaurantProfile.setDeliveryEtaMinutes(restaurantProfile.getDeliveryEtaMinutes());
-        oldRestaurantProfile.setPickupEtaMinutes(restaurantProfile.getPickupEtaMinutes());
-        oldRestaurantProfile.setCuisineSet(restaurantProfile.getCuisineSet());
-        return restaurantProfileRepository.save(oldRestaurantProfile);
+        oldRestaurant.setBusinessName(restaurant.getBusinessName());
+        oldRestaurant.setDescription(restaurant.getBusinessName());
+        oldRestaurant.setTimeZone(restaurant.getTimeZone());
+        oldRestaurant.setDeliveryAvailable(restaurant.getDeliveryAvailable());
+        oldRestaurant.setDeliveryFee(restaurant.getDeliveryFee());
+        oldRestaurant.setDeliveryEtaMinutes(restaurant.getDeliveryEtaMinutes());
+        oldRestaurant.setPickupEtaMinutes(restaurant.getPickupEtaMinutes());
+        oldRestaurant.setCuisineSet(restaurant.getCuisineSet());
+        return restaurantRepository.save(oldRestaurant);
     }
 
-    public RestaurantProfile updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
-        RestaurantProfile restaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
+    public Restaurant updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
 
         for (OperatingHours newHours: newHoursList) {
-            Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantProfileIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
+            Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
             if (hours.isPresent()) {
                 OperatingHours oldHours = hours.get();
                 oldHours.setOpenTime(newHours.getOpenTime());
@@ -91,33 +104,28 @@ public class RestaurantService {
                 operatingHoursRepository.save(oldHours);
             }
         }
-        return restaurantProfileRepository.save(restaurantProfile);
+        return restaurantRepository.save(restaurant);
     }
 
-    public RestaurantProfile updateRestaurantAddress(Long restaurantId, Address newAddress) {
-        RestaurantProfile restaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
-        Address oldAddress = restaurantProfile.getAddress();
+    public Restaurant updateRestaurantAddress(Long restaurantId, Address newAddress) {
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
 
-        oldAddress.setStreet1(newAddress.getStreet1());
-        oldAddress.setStreet2(newAddress.getStreet2());
-        oldAddress.setCity(newAddress.getCity());
-        oldAddress.setZipcode(newAddress.getZipcode());
-        oldAddress.setLatitude(newAddress.getLatitude());
-        oldAddress.setLongitude(newAddress.getLongitude());
-        oldAddress.setStateAbbreviation(newAddress.getStateAbbreviation());
+        Address oldAddress = restaurant.getAddress();
+        propertyCopier.copyNonNull(newAddress, oldAddress);
+        System.out.println(oldAddress);
         addressRepository.save(oldAddress);
 
-        return restaurantProfileRepository.save(restaurantProfile);
+        return restaurantRepository.save(restaurant);
     }
 
     public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {
-        RestaurantProfile restaurantProfile = getRestaurant(restaurantId); // handles RestaurantNotFoundException
-        return restaurantProfile.getMenuItems();
+        Restaurant restaurant = getRestaurant(restaurantId); // handles RestaurantNotFoundException
+        return restaurant.getMenuItems();
     }
 
     public MenuItem getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
-        RestaurantProfile restaurantProfile = getRestaurant(restaurantId);
-        Optional<MenuItem> optionalMenuItem = restaurantProfile.getMenuItems()
+        Restaurant restaurant = getRestaurant(restaurantId);
+        Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))
                 .findFirst();
@@ -125,8 +133,8 @@ public class RestaurantService {
     }
 
     public MenuItem createMenuItem(Long restaurantId, MenuItem menuItem) {
-        RestaurantProfile restaurantProfile = getRestaurantByUser(restaurantId, getUser().getId());
-        menuItem.setRestaurantProfile(restaurantProfile);
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
+        menuItem.setRestaurant(restaurant);
         return menuItemRepository.save(menuItem);
     }
 

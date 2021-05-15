@@ -20,8 +20,8 @@ public class Address {
     private String street2;
     private String city;
     private String zipcode;
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
 
     @Enumerated(EnumType.STRING)
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)

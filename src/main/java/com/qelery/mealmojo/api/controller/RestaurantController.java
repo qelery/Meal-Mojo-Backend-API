@@ -3,10 +3,9 @@ package com.qelery.mealmojo.api.controller;
 import com.qelery.mealmojo.api.model.Address;
 import com.qelery.mealmojo.api.model.MenuItem;
 import com.qelery.mealmojo.api.model.OperatingHours;
-import com.qelery.mealmojo.api.model.RestaurantProfile;
+import com.qelery.mealmojo.api.model.Restaurant;
 import com.qelery.mealmojo.api.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,42 +25,42 @@ public class RestaurantController {
     // Restaurant endpoints
 
     @GetMapping("/restaurants")
-    public List<RestaurantProfile> getRestaurants() {
+    public List<Restaurant> getRestaurants() {
         return restaurantService.getRestaurants();
     }
 
-    @GetMapping("/restaurants")
-    public List<RestaurantProfile> getRestaurantsWithinDistance(@RequestParam double latitude,
-                                                  @RequestParam double longitude,
-                                                  @RequestParam(defaultValue="15") int maxDistance) {
-        return restaurantService.getRestaurantsWithinDistance(latitude, longitude, maxDistance);
-    }
+//    @GetMapping("/restaurants")
+//    public List<Restaurant> getRestaurantsWithinDistance(@RequestParam double latitude,
+//                                                  @RequestParam double longitude,
+//                                                  @RequestParam(defaultValue="15") int maxDistance) {
+//        return restaurantService.getRestaurantsWithinDistance(latitude, longitude, maxDistance);
+//    }
 
     @GetMapping("/restaurants/{restaurantId}")
-    public RestaurantProfile getRestaurant(@PathVariable Long restaurantId) {
+    public Restaurant getRestaurant(@PathVariable Long restaurantId) {
         return restaurantService.getRestaurant(restaurantId);
     }
 
     @PostMapping("/restaurants")
-    public RestaurantProfile createRestaurant(@RequestBody RestaurantProfile restaurantProfile) {
-        return restaurantService.createRestaurant(restaurantProfile);
+    public Restaurant createRestaurant(@RequestBody Restaurant restaurant) {
+        return restaurantService.createRestaurant(restaurant);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/basicinfo")
-    public RestaurantProfile updateRestaurantBasicInfo(@PathVariable Long restaurantId,
-                                                       @RequestBody RestaurantProfile restaurantProfile) {
-        return restaurantService.updateRestaurantBasicInfo(restaurantId, restaurantProfile);
+    public Restaurant updateRestaurantBasicInfo(@PathVariable Long restaurantId,
+                                                @RequestBody Restaurant restaurant) {
+        return restaurantService.updateRestaurantBasicInfo(restaurantId, restaurant);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/hours")
-    public RestaurantProfile updateRestaurantHours(@PathVariable Long restaurantId,
-                                                   @RequestBody List<OperatingHours> hoursList) {
+    public Restaurant updateRestaurantHours(@PathVariable Long restaurantId,
+                                            @RequestBody List<OperatingHours> hoursList) {
         return restaurantService.updateRestaurantHours(restaurantId, hoursList);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/address")
-    public RestaurantProfile updateRestaurantAddress(@PathVariable Long restaurantId,
-                                                   @RequestBody Address address) {
+    public Restaurant updateRestaurantAddress(@PathVariable Long restaurantId,
+                                              @RequestBody Address address) {
         return restaurantService.updateRestaurantAddress(restaurantId, address);
     }
 

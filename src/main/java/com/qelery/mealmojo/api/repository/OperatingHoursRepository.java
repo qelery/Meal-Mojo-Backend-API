@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface OperatingHoursRepository extends JpaRepository<OperatingHours, Long> {
 
-    Optional<OperatingHours> findByRestaurantProfileIdAndDayOfWeek(Long restaurantProfileId, DayOfWeek dayOfWeek);
+    Optional<OperatingHours> findByRestaurantIdAndDayOfWeek(Long restaurantId, DayOfWeek dayOfWeek);
 }

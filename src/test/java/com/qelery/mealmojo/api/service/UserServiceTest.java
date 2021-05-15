@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.model.login.LoginRequest;
 import com.qelery.mealmojo.api.model.login.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
@@ -39,7 +40,7 @@ class UserServiceTest {
     @DisplayName("Should save new user to database and return 201 response")
     void createUser() {
         UserService userService = new UserService(userRepository, userDetailsService, passwordEncoder, jwtUtils, authenticationManager);
-        User user = new User("test@test.com", "password");
+        User user = new User("test@test.com", "password", Role.CUSTOMER);
 
         String message = "Successfully registered new user with email address " + user.getEmail();
         ResponseEntity<String> expectedResponse = ResponseEntity.status(201).body(message);

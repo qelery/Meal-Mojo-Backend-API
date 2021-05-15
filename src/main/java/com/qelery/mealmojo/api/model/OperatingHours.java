@@ -28,7 +28,7 @@ public class OperatingHours {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="restaurant_profile_id")
-    private RestaurantProfile restaurantProfile;
+    @JoinColumn(name="restaurante_id")
+    private Restaurant restaurant;
 
 }

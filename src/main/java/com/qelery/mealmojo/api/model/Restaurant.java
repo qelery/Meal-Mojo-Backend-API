@@ -2,11 +2,10 @@ package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.qelery.mealmojo.api.model.enums.PaymentMethod;
+import com.qelery.mealmojo.api.model.enums.Cuisine;
 import lombok.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import com.qelery.mealmojo.api.model.enums.Cuisine;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -14,9 +13,9 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Getter @Setter @ToString
+@Getter @Setter @ToString(exclude={"user"})
 @NoArgsConstructor @AllArgsConstructor
-public class RestaurantProfile {
+public class Restaurant {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -36,22 +35,23 @@ public class RestaurantProfile {
     @JoinColumn(name="address_id")
     private Address address;
 
-    @OneToMany(mappedBy="restaurantProfile")
+    @OneToMany(mappedBy="restaurant")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OperatingHours> operatingHoursList;
 
-    @OneToMany(mappedBy="restaurantProfile")
+    @OneToMany(mappedBy="restaurant")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<MenuItem> menuItems;
 
     @ElementCollection(targetClass=Cuisine.class)
-    @CollectionTable(name="restaurant_profile_cuisine", joinColumns=@JoinColumn(name="restaurant_profile_id"))
+    @CollectionTable(name="restaurant_cuisine", joinColumns=@JoinColumn(name="restaurant_id"))
     @Column(name="cuisine")
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private Set<Cuisine> cuisineSet = new HashSet<>();
 
     @JsonIgnore
-    @OneToOne(mappedBy="restaurantProfile")
+    @ManyToOne
+    @JoinColumn(name="user_id")
     private User user;
 }

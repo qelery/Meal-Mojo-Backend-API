@@ -2,6 +2,7 @@ package com.qelery.mealmojo.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.security.JwtRequestFilter;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
@@ -34,7 +35,7 @@ class UserControllerTest {
 
     @Test
     void registerAcceptsUserObject() throws Exception {
-        User userObject = new User("testuser93014@gmail.com", "password");
+        User userObject = new User("testuser93014@gmail.com", "password", Role.CUSTOMER);
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register")
                 .content(asJsonString(userObject))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -43,7 +44,7 @@ class UserControllerTest {
 
     @Test
     void registerReturns400WhenNonNullableValuesAreNull() throws Exception {
-        User userObject = new User(null, "password");
+        User userObject = new User(null, "password", Role.CUSTOMER);
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register")
                 .content(asJsonString(userObject))
                 .contentType(MediaType.APPLICATION_JSON))
