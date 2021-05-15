@@ -11,6 +11,11 @@ import java.util.Objects;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    public ResponseEntity<String> handleException(RestaurantNotFoundException ex)  {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(EmailExistsException.class)
     public ResponseEntity<String> handleException(EmailExistsException ex)  {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);

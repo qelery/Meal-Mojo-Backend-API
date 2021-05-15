@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.qelery.mealmojo.api.model.enums.DeliveryMethod;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
 import lombok.*;
@@ -27,6 +28,7 @@ public class Order {
 
     @Column
     @Enumerated(EnumType.STRING)
+    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private PaymentMethod paymentMethod;
 
     @Column

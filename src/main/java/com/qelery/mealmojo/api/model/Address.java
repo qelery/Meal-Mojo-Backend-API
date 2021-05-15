@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.qelery.mealmojo.api.model.enums.StateAbbreviation;
 import lombok.*;
 
@@ -19,8 +20,11 @@ public class Address {
     private String street2;
     private String city;
     private String zipcode;
+    private double latitude;
+    private double longitude;
 
     @Enumerated(EnumType.STRING)
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private StateAbbreviation stateAbbreviation;
 
 }

@@ -10,4 +10,5 @@ public enum Cuisine {
     CHINESE,
     MEXICAN,
     BREAKFAST,
+    ITALIAN,
 }

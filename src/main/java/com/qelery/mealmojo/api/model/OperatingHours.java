@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class OperatingHours {
 
     @Column
     @Enumerated(EnumType.STRING)
+    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private DayOfWeek dayOfWeek;
 
     @Column

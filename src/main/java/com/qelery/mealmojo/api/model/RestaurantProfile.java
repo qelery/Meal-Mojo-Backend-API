@@ -1,5 +1,7 @@
 package com.qelery.mealmojo.api.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -20,7 +22,7 @@ public class RestaurantProfile {
     private Long id;
 
     @Column
-    private String business_name;
+    private String businessName;
     private String description;
     private String timeZone;
     private String logoImageUrl;
@@ -45,6 +47,10 @@ public class RestaurantProfile {
     @CollectionTable(name="restaurant_profile_cuisine", joinColumns=@JoinColumn(name="restaurant_profile_id"))
     @Column(name="cuisine")
     @Enumerated(EnumType.STRING)
-    private final Set<Cuisine> cuisineSet = new HashSet<>();
+    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+    private Set<Cuisine> cuisineSet = new HashSet<>();
 
+    @JsonIgnore
+    @OneToOne(mappedBy="restaurantProfile")
+    private User user;
 }

@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,4 +25,7 @@ public class CustomerProfile {
     @JoinColumn(name="address_id")
     private Address address;
 
+    @JsonIgnore
+    @OneToOne(mappedBy="restaurantProfile")
+    private User user;
 }

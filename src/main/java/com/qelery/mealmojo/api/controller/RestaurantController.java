@@ -21,8 +21,14 @@ public class RestaurantController {
     }
 
 
-
     // Restaurant endpoints
+
+//    @GetMapping("/restaurants")
+//    public List<RestaurantProfile> getRestaurants(@RequestParam double latitude,
+//                                                  @RequestParam double longitude,
+//                                                  @RequestParam(defaultValue="15") int maxDistance) {
+//        return restaurantService.getRestaurants(latitude, longitude, maxDistance);
+//    }
 
     @GetMapping("/restaurants")
     public List<RestaurantProfile> getRestaurants() {
@@ -39,16 +45,16 @@ public class RestaurantController {
         return restaurantService.createRestaurant(restaurantProfile);
     }
 
-    @PutMapping("/restaurants")
-    public RestaurantProfile updateRestaurant(@RequestBody RestaurantProfile restaurantProfile) {
-        return restaurantService.updateRestaurant(restaurantProfile);
+    @PutMapping("/restaurants/{restaurantId}")
+    public RestaurantProfile updateRestaurant(@RequestBody RestaurantProfile restaurantProfile,
+                                              @PathVariable Long restaurantId) {
+        return restaurantService.updateRestaurant(restaurantProfile, restaurantId);
     }
 
     @DeleteMapping("/restaurants/{restaurantId}")
     public ResponseEntity<String> deleteRestaurant(@PathVariable Long restaurantId) {
         return restaurantService.deleteRestaurant(restaurantId);
     }
-
 
 
     // Menu Item endpoints
@@ -61,7 +67,7 @@ public class RestaurantController {
     @GetMapping("/restaurants/{restaurantId}/menuitems/{menuitemsId}")
     public MenuItem getMenuItemByRestaurant(@PathVariable Long restaurantId,
                                             @PathVariable Long menuitemsId) {
-        return restaurantService.getMenuItemByRestuarant(restaurantId, menuitemsId);
+        return restaurantService.getMenuItemByRestaurant(restaurantId, menuitemsId);
     }
 
     @PostMapping("/restaurants/{restaurantId}/menuitems/{menuitemsId}")
