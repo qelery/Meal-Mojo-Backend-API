@@ -9,17 +9,12 @@ import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class RestaurantService {
@@ -78,7 +73,7 @@ public class RestaurantService {
         propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
         return restaurantRepository.save(oldRestaurant);
     }
-    
+
     public Restaurant updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
         Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
 
