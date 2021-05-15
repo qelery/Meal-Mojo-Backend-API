@@ -1,6 +1,10 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.model.Order;
+import com.qelery.mealmojo.api.repository.OrderRepository;
+import com.qelery.mealmojo.api.service.utility.PropertyCopier;
+import org.aspectj.weaver.ast.Or;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +13,18 @@ import java.util.List;
 
 @Service
 public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final PropertyCopier propertyCopier;
+
+    @Autowired
+    public OrderService(OrderRepository orderRepository, PropertyCopier propertyCopier) {
+        this.orderRepository = orderRepository;
+        this.propertyCopier = propertyCopier;
+    }
+
     public List<Order> getOrders(Long restaurantId, Long userId) {
-        return new ArrayList<>();
+        orderRepository.findAll().
     }
 
     public List<Order> getOrdersByRestaurant(Long restaurantId) {

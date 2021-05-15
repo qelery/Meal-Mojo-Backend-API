@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qelery.mealmojo.api.model.enums.DeliveryMethod;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name="orders")
-@Getter @Setter @ToString
+@Getter @Setter @ToString(exclude={"user", "restaurant"})
 @NoArgsConstructor @AllArgsConstructor
 public class Order {
 
@@ -40,4 +41,13 @@ public class Order {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OrderLine> orderLines;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="restaurant_id")
+    private Restaurant restaurant;
 }

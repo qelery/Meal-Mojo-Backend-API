@@ -43,6 +43,10 @@ public class Restaurant {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<MenuItem> menuItems;
 
+    @OneToMany(mappedBy="restaurant")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<Order> orders;
+
     @ElementCollection(targetClass=Cuisine.class)
     @CollectionTable(name="restaurant_cuisine", joinColumns=@JoinColumn(name="restaurant_id"))
     @Column(name="cuisine")
