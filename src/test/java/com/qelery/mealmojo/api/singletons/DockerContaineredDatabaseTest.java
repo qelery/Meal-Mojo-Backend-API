@@ -2,7 +2,7 @@ package com.qelery.mealmojo.api.singletons;
 
 import org.testcontainers.containers.PostgreSQLContainer;
 
-public class DatabaseTest {
+public class DockerContaineredDatabaseTest {
 
     static PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:latest")
             .withDatabaseName("spring-mealmojo-test-db")
