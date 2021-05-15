@@ -23,12 +23,21 @@ public class OperatingHours {
 
     @Column
     private Time openTime;
-
-    @Column
     private Time closeTime;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="merchant_profile_id")
     private MerchantProfile merchantProfile;
+
+    @Override
+    public String toString() {
+        return "OperatingHours{" +
+                "id=" + id +
+                ", dayOfWeek=" + dayOfWeek +
+                ", openTime=" + openTime +
+                ", closeTime=" + closeTime +
+                ", merchantProfile=" + merchantProfile +
+                '}';
+    }
 }

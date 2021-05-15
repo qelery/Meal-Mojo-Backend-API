@@ -15,16 +15,17 @@ public class CustomerProfile {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    private String firstName;
+    private String lastName;
+
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="address_id")
     private Address address;
 
-    private String firstName;
-    private String lastName;
-
     @Override
     public String toString() {
-        return "Customer{" +
+        return "CustomerProfile{" +
                 "id=" + id +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
