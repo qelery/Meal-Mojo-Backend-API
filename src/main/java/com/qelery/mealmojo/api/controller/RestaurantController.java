@@ -48,7 +48,7 @@ public class RestaurantController {
     }
 
     @PutMapping("/restaurants/{restaurantId}")
-    public Restaurant updateRestaurant(@PathVariable Long restaurantId,
+    public ResponseEntity<String> updateRestaurant(@PathVariable Long restaurantId,
                                        @RequestBody Restaurant restaurant) {
         return restaurantService.updateRestaurant(restaurantId, restaurant);
     }
@@ -86,7 +86,7 @@ public class RestaurantController {
     }
 
     @PutMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}")
-    public MenuItem updateMenuItem(@PathVariable Long restaurantId,
+    public ResponseEntity<String> updateMenuItem(@PathVariable Long restaurantId,
                                    @PathVariable Long menuItemId,
                                    @RequestBody MenuItem menuItem) {
         return restaurantService.updateMenuItem(restaurantId, menuItemId, menuItem);

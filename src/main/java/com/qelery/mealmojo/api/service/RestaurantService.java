@@ -70,10 +70,11 @@ public class RestaurantService {
         return restaurantRepository.save(restaurant);
     }
 
-    public Restaurant updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
+    public ResponseEntity<String> updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
         Restaurant oldRestaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
         propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
-        return restaurantRepository.save(oldRestaurant);
+        restaurantRepository.save(oldRestaurant);
+        return ResponseEntity.ok("Restaurant updated");
     }
 
     public ResponseEntity<String> updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
@@ -122,8 +123,17 @@ public class RestaurantService {
         return restaurant.getMenuItems();
     }
 
-    public MenuItem getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
+    public MenuItem getMenuItemByRestaurant(Long menuItemId, Long restaurantId) {
         Restaurant restaurant = getRestaurant(restaurantId);
+        Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
+                .stream()
+                .filter(menuItem -> menuItem.getId().equals(menuItemId))
+                .findFirst();
+        return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+    }
+
+    public MenuItem getMenuItemByRestaurantAndUser(Long menuItemId, Long restaurantId, Long userId) {
+        Restaurant restaurant = getRestaurantByUser(restaurantId, userId);
         Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))
@@ -137,10 +147,18 @@ public class RestaurantService {
         return menuItemRepository.save(menuItem);
     }
 
-    public MenuItem updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
-        MenuItem oldMenuItem = getMenuItemByRestaurant(restaurantId, menuItemId); // handles RestaurantNotFound and MenuItemNotFound exceptions
+    public ResponseEntity<String> updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
+        Role roleOfLoggedInUser = getLoggedInUser().getRole();
+
+        MenuItem oldMenuItem;
+        if (roleOfLoggedInUser.equals(Role.ADMIN)) {
+            oldMenuItem = getMenuItemByRestaurant(menuItemId, restaurantId); // handles RestaurantNotFound and MenuItemNotFound exceptions
+        } else {
+            oldMenuItem = getMenuItemByRestaurantAndUser(menuItemId, restaurantId, getLoggedInUser().getId()); // handles RestaurantNotFound and MenuItemNotFound exceptions
+        }
         propertyCopier.copyNonNull(newMenuItem, oldMenuItem);
-        return menuItemRepository.save(oldMenuItem);
+        menuItemRepository.save(oldMenuItem);
+        return ResponseEntity.ok("Menu Item updated");
     }
 
     private User getLoggedInUser() {

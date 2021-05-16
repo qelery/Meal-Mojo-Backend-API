@@ -46,7 +46,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/restaurants/{[0-9]+}").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/restaurants/{[0-9]+}/menuitems").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/restaurants/{[0-9]+}/menuitems/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/restaurants/{[0-9]+}/menuitems").hasAnyAuthority("MERCHANT", "ADMIN")
+                .antMatchers(HttpMethod.POST, "/api/restaurants/{[0-9]+}/menuitems").hasAnyAuthority("MERCHANT")
                 .antMatchers(HttpMethod.PUT, "/api/restaurants/{[0-9]+}/menuitems/**").hasAnyAuthority("MERCHANT", "ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/api/restaurants/{[0-9]+}/menuitems/**").hasAnyAuthority("MERCHANT", "ADMIN")
                 .antMatchers(HttpMethod.GET, "/api/orders").hasAnyAuthority("CUSTOMER", "MERCHANT", "ADMIN")
