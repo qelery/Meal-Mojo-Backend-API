@@ -67,11 +67,6 @@ public class OrderService {
         }
     }
 
-    public Restaurant getRestaurantByUser(Long restaurantId, Long userId) {
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, userId);
-        return optionalRestaurant.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
-    }
-
 
 
     public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {
@@ -88,35 +83,16 @@ public class OrderService {
         return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
     }
 
-
-
-
-
-
-    public List<Order> getOrders(Long restaurantId, Long userId) {
-        if (restaurantId == null && userId == null) {
-            return orderRepository.findAll();
-        } else if (restaurantId == null) {
-            return orderRepository.findAllByUserId(userId);
-        } else if (userId == null) {
-            return getRestaurant(restaurantId).getOrders();
+    public List<Order> getOrders(Long restaurantId) {
+        if (restaurantId == null) {
+            return orderRepository.findAllByUserId(getLoggedInUser().getId());
         } else {
             return getRestaurant(restaurantId).getOrders()
                     .stream()
-                    .filter(o -> o.getUser().getId().equals(userId))
+                    .filter(o -> o.getUser().getId().equals(getLoggedInUser()))
                     .collect(Collectors.toList());
         }
     }
-
-    public List<Order> getOrdersByRestaurant(Long restaurantId) {
-        return getRestaurant(restaurantId).getOrders();
-    }
-
-//    public Order getOrderByRestaurant(Long restaurantId, Long orderId) {
-//        Optional<Order> optionalOrder = orderRepository.findByIdAndRestaurantId(orderId, restaurantId);
-//        return optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
-//    }
-
 
     public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
         MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);

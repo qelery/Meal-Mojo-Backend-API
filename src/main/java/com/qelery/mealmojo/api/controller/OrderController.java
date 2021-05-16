@@ -72,9 +72,8 @@ public class OrderController {
     }
 
     @GetMapping("/order/orders")
-    public List<Order> getOrders(@RequestParam(required=false) Long restaurantId,
-                                 @RequestParam(required=false) Long userId) {
-        return this.orderService.getOrders(restaurantId, userId);
+    public List<Order> getOrders(@RequestParam(required=false) Long restaurantId) {
+        return this.orderService.getOrders(restaurantId);
     }
 
 }

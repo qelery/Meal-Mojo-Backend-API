@@ -1,13 +1,11 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
+import com.qelery.mealmojo.api.exception.OrderNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.model.enums.Role;
-import com.qelery.mealmojo.api.repository.AddressRepository;
-import com.qelery.mealmojo.api.repository.MenuItemRepository;
-import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
-import com.qelery.mealmojo.api.repository.RestaurantRepository;
+import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +21,7 @@ public class MerchantService {
 
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
+    private final OrderRepository orderRepository;
     private final OperatingHoursRepository operatingHoursRepository;
     private final AddressRepository addressRepository;
     private final PropertyCopier propertyCopier;
@@ -30,10 +29,12 @@ public class MerchantService {
     @Autowired
     public MerchantService(RestaurantRepository restaurantRepository,
                            MenuItemRepository menuItemRepository,
+                           OrderRepository orderRepository,
                            OperatingHoursRepository operatingHoursRepository,
                            AddressRepository addressRepository,
                            PropertyCopier propertyCopier) {
         this.restaurantRepository = restaurantRepository;
+        this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
         this.operatingHoursRepository = operatingHoursRepository;
         this.addressRepository = addressRepository;
@@ -53,8 +54,16 @@ public class MerchantService {
     }
 
     public List<Restaurant> getAllRestaurantsOwned() {
-        List<Restaurant> restaurants = restaurantRepository.findAllByUserId(getLoggedInUser().getId());
-        return restaurants;
+        return restaurantRepository.findAllByUserId(getLoggedInUser().getId());
+    }
+
+    public Restaurant getRestaurantOwned(Long restaurantId) {
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, getLoggedInUser().getId());
+        if (optionalRestaurant.isPresent()) {
+            return optionalRestaurant.get();
+        } else {
+            throw new RestaurantNotFoundException(restaurantId);
+        }
     }
 
     public Restaurant getRestaurant(Long restaurantId) {
@@ -158,5 +167,18 @@ public class MerchantService {
         return ResponseEntity.ok("Menu Item updated");
     }
 
+    public List<Order> getOwnedRestaurantOrders(Long restaurantId) {
+        Restaurant restaurant = getRestaurantOwned(restaurantId);
+        return orderRepository.findAllByRestaurantId(restaurant.getId());
+    }
 
+    public Order getOwnedRestaurantOrder(Long restaurantId, Long orderId) {
+        Restaurant restaurant = getRestaurant(restaurantId);
+        Optional<Order> optionalOrder = orderRepository.findByIdAndRestaurantId(orderId, restaurant.getId());
+        return optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
+    }
+
+    public ResponseEntity<String> markOrderComplete(Long restaurantId, Long orderId) {
+
+    }
 }

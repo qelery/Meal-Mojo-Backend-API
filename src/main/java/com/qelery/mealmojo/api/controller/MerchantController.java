@@ -1,9 +1,6 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.Address;
-import com.qelery.mealmojo.api.model.MenuItem;
-import com.qelery.mealmojo.api.model.OperatingHours;
-import com.qelery.mealmojo.api.model.Restaurant;
+import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.service.MerchantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +19,24 @@ public class MerchantController {
         this.merchantService = merchantService;
     }
 
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
     @GetMapping("/merchant/restaurants/all")
     public List<Restaurant> getAllRestaurantOwned() {
         return merchantService.getAllRestaurantsOwned();
     }
 
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
     @GetMapping("/merchant/restaurants/{restaurantId}")
     public Restaurant getRestaurantOwned(@PathVariable Long restaurantId) {
-        return merchantService.getRestaurant(restaurantId);
+        return merchantService.getRestaurantOwned(restaurantId);
     }
 
     @PostMapping("/merchant/restaurants")
@@ -66,5 +73,32 @@ public class MerchantController {
                                                  @PathVariable Long menuItemId,
                                                  @RequestBody MenuItem menuItem) {
         return merchantService.updateMenuItem(restaurantId, menuItemId, menuItem);
+    }
+
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    @GetMapping("/merchant/restaurants/{restaurantId}/orders")
+    public List<Order> getOwnedRestaurantOrders(@PathVariable Long restaurantId) {
+        return merchantService.getOwnedRestaurantOrders(restaurantId);
+    }
+
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    @GetMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}")
+    public Order getOwnedRestaurantOrder(@PathVariable Long restaurantId,
+                                                @PathVariable Long orderId) {
+        return merchantService.getOwnedRestaurantOrder(restaurantId, orderId);
+    }
+
+    @PatchMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}/complete")
+    public ResponseEntity<String> markOrderComplete(@PathVariable Long restaurantId,
+                                                    @PathVariable Long orderId) {
+        return merchantService.markOrderComplete(restaurantId, orderId);
     }
 }
