@@ -48,7 +48,7 @@ public class RestaurantController {
 
     @PatchMapping("/restaurants/{restaurantId}")
     public Restaurant updateRestaurant(@PathVariable Long restaurantId,
-                                                @RequestBody Restaurant restaurant) {
+                                       @RequestBody Restaurant restaurant) {
         return restaurantService.updateRestaurant(restaurantId, restaurant);
     }
 

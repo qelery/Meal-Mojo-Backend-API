@@ -89,7 +89,15 @@ public class UserService {
         }
     }
 
-
+    /**
+     * Creates default admin.
+     *
+     * When the app starts up, it check if there exists at least one User with
+     * the role Admin. If one does not exist, it creates a User with the admin
+     * role and default login credentials admin/admin. After that point, only
+     * Users with the roles "customer" and "merchant" can be created, and only
+     * existing admins can grant other users the admin role.
+     */
     public void createDefaultAdmin() {
         boolean anAdminAccountExists = userRepository.existsByRole(Role.ADMIN);
         if (!anAdminAccountExists) {
