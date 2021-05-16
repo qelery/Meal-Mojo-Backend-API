@@ -74,45 +74,4 @@ public class UserService {
         return ResponseEntity.ok(new LoginResponse(JWT));
     }
 
-    public ResponseEntity<String> grantRoleToUser(Long userId, String role) {
-        Role assignedRole = getLoggedInUser().getRole();
-        // only Admin users can change another user's role
-        if (assignedRole.equals(Role.ADMIN)) {
-            Optional<User> optionalUser = userRepository.findById(userId);
-            User userToChange = optionalUser.orElseThrow(() -> new UsernameNotFoundException("Could not find User by id " + userId));
-            userToChange.setRole(Role.valueOf(role.toUpperCase()));
-            userRepository.save(userToChange);
-            return ResponseEntity.ok("User with id " + userId + " has been granted the role " + role.toUpperCase());
-        } else {
-            String message = "Unauthorized. Must be ADMIN to change a user's role";
-            return ResponseEntity.status(401).body(message);
-        }
-    }
-
-    /**
-     * Creates default admin.
-     *
-     * When the app starts up, it check if there exists at least one User with
-     * the role Admin. If one does not exist, it creates a User with the admin
-     * role and default login credentials admin/admin. After that point, only
-     * Users with the roles "customer" and "merchant" can be created, and only
-     * existing admins can grant other users the admin role.
-     */
-    public void createDefaultAdmin() {
-        boolean anAdminAccountExists = userRepository.existsByRole(Role.ADMIN);
-        if (!anAdminAccountExists) {
-            User user = new User();
-            user.setEmail("admin");
-            user.setPassword(passwordEncoder.encode("admin"));
-            user.setRole(Role.ADMIN);
-            userRepository.save(user);
-        }
-    }
-
-    private User getLoggedInUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
-                getAuthentication()
-                .getPrincipal();
-        return userDetails.getUser();
-    }
 }

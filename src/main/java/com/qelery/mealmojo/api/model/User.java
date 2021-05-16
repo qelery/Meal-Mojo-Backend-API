@@ -31,7 +31,7 @@ public class User {
     @Column
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-    private Role role;  // CUSTOMER, MERCHANT, or ADMIN
+    private Role role;  // CUSTOMER or MERCHANT
 
     @Column
     private String firstName;
@@ -43,11 +43,11 @@ public class User {
 
     @OneToMany(mappedBy="user")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Restaurant> restaurantsOwned;   // this field will be NULL for CUSTOMER role and ADMIN role
+    private List<Restaurant> restaurantsOwned;   // this field will be NULL for CUSTOMER role
 
     @OneToMany(mappedBy="user")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Order> foodOrdersPlaced;   // this field will be NULL for users with MERCHANT role and ADMIN role
+    private List<Order> foodOrdersPlaced;   // this field will be NULL for users with MERCHANT role
 
     public User(String email, String password, Role role) {
         this.email = email;

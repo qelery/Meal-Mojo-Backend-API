@@ -179,6 +179,9 @@ public class MerchantService {
     }
 
     public ResponseEntity<String> markOrderComplete(Long restaurantId, Long orderId) {
-
+        Order order = getOwnedRestaurantOrder(restaurantId, orderId);
+        order.setCompleted(true);
+        orderRepository.save(order);
+        return ResponseEntity.ok("Order " + orderId + " marked complete");
     }
 }
