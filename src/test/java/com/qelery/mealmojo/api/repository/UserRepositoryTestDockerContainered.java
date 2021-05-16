@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -62,7 +64,13 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     void findByEmail() {
         User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
         userRepository.save(expectedUserObject);
-        User actualUserObject = userRepository.findByEmail(expectedUserObject.getEmail());
+        Optional<User> optionalActualUserObject = userRepository.findByEmail(expectedUserObject.getEmail());
+
+        if (optionalActualUserObject.isEmpty()) {
+            fail();
+        }
+
+        User actualUserObject = optionalActualUserObject.get();
 
         assertEquals(expectedUserObject.getEmail(), actualUserObject.getEmail());
         assertEquals(expectedUserObject.getPassword(), actualUserObject.getPassword());
