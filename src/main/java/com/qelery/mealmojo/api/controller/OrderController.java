@@ -20,7 +20,7 @@ public class OrderController {
     }
 
 
-    @GetMapping(value="/orders", params="restaurantId, userId")
+    @GetMapping(value="/orders")
     public List<Order> getOrders(@RequestParam(required=false) Long restaurantId,
                                  @RequestParam(required=false) Long userId) {
         return this.orderService.getOrders(restaurantId, userId);

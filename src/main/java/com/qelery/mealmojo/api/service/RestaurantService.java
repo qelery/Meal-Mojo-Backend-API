@@ -3,6 +3,7 @@ package com.qelery.mealmojo.api.service;
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
+import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.AddressRepository;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
@@ -10,6 +11,7 @@ import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -74,29 +76,45 @@ public class RestaurantService {
         return restaurantRepository.save(oldRestaurant);
     }
 
-    public Restaurant updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
-        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
+    public ResponseEntity<String> updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
+        Role roleOfLoggedInUser = getLoggedInUser().getRole();
+
+        Restaurant restaurant;
+        if (roleOfLoggedInUser.equals(Role.ADMIN)) {
+            restaurant = getRestaurant(restaurantId);
+        } else {
+            restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
+        }
 
         for (OperatingHours newHours: newHoursList) {
             Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
             if (hours.isPresent()) {
                 OperatingHours oldHours = hours.get();
-                oldHours.setOpenTime(newHours.getOpenTime());
-                oldHours.setCloseTime(newHours.getCloseTime());
+                propertyCopier.copyNonNull(newHours, oldHours);
                 operatingHoursRepository.save(oldHours);
+            } else {
+                newHours.setRestaurant(restaurant);
+                operatingHoursRepository.save(newHours);
             }
         }
-        return restaurantRepository.save(restaurant);
+        return ResponseEntity.ok("Hours updated");
     }
 
-    public Restaurant updateRestaurantAddress(Long restaurantId, Address newAddress) {
-        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
+    public ResponseEntity<String> updateRestaurantAddress(Long restaurantId, Address newAddress) {
+        Role roleOfLoggedInUser = getLoggedInUser().getRole();
+
+        Restaurant restaurant;
+        if (roleOfLoggedInUser.equals(Role.ADMIN)) {
+            restaurant = getRestaurant(restaurantId);
+        } else {
+            restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
+        }
 
         Address oldAddress = restaurant.getAddress();
         propertyCopier.copyNonNull(newAddress, oldAddress);
         addressRepository.save(oldAddress);
 
-        return restaurantRepository.save(restaurant);
+        return ResponseEntity.ok("Address updated");
     }
 
     public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {

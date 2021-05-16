@@ -1,6 +1,6 @@
 package com.qelery.mealmojo.api.model.enums;
 
-public enum StateAbbreviation {
+public enum State {
     AK, AL, AR, AZ, CA,
     CO, CT, DE, FL, GA,
     HI, IA, ID, IL, IN,

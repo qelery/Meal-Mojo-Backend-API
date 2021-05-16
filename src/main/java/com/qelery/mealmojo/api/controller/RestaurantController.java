@@ -6,6 +6,7 @@ import com.qelery.mealmojo.api.model.OperatingHours;
 import com.qelery.mealmojo.api.model.Restaurant;
 import com.qelery.mealmojo.api.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,21 +47,21 @@ public class RestaurantController {
         return restaurantService.createRestaurant(restaurant);
     }
 
-    @PatchMapping("/restaurants/{restaurantId}")
+    @PutMapping("/restaurants/{restaurantId}")
     public Restaurant updateRestaurant(@PathVariable Long restaurantId,
                                        @RequestBody Restaurant restaurant) {
         return restaurantService.updateRestaurant(restaurantId, restaurant);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/hours")
-    public Restaurant updateRestaurantHours(@PathVariable Long restaurantId,
-                                            @RequestBody List<OperatingHours> hoursList) {
+    public ResponseEntity<String> updateRestaurantHours(@PathVariable Long restaurantId,
+                                                        @RequestBody List<OperatingHours> hoursList) {
         return restaurantService.updateRestaurantHours(restaurantId, hoursList);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/address")
-    public Restaurant updateRestaurantAddress(@PathVariable Long restaurantId,
-                                              @RequestBody Address address) {
+    public ResponseEntity<String> updateRestaurantAddress(@PathVariable Long restaurantId,
+                                                          @RequestBody Address address) {
         return restaurantService.updateRestaurantAddress(restaurantId, address);
     }
 
