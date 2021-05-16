@@ -50,7 +50,7 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(Role.CUSTOMER);
             userRepository.save(user);
-            String message = "Successfully registered new user with email address " + user.getEmail();
+            String message = "Registered user, " + user.getEmail() + ", with the Customer role.";
             return ResponseEntity.status(201).body(message);
         }
     }
@@ -62,7 +62,7 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(Role.MERCHANT);
             userRepository.save(user);
-            String message = "Successfully registered new user with email address " + user.getEmail();
+            String message = "Registered user, " + user.getEmail() + ", with the Merchant role.";
             return ResponseEntity.status(201).body(message);
         }
     }

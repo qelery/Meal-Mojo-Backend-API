@@ -20,40 +20,27 @@ public class OrderController {
     }
 
 
-    @GetMapping(value="/orders", params="restaurantId, userId")
-    public List<Order> getOrders(@RequestParam(required=false) Long restaurantId,
-                                 @RequestParam(required=false) Long userId) {
-        return this.orderService.getOrders(restaurantId, userId);
-    }
 
-    @GetMapping(value="/restaurants/{restaurantId}/orders")
-    public List<Order> getOrdersByRestaurant(@PathVariable Long restaurantId) {
-        return this.orderService.getOrdersByRestaurant(restaurantId);
-    }
 
-    @GetMapping("/restaurants/{restaurantId}/orders/{orderId}")
-    public Order getOrderByRestaurant(@PathVariable Long restaurantId,
-                          @PathVariable Long orderId) {
-        return this.orderService.getOrderByRestaurant(restaurantId, orderId);
-    }
+//    @GetMapping("/restaurants/{restaurantId}/orders/{orderId}")
+//    public Order getOrderByRestaurant(@PathVariable Long restaurantId,
+//                          @PathVariable Long orderId) {
+//        return this.orderService.getOrderByRestaurant(restaurantId, orderId);
+//    }
 
-    @PostMapping("/restaurants/{restaurantId}/orders")
-    public Order createOrder(@PathVariable Long restaurantId,
-                             @RequestBody Order order) {
-        return this.orderService.createOrder(restaurantId, order);
-    }
 
-    @PutMapping("/restaurants/{restaurantId}/orders/{orderId}")
-    public Order updateOrder(@PathVariable Long restaurantId,
-                             @PathVariable Long orderId,
-                             @RequestBody Order order) {
-        return this.orderService.updateOrder(restaurantId, orderId, order);
-    }
+//    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+//    public Order addOrderLineToCart(@PathVariable Long restaurantId,
+//                                    @PathVariable Long menuItemId,
+//                                    @PathVariable Integer quantity) {
+//        return this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+//    }
 
-    @PatchMapping("/restaurants/{restaurantId}/orders/{orderId}")
-    public ResponseEntity<String> changeOrderCompletionStatus(@PathVariable Long restaurantId,
-                                                              @PathVariable Long orderId,
-                                                              @RequestBody Boolean completionStatus) {
-        return this.orderService.changeOrderCompletionStatus(restaurantId, orderId, completionStatus);
-    }
+
+//    @PatchMapping("/restaurants/{restaurantId}/orders/{orderId}")
+//    public ResponseEntity<String> changeOrderCompletionStatus(@PathVariable Long restaurantId,
+//                                                              @PathVariable Long orderId,
+//                                                              @RequestBody Boolean completionStatus) {
+//        return this.orderService.changeOrderCompletionStatus(restaurantId, orderId, completionStatus);
+//    }
 }

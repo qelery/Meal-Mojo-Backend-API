@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.model.enums;
 
 public enum Cuisine {
-
     PIZZA,
+    BURGERS,
     SANDWICHES,
     CHICKEN,
     SEAFOOD,

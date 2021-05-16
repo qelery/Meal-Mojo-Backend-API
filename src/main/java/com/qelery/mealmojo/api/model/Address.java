@@ -1,7 +1,7 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.qelery.mealmojo.api.model.enums.StateAbbreviation;
+import com.qelery.mealmojo.api.model.enums.State;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,6 +25,5 @@ public class Address {
 
     @Enumerated(EnumType.STRING)
     @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-    private StateAbbreviation stateAbbreviation;
-
+    private State state;
 }

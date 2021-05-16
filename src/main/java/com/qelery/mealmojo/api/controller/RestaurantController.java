@@ -1,11 +1,9 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.Address;
-import com.qelery.mealmojo.api.model.MenuItem;
-import com.qelery.mealmojo.api.model.OperatingHours;
-import com.qelery.mealmojo.api.model.Restaurant;
+import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,21 +44,21 @@ public class RestaurantController {
         return restaurantService.createRestaurant(restaurant);
     }
 
-    @PatchMapping("/restaurants/{restaurantId}")
-    public Restaurant updateRestaurant(@PathVariable Long restaurantId,
+    @PutMapping("/restaurants/{restaurantId}")
+    public ResponseEntity<String> updateRestaurant(@PathVariable Long restaurantId,
                                        @RequestBody Restaurant restaurant) {
         return restaurantService.updateRestaurant(restaurantId, restaurant);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/hours")
-    public Restaurant updateRestaurantHours(@PathVariable Long restaurantId,
-                                            @RequestBody List<OperatingHours> hoursList) {
+    public ResponseEntity<String> updateRestaurantHours(@PathVariable Long restaurantId,
+                                                        @RequestBody List<OperatingHours> hoursList) {
         return restaurantService.updateRestaurantHours(restaurantId, hoursList);
     }
 
     @PatchMapping("/restaurants/{restaurantId}/address")
-    public Restaurant updateRestaurantAddress(@PathVariable Long restaurantId,
-                                              @RequestBody Address address) {
+    public ResponseEntity<String> updateRestaurantAddress(@PathVariable Long restaurantId,
+                                                          @RequestBody Address address) {
         return restaurantService.updateRestaurantAddress(restaurantId, address);
     }
 
@@ -85,9 +83,45 @@ public class RestaurantController {
     }
 
     @PutMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}")
-    public MenuItem updateMenuItem(@PathVariable Long restaurantId,
+    public ResponseEntity<String> updateMenuItem(@PathVariable Long restaurantId,
                                    @PathVariable Long menuItemId,
                                    @RequestBody MenuItem menuItem) {
         return restaurantService.updateMenuItem(restaurantId, menuItemId, menuItem);
+    }
+
+    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+    public OrderLine addOrderLineToCart(@PathVariable Long restaurantId,
+                                    @PathVariable Long menuItemId,
+                                    @PathVariable Integer quantity) {
+        return this.restaurantService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+    }
+
+    @PutMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+    public OrderLine editOrderLineInCart(@PathVariable Long restaurantId,
+                                        @PathVariable Long menuItemId,
+                                        @PathVariable Integer quantity) {
+        return this.restaurantService.editOrderLineInCart(restaurantId, menuItemId, quantity);
+    }
+
+    @DeleteMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines")
+    public ResponseEntity<String> editOrderLineFromCart(@PathVariable Long restaurantId,
+                                                        @PathVariable Long menuItemId) {
+        return this.restaurantService.deleteOrderLineFromCart(restaurantId, menuItemId);
+    }
+
+    @GetMapping(value="/orders")
+    public List<Order> getOrders(@RequestParam(required=false) Long restaurantId,
+                                 @RequestParam(required=false) Long userId) {
+        return this.restaurantService.getOrders(restaurantId, userId);
+    }
+
+    @PostMapping("/cart/checkout")
+    public Order checkoutCart(@RequestBody Order order) {
+        return this.restaurantService.checkoutCart(order);
+    }
+
+    @PostMapping("/cart/clear")
+    public ResponseEntity<String> clearCart() {
+        return this.restaurantService.clearCart();
     }
 }
