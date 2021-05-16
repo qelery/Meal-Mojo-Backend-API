@@ -64,18 +64,18 @@ public class RestaurantService {
     }
 
     public Restaurant createRestaurant(Restaurant restaurant) {
-        restaurant.setUser(getUser());
+        restaurant.setUser(getLoggedInUser());
         return restaurantRepository.save(restaurant);
     }
 
     public Restaurant updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
-        Restaurant oldRestaurant = getRestaurantByUser(restaurantId, getUser().getId());
+        Restaurant oldRestaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
         propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
         return restaurantRepository.save(oldRestaurant);
     }
 
     public Restaurant updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
-        Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
 
         for (OperatingHours newHours: newHoursList) {
             Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
@@ -90,7 +90,7 @@ public class RestaurantService {
     }
 
     public Restaurant updateRestaurantAddress(Long restaurantId, Address newAddress) {
-        Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
 
         Address oldAddress = restaurant.getAddress();
         propertyCopier.copyNonNull(newAddress, oldAddress);
@@ -114,7 +114,7 @@ public class RestaurantService {
     }
 
     public MenuItem createMenuItem(Long restaurantId, MenuItem menuItem) {
-        Restaurant restaurant = getRestaurantByUser(restaurantId, getUser().getId());
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
         menuItem.setRestaurant(restaurant);
         return menuItemRepository.save(menuItem);
     }
@@ -125,7 +125,7 @@ public class RestaurantService {
         return menuItemRepository.save(oldMenuItem);
     }
 
-    private User getUser() {
+    private User getLoggedInUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
                 getAuthentication()
                 .getPrincipal();
