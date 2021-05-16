@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(MenuItemNotFoundException.class)
+    @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<String> handleException(OrderNotFoundException ex)  {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }

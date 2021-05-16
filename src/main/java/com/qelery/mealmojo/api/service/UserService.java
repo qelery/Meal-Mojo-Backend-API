@@ -9,7 +9,6 @@ import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +19,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -45,11 +43,24 @@ public class UserService {
         this.authenticationManager = authenticationManager;
     }
 
-    public ResponseEntity<String> createUser(User user) {
+    public ResponseEntity<String> createUserWithCustomerRole(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRole(Role.CUSTOMER);
+            userRepository.save(user);
+            String message = "Successfully registered new user with email address " + user.getEmail();
+            return ResponseEntity.status(201).body(message);
+        }
+    }
+
+    public ResponseEntity<String> createUserWithMerchantRole(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new EmailExistsException(user.getEmail());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRole(Role.MERCHANT);
             userRepository.save(user);
             String message = "Successfully registered new user with email address " + user.getEmail();
             return ResponseEntity.status(201).body(message);
@@ -73,7 +84,20 @@ public class UserService {
             userRepository.save(userToChange);
             return ResponseEntity.ok("User with id " + userId + " has been granted the role " + role.toUpperCase());
         } else {
-            return new ResponseEntity<>("Unauthorized. Must be ADMIN to change a user's role", HttpStatus.UNAUTHORIZED);
+            String message = "Unauthorized. Must be ADMIN to change a user's role";
+            return ResponseEntity.status(401).body(message);
+        }
+    }
+
+
+    public void createDefaultAdmin() {
+        boolean anAdminAccountExists = userRepository.existsByRole(Role.ADMIN);
+        if (!anAdminAccountExists) {
+            User user = new User();
+            user.setEmail("admin");
+            user.setPassword(passwordEncoder.encode("admin"));
+            user.setRole(Role.ADMIN);
+            userRepository.save(user);
         }
     }
 

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
+
 @RestController
 @RequestMapping("/auth/users")
 public class UserController {
@@ -19,9 +21,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    @PostConstruct
+    public void createDefaultAdmin() {
+        userService.createDefaultAdmin();
+    }
+
+    @PostMapping("/register/customer")
+    public ResponseEntity<String> createUserWithCustomerRole(@RequestBody User user) {
+        return userService.createUserWithCustomerRole(user);
+    }
+
+    @PostMapping("/register/merchant")
+    public ResponseEntity<String> createUserWithMerchantRole(@RequestBody User user) {
+        return userService.createUserWithMerchantRole(user);
     }
 
     @PostMapping("/login")
