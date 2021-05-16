@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.qelery.mealmojo.api.model.enums.Role;
 import lombok.*;

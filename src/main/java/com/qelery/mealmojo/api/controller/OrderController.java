@@ -31,17 +31,32 @@ public class OrderController {
         return this.orderService.getOrdersByRestaurant(restaurantId);
     }
 
+    // Is this needed ????
+    // Is this needed ????
+    // Is this needed ???
+    // Is this needed ???
     @GetMapping("/restaurants/{restaurantId}/orders/{orderId}")
     public Order getOrderByRestaurant(@PathVariable Long restaurantId,
                           @PathVariable Long orderId) {
         return this.orderService.getOrderByRestaurant(restaurantId, orderId);
     }
 
+    // Is this needed ????
+    // Is this needed ????
+    // Is this needed ????
+    // Is this needed ????
     @PostMapping("/restaurants/{restaurantId}/orders")
     public Order createOrder(@PathVariable Long restaurantId,
                              @RequestBody Order order) {
         return this.orderService.createOrder(restaurantId, order);
     }
+
+//    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+//    public Order addOrderLineToCart(@PathVariable Long restaurantId,
+//                                    @PathVariable Long menuItemId,
+//                                    @PathVariable Integer quantity) {
+//        return this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+//    }
 
     @PutMapping("/restaurants/{restaurantId}/orders/{orderId}")
     public Order updateOrder(@PathVariable Long restaurantId,

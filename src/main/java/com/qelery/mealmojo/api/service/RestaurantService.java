@@ -1,13 +1,12 @@
 package com.qelery.mealmojo.api.service;
 
+import com.qelery.mealmojo.api.exception.EmptyCartException;
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
+import com.qelery.mealmojo.api.model.enums.PurchaseStatus;
 import com.qelery.mealmojo.api.model.enums.Role;
-import com.qelery.mealmojo.api.repository.AddressRepository;
-import com.qelery.mealmojo.api.repository.MenuItemRepository;
-import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
-import com.qelery.mealmojo.api.repository.RestaurantRepository;
+import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +14,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final OperatingHoursRepository operatingHoursRepository;
+    private final OrderRepository orderRepository;
+    private final OrderLineRepository orderLineRepository;
     private final AddressRepository addressRepository;
     private final MenuItemRepository menuItemRepository;
     private final LocationService locationService;
@@ -31,12 +35,16 @@ public class RestaurantService {
     @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository,
                              OperatingHoursRepository operatingHoursRepository,
+                             OrderRepository orderRepository,
+                             OrderLineRepository orderLineRepository,
                              AddressRepository addressRepository,
                              MenuItemRepository menuItemRepository,
                              LocationService locationService,
                              PropertyCopier propertyCopier) {
         this.restaurantRepository = restaurantRepository;
         this.operatingHoursRepository = operatingHoursRepository;
+        this.orderRepository = orderRepository;
+        this.orderLineRepository = orderLineRepository;
         this.addressRepository = addressRepository;
         this.menuItemRepository = menuItemRepository;
         this.locationService = locationService;
@@ -161,10 +169,59 @@ public class RestaurantService {
         return ResponseEntity.ok("Menu Item updated");
     }
 
+
+    public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
+        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
+        OrderLine orderLine = new OrderLine();
+
+        boolean itemsFromOtherRestaurantCarted = orderLineRepository.findAllByPurchaseStatus(PurchaseStatus.CART)
+                                                        .stream()
+                                                        .anyMatch(line -> !line.getRestaurant().getId().equals(restaurantId));
+
+        if (itemsFromOtherRestaurantCarted) {
+            clearCart();
+        }
+
+        orderLine.setRestaurant(menuItem.getRestaurant());
+        orderLine.setQuantity(quantity);
+        orderLine.setPriceEach(menuItem.getPrice());
+        orderLine.setMenuItem(menuItem);
+        orderLine.setPurchaseStatus(PurchaseStatus.CART);
+
+        return orderLineRepository.save(orderLine);
+    }
+
+    public Order checkoutCart(Order order) {
+        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatus(PurchaseStatus.CART);
+
+        if (itemsInCart.isEmpty()) {
+            throw new EmptyCartException();
+        }
+
+        order.setRestaurant(itemsInCart.get(0).getRestaurant());
+        order.setUser(getLoggedInUser());
+        order.setOrderLines(new ArrayList<>());
+        orderRepository.save(order);
+        for (OrderLine orderLine: itemsInCart) {
+            orderLine.setOrder(order);
+            orderLine.setPurchaseStatus(PurchaseStatus.PURCHASED);
+            orderLineRepository.save(orderLine);
+            order.getOrderLines().add(orderLine);
+        }
+        return orderRepository.save(order);
+    }
+
+
+    public ResponseEntity<String> clearCart() {
+        orderLineRepository.deleteAllByPurchaseStatus(PurchaseStatus.CART);
+        return ResponseEntity.ok("Cart cleared");
+    }
+
     private User getLoggedInUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
                 getAuthentication()
                 .getPrincipal();
         return userDetails.getUser();
     }
+
 }

@@ -23,9 +23,9 @@ public class Order {
     private Long id;
 
     @Column
-    private LocalDateTime dateTime;
+    private LocalDateTime dateTime = LocalDateTime.now();
     private Double tip;
-    private Boolean complete;
+    private Boolean completed = false;
 
     @Column
     @Enumerated(EnumType.STRING)

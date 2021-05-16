@@ -1,9 +1,6 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.Address;
-import com.qelery.mealmojo.api.model.MenuItem;
-import com.qelery.mealmojo.api.model.OperatingHours;
-import com.qelery.mealmojo.api.model.Restaurant;
+import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -90,5 +87,22 @@ public class RestaurantController {
                                    @PathVariable Long menuItemId,
                                    @RequestBody MenuItem menuItem) {
         return restaurantService.updateMenuItem(restaurantId, menuItemId, menuItem);
+    }
+
+    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+    public OrderLine addOrderLineToCart(@PathVariable Long restaurantId,
+                                    @PathVariable Long menuItemId,
+                                    @PathVariable Integer quantity) {
+        return this.restaurantService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+    }
+
+    @PostMapping("/cart/checkout")
+    public Order checkoutCart(@RequestBody Order order) {
+        return this.restaurantService.checkoutCart(order);
+    }
+
+    @PostMapping("/cart/clear")
+    public ResponseEntity<String> clearCart() {
+        return this.restaurantService.clearCart();
     }
 }
