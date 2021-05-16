@@ -40,20 +40,30 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-//        http.authorizeRequests().antMatchers("/auth/users", "/auth/users/login", "/auth/users/register").permitAll().anyRequest()
+        http.authorizeRequests()
+                .antMatchers("/auth/users/**").permitAll()
+                .antMatchers("/**").hasAuthority("ADMIN") // admins can access any route with any request
+                .anyRequest()
+                .authenticated()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .csrf().disable();
+
+//        http.authorizeRequests().antMatchers("/auth/users/**").permitAll().anyRequest()
 //                .authenticated()
 //                .and()
 //                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 //                .and()
 //                .csrf().disable();
 
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/apid/restaurants").hasRole("USER")
-                .antMatchers("/auth/users", "/auth/users/login", "/auth/users/register", "/api/restaurants").permitAll().anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .csrf().disable();
+//        http.authorizeRequests().antMatchers(HttpMethod.GET, "/apid/restaurants").hasRole("USER")
+//                .antMatchers("/auth/users", "/auth/users/login", "/auth/users/register", "/api/restaurants").permitAll().anyRequest()
+//                .authenticated()
+//                .and()
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
+//                .csrf().disable();
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
