@@ -7,7 +7,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @ToString(exclude={"order", "cart", "menuItem", "restaurant"})
+@Getter @Setter @ToString(exclude={"order", "menuItem", "restaurant"})
 @NoArgsConstructor @AllArgsConstructor
 public class OrderLine {
 
