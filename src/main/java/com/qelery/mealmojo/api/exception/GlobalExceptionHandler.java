@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(OrderLineNotFoundException.class)
+    public ResponseEntity<String> handleException(OrderLineNotFoundException ex)  {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(EmptyCartException.class)
     public ResponseEntity<String> handleException(EmptyCartException ex)  {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);

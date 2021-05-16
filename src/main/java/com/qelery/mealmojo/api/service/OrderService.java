@@ -40,62 +40,39 @@ public class OrderService {
         this.propertyCopier = propertyCopier;
     }
 
-    public List<Order> getOrders(Long restaurantId, Long userId) {
-        if (restaurantId == null && userId == null) {
-            return orderRepository.findAll();
-        } else if (restaurantId == null) {
-            return orderRepository.findAllByUserId(userId);
-        } else if (userId == null) {
-            return getRestaurant(restaurantId).getOrders();
-        } else {
-            return getRestaurant(restaurantId).getOrders()
-                    .stream()
-                    .filter(o -> o.getUser().getId().equals(userId))
-                    .collect(Collectors.toList());
-        }
-    }
 
-    public List<Order> getOrdersByRestaurant(Long restaurantId) {
-        return getRestaurant(restaurantId).getOrders();
-    }
-
-    public Order getOrderByRestaurant(Long restaurantId, Long orderId) {
-        Optional<Order> optionalOrder = orderRepository.findByIdAndRestaurantId(orderId, restaurantId);
-        return optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
-    }
-
-    public Order createOrder(Long restaurantId, Order order) {
-        Restaurant restaurant = getRestaurant(restaurantId);
-        order.setRestaurant(restaurant);
-        order.setUser(getUser());
-        orderRepository.save(order);
-        System.out.println("\n\n\n\n\n AAAAAAAAAAAAAAAAAAAAA \n\n\n\n\n\n");
-        for (OrderLine orderLine: order.getOrderLines()) {
-            System.out.println("\n\n\n\n\n BBBBBBBBBBBBBBBBBBBBB \n\n\n\n\n\n");
-            orderLine.setOrder(order);
-            System.out.println("\n\n\n\n\n CCCCCCCCCCCCCCCCCCc \n\n\n\n\n\n");
-            orderLineRepository.save(orderLine);
-            System.out.println("\n\n\n\n\n DDDDDDDDDDDDDDDDDDDDDDDDDDd \n\n\n\n\n\n");
-        }
-        return orderRepository.save(order);
-    }
+//    public Order createOrder(Long restaurantId, Order order) {
+//        Restaurant restaurant = getRestaurant(restaurantId);
+//        order.setRestaurant(restaurant);
+//        order.setUser(getUser());
+//        orderRepository.save(order);
+//        System.out.println("\n\n\n\n\n AAAAAAAAAAAAAAAAAAAAA \n\n\n\n\n\n");
+//        for (OrderLine orderLine: order.getOrderLines()) {
+//            System.out.println("\n\n\n\n\n BBBBBBBBBBBBBBBBBBBBB \n\n\n\n\n\n");
+//            orderLine.setOrder(order);
+//            System.out.println("\n\n\n\n\n CCCCCCCCCCCCCCCCCCc \n\n\n\n\n\n");
+//            orderLineRepository.save(orderLine);
+//            System.out.println("\n\n\n\n\n DDDDDDDDDDDDDDDDDDDDDDDDDDd \n\n\n\n\n\n");
+//        }
+//        return orderRepository.save(order);
+//    }
 
 
 //    public Order addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
 //
 //    }
 
-    public Order updateOrder(Long restaurantId, Long orderId, Order newOrder) {
-        Order oldOrder = getOrderByRestaurant(restaurantId, orderId);
-        propertyCopier.copyNonNull(newOrder, oldOrder);
-        return orderRepository.save(oldOrder);
-    }
-
-    public ResponseEntity<String> changeOrderCompletionStatus(Long restaurantId, Long orderId, Boolean completionStatus) {
-        Order order = getOrderByRestaurant(restaurantId, orderId);
-        order.setCompleted(completionStatus);
-        return ResponseEntity.ok("Order marked " + (completionStatus ? "complete" : "incomplete"));
-    }
+//    public Order updateOrder(Long restaurantId, Long orderId, Order newOrder) {
+//        Order oldOrder = getOrderByRestaurant(restaurantId, orderId);
+//        propertyCopier.copyNonNull(newOrder, oldOrder);
+//        return orderRepository.save(oldOrder);
+//    }
+//
+//    public ResponseEntity<String> changeOrderCompletionStatus(Long restaurantId, Long orderId, Boolean completionStatus) {
+//        Order order = getOrderByRestaurant(restaurantId, orderId);
+//        order.setCompleted(completionStatus);
+//        return ResponseEntity.ok("Order marked " + (completionStatus ? "complete" : "incomplete"));
+//    }
 
     private User getUser() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().

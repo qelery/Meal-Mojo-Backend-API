@@ -37,4 +37,9 @@ public class OrderLine {
     @ManyToOne
     @JoinColumn(name="restaurant_id")
     private Restaurant restaurant;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
 }

@@ -50,6 +50,8 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.PUT, "/api/restaurants/{[0-9]+}/menuitems/{[0-9]+}").hasAnyAuthority("MERCHANT", "ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/api/restaurants/{[0-9]+}/menuitems/{[0-9]+}").hasAnyAuthority("MERCHANT", "ADMIN")
                 .antMatchers(HttpMethod.POST, "/api/restaurants/{[0-9]+}/menuitems/{[0-9]+}/orderlines/**").hasAnyAuthority("CUSTOMER")
+                .antMatchers(HttpMethod.PUT, "/api/restaurants/{[0-9]+}/menuitems/{[0-9]+}/orderlines/**").hasAnyAuthority("CUSTOMER", "ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/api/restaurants/{[0-9]+}/menuitems/{[0-9]+}/orderlines/**").hasAnyAuthority("CUSTOMER", "ADMIN")
                 .antMatchers(HttpMethod.GET, "/api/orders").hasAnyAuthority("ADMIN")
                 .antMatchers(HttpMethod.GET, "/api/restaurants/{[0-9]+}/orders").hasAnyAuthority("MERCHANT", "ADMIN")
                 .antMatchers(HttpMethod.POST, "/api/restaurants/{[0-9]+}/orders").hasAnyAuthority("CUSTOMER")
@@ -67,21 +69,6 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .csrf().disable();
-
-//        http.authorizeRequests().antMatchers("/auth/users/**").permitAll().anyRequest()
-//                .authenticated()
-//                .and()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .csrf().disable();
-
-//        http.authorizeRequests().antMatchers(HttpMethod.GET, "/apid/restaurants").hasRole("USER")
-//                .antMatchers("/auth/users", "/auth/users/login", "/auth/users/register", "/api/restaurants").permitAll().anyRequest()
-//                .authenticated()
-//                .and()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .csrf().disable();
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }

@@ -1,8 +1,6 @@
 package com.qelery.mealmojo.api.service;
 
-import com.qelery.mealmojo.api.exception.EmptyCartException;
-import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
-import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
+import com.qelery.mealmojo.api.exception.*;
 import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.model.enums.PurchaseStatus;
 import com.qelery.mealmojo.api.model.enums.Role;
@@ -18,6 +16,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -170,29 +169,94 @@ public class RestaurantService {
     }
 
 
+    public List<Order> getOrders(Long restaurantId, Long userId) {
+        if (restaurantId == null && userId == null) {
+            return orderRepository.findAll();
+        } else if (restaurantId == null) {
+            return orderRepository.findAllByUserId(userId);
+        } else if (userId == null) {
+            return getRestaurant(restaurantId).getOrders();
+        } else {
+            return getRestaurant(restaurantId).getOrders()
+                    .stream()
+                    .filter(o -> o.getUser().getId().equals(userId))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    public List<Order> getOrdersByRestaurant(Long restaurantId) {
+        return getRestaurant(restaurantId).getOrders();
+    }
+
+//    public Order getOrderByRestaurant(Long restaurantId, Long orderId) {
+//        Optional<Order> optionalOrder = orderRepository.findByIdAndRestaurantId(orderId, restaurantId);
+//        return optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
+//    }
+
+
     public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
         MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
-        OrderLine orderLine = new OrderLine();
 
-        boolean itemsFromOtherRestaurantCarted = orderLineRepository.findAllByPurchaseStatus(PurchaseStatus.CART)
-                                                        .stream()
-                                                        .anyMatch(line -> !line.getRestaurant().getId().equals(restaurantId));
-
+        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
+                                                                                           getLoggedInUser().getId());
+        boolean itemsFromOtherRestaurantCarted = itemsInCart.stream()
+                                                      .anyMatch(line -> !line.getRestaurant().getId().equals(restaurantId));
         if (itemsFromOtherRestaurantCarted) {
             clearCart();
         }
 
-        orderLine.setRestaurant(menuItem.getRestaurant());
-        orderLine.setQuantity(quantity);
-        orderLine.setPriceEach(menuItem.getPrice());
-        orderLine.setMenuItem(menuItem);
-        orderLine.setPurchaseStatus(PurchaseStatus.CART);
+        Optional<OrderLine> orderLineAlreadyInCart = itemsInCart.stream()
+                                                        .filter(line -> line.getMenuItem().equals(menuItem))
+                                                        .findFirst();
+        if (orderLineAlreadyInCart.isPresent()) {
+            int quantityInCart = orderLineAlreadyInCart.get().getQuantity();
+            orderLineAlreadyInCart.get().setQuantity(quantity + quantityInCart);
+            return orderLineRepository.save(orderLineAlreadyInCart.get());
+        } else {
+            OrderLine orderLine = new OrderLine();
+            orderLine.setRestaurant(menuItem.getRestaurant());
+            orderLine.setUser(getLoggedInUser());
+            orderLine.setQuantity(quantity);
+            orderLine.setPriceEach(menuItem.getPrice());
+            orderLine.setMenuItem(menuItem);
+            orderLine.setPurchaseStatus(PurchaseStatus.CART);
+            return orderLineRepository.save(orderLine);
+        }
+    }
 
-        return orderLineRepository.save(orderLine);
+    public OrderLine editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
+        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
+
+        List<OrderLine> itemsInCart =
+                orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
+        Optional<OrderLine> optionalOrderLine = itemsInCart.stream()
+                .filter(item -> item.getMenuItem().equals(menuItem)).findFirst();
+
+        if (optionalOrderLine.isPresent()) {
+            optionalOrderLine.get().setQuantity(quantity);
+            return orderLineRepository.save(optionalOrderLine.get());
+        } else {
+            return addOrderLineToCart(restaurantId, menuItemId, quantity);
+        }
+    }
+
+
+    public ResponseEntity<String> deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
+        Optional<OrderLine> optionalOrderLine =
+                orderLineRepository.findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus.CART,
+                                                                                   getLoggedInUser().getId(),
+                                                                                   menuItemId);
+        if (optionalOrderLine.isPresent()) {
+            orderLineRepository.delete(optionalOrderLine.get());
+            return ResponseEntity.ok("Removed from cart");
+        } else {
+            throw new OrderLineNotFoundException(restaurantId, menuItemId);
+        }
     }
 
     public Order checkoutCart(Order order) {
-        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatus(PurchaseStatus.CART);
+        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
+                                                                                           getLoggedInUser().getId());
 
         if (itemsInCart.isEmpty()) {
             throw new EmptyCartException();
@@ -213,7 +277,7 @@ public class RestaurantService {
 
 
     public ResponseEntity<String> clearCart() {
-        orderLineRepository.deleteAllByPurchaseStatus(PurchaseStatus.CART);
+        orderLineRepository.deleteAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
         return ResponseEntity.ok("Cart cleared");
     }
 
@@ -223,5 +287,6 @@ public class RestaurantService {
                 .getPrincipal();
         return userDetails.getUser();
     }
+
 
 }

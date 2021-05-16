@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
 
-    List<OrderLine> findAllByPurchaseStatus(PurchaseStatus purchaseStatus);
-    void deleteAllByPurchaseStatus(PurchaseStatus purchaseStatus);
+    List<OrderLine> findAllByPurchaseStatusAndUserId(PurchaseStatus purchaseStatus, Long userId);
+    Optional<OrderLine> findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus purchaseStatus, Long userId, Long menuItemId);
+    void deleteAllByPurchaseStatusAndUserId(PurchaseStatus purchaseStatus, Long userId);
 }
