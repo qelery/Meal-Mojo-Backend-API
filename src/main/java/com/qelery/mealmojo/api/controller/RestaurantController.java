@@ -115,11 +115,6 @@ public class RestaurantController {
         return this.restaurantService.getOrders(restaurantId, userId);
     }
 
-    @GetMapping(value="/restaurants/{restaurantId}/orders")
-    public List<Order> getOrdersByRestaurant(@PathVariable Long restaurantId) {
-        return this.restaurantService.getOrdersByRestaurant(restaurantId);
-    }
-
     @PostMapping("/cart/checkout")
     public Order checkoutCart(@RequestBody Order order) {
         return this.restaurantService.checkoutCart(order);
