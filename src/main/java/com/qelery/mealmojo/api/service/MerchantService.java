@@ -88,14 +88,7 @@ public class MerchantService {
     }
 
     public ResponseEntity<String> updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
-        Role roleOfLoggedInUser = getLoggedInUser().getRole();
-
-        Restaurant restaurant;
-        if (roleOfLoggedInUser.equals(Role.ADMIN)) {
-            restaurant = getRestaurant(restaurantId);
-        } else {
-            restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
-        }
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
 
         for (OperatingHours newHours: newHoursList) {
             Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
@@ -112,14 +105,8 @@ public class MerchantService {
     }
 
     public ResponseEntity<String> updateRestaurantAddress(Long restaurantId, Address newAddress) {
-        Role roleOfLoggedInUser = getLoggedInUser().getRole();
+        Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
 
-        Restaurant restaurant;
-        if (roleOfLoggedInUser.equals(Role.ADMIN)) {
-            restaurant = getRestaurant(restaurantId);
-        } else {
-            restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
-        }
 
         Address oldAddress = restaurant.getAddress();
         propertyCopier.copyNonNull(newAddress, oldAddress);
@@ -154,14 +141,7 @@ public class MerchantService {
 
 
     public ResponseEntity<String> updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
-        Role roleOfLoggedInUser = getLoggedInUser().getRole();
-
-        MenuItem oldMenuItem;
-        if (roleOfLoggedInUser.equals(Role.ADMIN)) {
-            oldMenuItem = getMenuItemByRestaurant(menuItemId, restaurantId); // handles RestaurantNotFound and MenuItemNotFound exceptions
-        } else {
-            oldMenuItem = getMenuItemByRestaurantAndUser(menuItemId, restaurantId, getLoggedInUser().getId()); // handles RestaurantNotFound and MenuItemNotFound exceptions
-        }
+        MenuItem oldMenuItem = getMenuItemByRestaurantAndUser(menuItemId, restaurantId, getLoggedInUser().getId()); // handles RestaurantNotFound and MenuItemNotFound exceptions
         propertyCopier.copyNonNull(newMenuItem, oldMenuItem);
         menuItemRepository.save(oldMenuItem);
         return ResponseEntity.ok("Menu Item updated");

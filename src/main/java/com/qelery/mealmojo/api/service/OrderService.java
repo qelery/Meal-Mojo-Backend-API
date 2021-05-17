@@ -89,7 +89,7 @@ public class OrderService {
         } else {
             return getRestaurant(restaurantId).getOrders()
                     .stream()
-                    .filter(o -> o.getUser().getId().equals(getLoggedInUser()))
+                    .filter(o -> o.getUser().getId().equals(getLoggedInUser().getId()))
                     .collect(Collectors.toList());
         }
     }
