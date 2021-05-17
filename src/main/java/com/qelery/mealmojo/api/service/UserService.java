@@ -4,9 +4,9 @@ import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.model.Address;
 import com.qelery.mealmojo.api.model.User;
 import com.qelery.mealmojo.api.model.enums.Role;
-import com.qelery.mealmojo.api.model.form.UserInfo;
-import com.qelery.mealmojo.api.model.login.LoginRequest;
-import com.qelery.mealmojo.api.model.login.LoginResponse;
+import com.qelery.mealmojo.api.model.request.UserInfoRequest;
+import com.qelery.mealmojo.api.model.request.LoginRequest;
+import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
@@ -18,11 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -80,16 +77,16 @@ public class UserService {
         return ResponseEntity.ok(new LoginResponse(JWT));
     }
 
-    public ResponseEntity<String> updateUserInfo(UserInfo updatedUserInfo) {
+    public ResponseEntity<String> updateUserInfo(UserInfoRequest updatedUserInfoRequest) {
         User currentUserInfo = getLoggedInUser();
-        if (updatedUserInfo.getPassword() != null) {
-            updatedUserInfo.setPassword(passwordEncoder.encode(updatedUserInfo.getPassword()));
+        if (updatedUserInfoRequest.getPassword() != null) {
+            updatedUserInfoRequest.setPassword(passwordEncoder.encode(updatedUserInfoRequest.getPassword()));
         }
         Address currentAddress = currentUserInfo.getAddress();
-        propertyCopier.copyNonNull(updatedUserInfo, currentUserInfo);
+        propertyCopier.copyNonNull(updatedUserInfoRequest, currentUserInfo);
 
         if (currentAddress != null) {
-            propertyCopier.copyNonNull(updatedUserInfo.getAddress(), currentAddress);
+            propertyCopier.copyNonNull(updatedUserInfoRequest.getAddress(), currentAddress);
         }
         currentUserInfo.setAddress(currentAddress);
         userRepository.save(currentUserInfo);

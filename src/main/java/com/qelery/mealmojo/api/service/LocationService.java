@@ -18,7 +18,6 @@ public class LocationService {
         this.restaurantRepository = restaurantRepository;
     }
 
-
     public List<Restaurant> findRestaurantsWithinDistance(double originLatitude, double originLongitude, int maxDistance) {
         List<Restaurant> allRestaurants = restaurantRepository.findAll();
         return allRestaurants.stream().filter(restaurant -> {

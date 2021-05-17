@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.model.form;
+package com.qelery.mealmojo.api.model.request;
 
 import com.qelery.mealmojo.api.model.Address;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Getter @Setter @ToString
-public class UserInfo {
+public class UserInfoRequest {
 
     private String email;
     private String password;

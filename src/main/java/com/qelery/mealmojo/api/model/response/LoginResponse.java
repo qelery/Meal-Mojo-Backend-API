@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.model.login;
+package com.qelery.mealmojo.api.model.response;
 
 import lombok.Getter;
 import lombok.Setter;

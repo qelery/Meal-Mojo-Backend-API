@@ -1,9 +1,9 @@
 package com.qelery.mealmojo.api.controller;
 
 import com.qelery.mealmojo.api.model.User;
-import com.qelery.mealmojo.api.model.form.UserInfo;
-import com.qelery.mealmojo.api.model.login.LoginRequest;
-import com.qelery.mealmojo.api.model.login.LoginResponse;
+import com.qelery.mealmojo.api.model.request.UserInfoRequest;
+import com.qelery.mealmojo.api.model.request.LoginRequest;
+import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updateUserInfo(@RequestBody UserInfo userInfo) {
-        return userService.updateUserInfo(userInfo);
+    public ResponseEntity<String> updateUserInfo(@RequestBody UserInfoRequest userInfoRequest) {
+        return userService.updateUserInfo(userInfoRequest);
     }
 }
