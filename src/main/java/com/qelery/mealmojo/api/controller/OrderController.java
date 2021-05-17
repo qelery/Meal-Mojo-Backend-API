@@ -34,6 +34,18 @@ public class OrderController {
         return orderService.getRestaurants();
     }
 
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    // UNTESTED
+    @GetMapping(value="/order/restaurants", params={"latitude", "longitude", "maxDistance"})
+    public List<Restaurant> getRestaurantsWithinDistance(@RequestParam double latitude,
+                                              @RequestParam double longitude,
+                                              @RequestParam(defaultValue="15") int maxDistance) {
+        return orderService.getRestaurantsWithinDistance(latitude, longitude, maxDistance);
+    }
+
     @GetMapping("/order/restaurants/{restaurantId}")
     public Restaurant getRestaurant(@PathVariable Long restaurantId) {
         return orderService.getRestaurant(restaurantId);

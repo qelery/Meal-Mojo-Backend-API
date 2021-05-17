@@ -23,31 +23,19 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final RestaurantRepository restaurantRepository;
-    private final OperatingHoursRepository operatingHoursRepository;
     private final OrderRepository orderRepository;
     private final OrderLineRepository orderLineRepository;
-    private final AddressRepository addressRepository;
-    private final MenuItemRepository menuItemRepository;
     private final LocationService locationService;
-    private final PropertyCopier propertyCopier;
 
     @Autowired
     public OrderService(RestaurantRepository restaurantRepository,
-                             OperatingHoursRepository operatingHoursRepository,
                              OrderRepository orderRepository,
                              OrderLineRepository orderLineRepository,
-                             AddressRepository addressRepository,
-                             MenuItemRepository menuItemRepository,
-                             LocationService locationService,
-                             PropertyCopier propertyCopier) {
+                             LocationService locationService) {
         this.restaurantRepository = restaurantRepository;
-        this.operatingHoursRepository = operatingHoursRepository;
         this.orderRepository = orderRepository;
         this.orderLineRepository = orderLineRepository;
-        this.addressRepository = addressRepository;
-        this.menuItemRepository = menuItemRepository;
         this.locationService = locationService;
-        this.propertyCopier = propertyCopier;
     }
 
     public List<Restaurant> getRestaurants() {
@@ -67,10 +55,8 @@ public class OrderService {
         }
     }
 
-
-
     public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {
-        Restaurant restaurant = getRestaurant(restaurantId); // handles RestaurantNotFoundException
+        Restaurant restaurant = getRestaurant(restaurantId);
         return restaurant.getMenuItems();
     }
 
@@ -139,7 +125,6 @@ public class OrderService {
             return addOrderLineToCart(restaurantId, menuItemId, quantity);
         }
     }
-
 
     public ResponseEntity<String> deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
         Optional<OrderLine> optionalOrderLine =

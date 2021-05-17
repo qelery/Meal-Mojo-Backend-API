@@ -1,16 +1,32 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.model.Restaurant;
+import com.qelery.mealmojo.api.repository.RestaurantRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationService {
 
-    public List<Restaurant> findRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
-        return new ArrayList<>();
+    private final RestaurantRepository restaurantRepository;
+
+    @Autowired
+    public LocationService(RestaurantRepository restaurantRepository) {
+        this.restaurantRepository = restaurantRepository;
+    }
+
+
+    public List<Restaurant> findRestaurantsWithinDistance(double originLatitude, double originLongitude, int maxDistance) {
+        List<Restaurant> allRestaurants = restaurantRepository.findAll();
+        return allRestaurants.stream().filter(restaurant -> {
+            double restaurantLongitude = restaurant.getAddress().getLongitude();
+            double restaurantLatitude = restaurant.getAddress().getLongitude();
+            double distance = distanceApartInMiles(originLatitude, originLongitude, restaurantLatitude, restaurantLongitude);
+            return distance <= maxDistance;
+        }).collect(Collectors.toList());
     }
 
     private double distanceApartInMiles(double latitudeA, double longitudeA, double latitudeB, double longitudeB) {

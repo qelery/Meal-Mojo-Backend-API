@@ -4,7 +4,6 @@ import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.OrderNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
-import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
