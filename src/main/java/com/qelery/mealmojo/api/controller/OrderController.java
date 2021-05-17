@@ -1,7 +1,8 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.Order;
+import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.service.OrderService;
+import com.qelery.mealmojo.api.service.TempService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,32 +16,64 @@ public class OrderController {
     private OrderService orderService;
 
     @Autowired
-    public void setOrderService(OrderService orderService) {
-        this.orderService = orderService;
+    public void setOrderService(OrderService restaurantService) {
+        this.orderService = restaurantService;
     }
 
+    @PostMapping("/order/cart/checkout")
+    public Order checkoutCart(@RequestBody Order order) {
+        return this.orderService.checkoutCart(order);
+    }
 
+    @PostMapping("/order/cart/clear")
+    public ResponseEntity<String> clearCart() {
+        return this.orderService.clearCart();
+    }
 
+    @GetMapping("/order/restaurants")
+    public List<Restaurant> getRestaurants() {
+        return orderService.getRestaurants();
+    }
 
-//    @GetMapping("/restaurants/{restaurantId}/orders/{orderId}")
-//    public Order getOrderByRestaurant(@PathVariable Long restaurantId,
-//                          @PathVariable Long orderId) {
-//        return this.orderService.getOrderByRestaurant(restaurantId, orderId);
-//    }
+    @GetMapping("/order/restaurants/{restaurantId}")
+    public Restaurant getRestaurant(@PathVariable Long restaurantId) {
+        return orderService.getRestaurant(restaurantId);
+    }
 
+    @GetMapping("/order/restaurants/{restaurantId}/menuitems")
+    public List<MenuItem> getMenuItemsByRestaurant(@PathVariable Long restaurantId) {
+        return orderService.getMenuItemsByRestaurant(restaurantId);
+    }
 
-//    @PostMapping("/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
-//    public Order addOrderLineToCart(@PathVariable Long restaurantId,
-//                                    @PathVariable Long menuItemId,
-//                                    @PathVariable Integer quantity) {
-//        return this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
-//    }
+    @GetMapping("/order/restaurants/{restaurantId}/menuitems/{menuitemId}")
+    public MenuItem getMenuItemByRestaurant(@PathVariable Long restaurantId,
+                                            @PathVariable Long menuitemId) {
+        return orderService.getMenuItemByRestaurant(restaurantId, menuitemId);
+    }
 
+    @PostMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+    public OrderLine addOrderLineToCart(@PathVariable Long restaurantId,
+                                        @PathVariable Long menuItemId,
+                                        @PathVariable Integer quantity) {
+        return this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+    }
 
-//    @PatchMapping("/restaurants/{restaurantId}/orders/{orderId}")
-//    public ResponseEntity<String> changeOrderCompletionStatus(@PathVariable Long restaurantId,
-//                                                              @PathVariable Long orderId,
-//                                                              @RequestBody Boolean completionStatus) {
-//        return this.orderService.changeOrderCompletionStatus(restaurantId, orderId, completionStatus);
-//    }
+    @PutMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
+    public OrderLine editOrderLineInCart(@PathVariable Long restaurantId,
+                                         @PathVariable Long menuItemId,
+                                         @PathVariable Integer quantity) {
+        return this.orderService.editOrderLineInCart(restaurantId, menuItemId, quantity);
+    }
+
+    @DeleteMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines")
+    public ResponseEntity<String> deleteOrderLineFromCart(@PathVariable Long restaurantId,
+                                                          @PathVariable Long menuItemId) {
+        return this.orderService.deleteOrderLineFromCart(restaurantId, menuItemId);
+    }
+
+    @GetMapping("/order/orders")
+    public List<Order> getOrders(@RequestParam(required=false) Long restaurantId) {
+        return this.orderService.getOrders(restaurantId);
+    }
+
 }
