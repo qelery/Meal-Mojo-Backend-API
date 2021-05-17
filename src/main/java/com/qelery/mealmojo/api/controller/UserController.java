@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.controller;
 
 import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.form.UserInfo;
 import com.qelery.mealmojo.api.model.login.LoginRequest;
 import com.qelery.mealmojo.api.model.login.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
@@ -34,4 +35,8 @@ public class UserController {
         return userService.loginUser(loginRequest);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<String> updateUserInfo(@RequestBody UserInfo userInfo) {
+        return userService.updateUserInfo(userInfo);
+    }
 }

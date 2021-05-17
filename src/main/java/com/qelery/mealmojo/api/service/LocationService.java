@@ -12,6 +12,8 @@ public class LocationService {
     public List<Restaurant> findRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
         return new ArrayList<>();
     }
+
+
 }
 
 

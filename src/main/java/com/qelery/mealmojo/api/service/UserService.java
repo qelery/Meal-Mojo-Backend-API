@@ -1,13 +1,16 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
+import com.qelery.mealmojo.api.model.Address;
 import com.qelery.mealmojo.api.model.User;
 import com.qelery.mealmojo.api.model.enums.Role;
+import com.qelery.mealmojo.api.model.form.UserInfo;
 import com.qelery.mealmojo.api.model.login.LoginRequest;
 import com.qelery.mealmojo.api.model.login.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
+import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,18 +32,21 @@ public class UserService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final PropertyCopier propertyCopier;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        UserDetailsService userDetailsService,
                        PasswordEncoder passwordEncoder,
                        JwtUtils jwtUtils,
-                       AuthenticationManager authenticationManager) {
+                       AuthenticationManager authenticationManager,
+                       PropertyCopier propertyCopier) {
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.propertyCopier = propertyCopier;
     }
 
     public ResponseEntity<String> createUserWithCustomerRole(User user) {
@@ -74,4 +80,26 @@ public class UserService {
         return ResponseEntity.ok(new LoginResponse(JWT));
     }
 
+    public ResponseEntity<String> updateUserInfo(UserInfo updatedUserInfo) {
+        User currentUserInfo = getLoggedInUser();
+        if (updatedUserInfo.getPassword() != null) {
+            updatedUserInfo.setPassword(passwordEncoder.encode(updatedUserInfo.getPassword()));
+        }
+        Address currentAddress = currentUserInfo.getAddress();
+        propertyCopier.copyNonNull(updatedUserInfo, currentUserInfo);
+
+        if (currentAddress != null) {
+            propertyCopier.copyNonNull(updatedUserInfo.getAddress(), currentAddress);
+        }
+        currentUserInfo.setAddress(currentAddress);
+        userRepository.save(currentUserInfo);
+        return ResponseEntity.ok("User updated");
+    }
+
+    private User getLoggedInUser() {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
+                getAuthentication()
+                .getPrincipal();
+        return userDetails.getUser();
+    }
 }
