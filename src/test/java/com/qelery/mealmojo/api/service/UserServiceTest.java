@@ -47,7 +47,7 @@ class UserServiceTest {
 
         String message = "Successfully registered new user with email address " + user.getEmail();
         ResponseEntity<String> expectedResponse = ResponseEntity.status(201).body(message);
-        ResponseEntity<String> actualResponse = userService.createUserWithCustomerRole(user);
+        ResponseEntity<User> actualResponse = userService.createUserWithCustomerRole(user);
         assertEquals(expectedResponse, actualResponse);
 
         Mockito.verify(userRepository, Mockito.times(1)).save(userArgumentCaptor.capture());

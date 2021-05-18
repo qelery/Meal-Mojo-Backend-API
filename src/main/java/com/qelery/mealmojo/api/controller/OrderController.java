@@ -63,21 +63,21 @@ public class OrderController {
     }
 
     @PostMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
-    public OrderLine addOrderLineToCart(@PathVariable Long restaurantId,
+    public ResponseEntity<OrderLine> addOrderLineToCart(@PathVariable Long restaurantId,
                                         @PathVariable Long menuItemId,
                                         @PathVariable Integer quantity) {
         return this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
     }
 
     @PutMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
-    public OrderLine editOrderLineInCart(@PathVariable Long restaurantId,
+    public ResponseEntity<OrderLine> editOrderLineInCart(@PathVariable Long restaurantId,
                                          @PathVariable Long menuItemId,
                                          @PathVariable Integer quantity) {
         return this.orderService.editOrderLineInCart(restaurantId, menuItemId, quantity);
     }
 
     @DeleteMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines")
-    public ResponseEntity<String> deleteOrderLineFromCart(@PathVariable Long restaurantId,
+    public ResponseEntity<Void> deleteOrderLineFromCart(@PathVariable Long restaurantId,
                                                           @PathVariable Long menuItemId) {
         return this.orderService.deleteOrderLineFromCart(restaurantId, menuItemId);
     }

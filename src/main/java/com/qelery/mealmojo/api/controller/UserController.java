@@ -21,12 +21,12 @@ public class UserController {
     }
 
     @PostMapping("/register/customer")
-    public ResponseEntity<String> createUserWithCustomerRole(@RequestBody User user) {
+    public ResponseEntity<User> createUserWithCustomerRole(@RequestBody User user) {
         return userService.createUserWithCustomerRole(user);
     }
 
     @PostMapping("/register/merchant")
-    public ResponseEntity<String> createUserWithMerchantRole(@RequestBody User user) {
+    public ResponseEntity<User> createUserWithMerchantRole(@RequestBody User user) {
         return userService.createUserWithMerchantRole(user);
     }
 
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updateUserInfo(@RequestBody UserInfoRequest userInfoRequest) {
+    public ResponseEntity<User> updateUserInfo(@RequestBody UserInfoRequest userInfoRequest) {
         return userService.updateUserInfo(userInfoRequest);
     }
 }

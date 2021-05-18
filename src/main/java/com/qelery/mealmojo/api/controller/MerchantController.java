@@ -63,13 +63,13 @@ public class MerchantController {
     }
 
     @PostMapping("/merchant/restaurants/{restaurantId}/menuitems")
-    public MenuItem createMenuItem(@PathVariable Long restaurantId,
+    public ResponseEntity<MenuItem> createMenuItem(@PathVariable Long restaurantId,
                                    @RequestBody MenuItem menuItem) {
         return merchantService.createMenuItem(restaurantId, menuItem);
     }
 
     @PutMapping("/merchant/restaurants/{restaurantId}/menuitems/{menuItemId}")
-    public ResponseEntity<String> updateMenuItem(@PathVariable Long restaurantId,
+    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable Long restaurantId,
                                                  @PathVariable Long menuItemId,
                                                  @RequestBody MenuItem menuItem) {
         return merchantService.updateMenuItem(restaurantId, menuItemId, menuItem);
@@ -97,7 +97,7 @@ public class MerchantController {
     }
 
     @PatchMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}/complete")
-    public ResponseEntity<String> markOrderComplete(@PathVariable Long restaurantId,
+    public ResponseEntity<Order> markOrderComplete(@PathVariable Long restaurantId,
                                                     @PathVariable Long orderId) {
         return merchantService.markOrderComplete(restaurantId, orderId);
     }

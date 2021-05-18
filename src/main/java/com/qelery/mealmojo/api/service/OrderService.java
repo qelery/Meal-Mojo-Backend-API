@@ -8,6 +8,7 @@ import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class OrderService {
         }
     }
 
-    public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
+    public ResponseEntity<OrderLine> addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
         MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
 
         List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
@@ -97,7 +98,7 @@ public class OrderService {
         if (orderLineAlreadyInCart.isPresent()) {
             int quantityInCart = orderLineAlreadyInCart.get().getQuantity();
             orderLineAlreadyInCart.get().setQuantity(quantity + quantityInCart);
-            return orderLineRepository.save(orderLineAlreadyInCart.get());
+            return new ResponseEntity<>(orderLineRepository.save(orderLineAlreadyInCart.get()), HttpStatus.CREATED);
         } else {
             OrderLine orderLine = new OrderLine();
             orderLine.setRestaurant(menuItem.getRestaurant());
@@ -106,11 +107,11 @@ public class OrderService {
             orderLine.setPriceEach(menuItem.getPrice());
             orderLine.setMenuItem(menuItem);
             orderLine.setPurchaseStatus(PurchaseStatus.CART);
-            return orderLineRepository.save(orderLine);
+            return new ResponseEntity<>(orderLineRepository.save(orderLine), HttpStatus.CREATED);
         }
     }
 
-    public OrderLine editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
+    public ResponseEntity<OrderLine> editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
         MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
 
         List<OrderLine> itemsInCart =
@@ -120,20 +121,20 @@ public class OrderService {
 
         if (optionalOrderLine.isPresent()) {
             optionalOrderLine.get().setQuantity(quantity);
-            return orderLineRepository.save(optionalOrderLine.get());
+            return new ResponseEntity<>(orderLineRepository.save(optionalOrderLine.get()), HttpStatus.OK);
         } else {
             return addOrderLineToCart(restaurantId, menuItemId, quantity);
         }
     }
 
-    public ResponseEntity<String> deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
+    public ResponseEntity<Void> deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
         Optional<OrderLine> optionalOrderLine =
                 orderLineRepository.findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus.CART,
                                                                                    getLoggedInUser().getId(),
                                                                                    menuItemId);
         if (optionalOrderLine.isPresent()) {
             orderLineRepository.delete(optionalOrderLine.get());
-            return ResponseEntity.ok("Removed from cart");
+            return ResponseEntity.noContent().build();
         } else {
             throw new OrderLineNotFoundException(restaurantId, menuItemId);
         }

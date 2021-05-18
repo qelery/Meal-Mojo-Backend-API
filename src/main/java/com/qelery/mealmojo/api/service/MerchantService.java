@@ -8,6 +8,7 @@ import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -114,10 +115,10 @@ public class MerchantService {
         return ResponseEntity.ok("Address updated");
     }
 
-    public MenuItem createMenuItem(Long restaurantId, MenuItem menuItem) {
+    public ResponseEntity<MenuItem> createMenuItem(Long restaurantId, MenuItem menuItem) {
         Restaurant restaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
         menuItem.setRestaurant(restaurant);
-        return menuItemRepository.save(menuItem);
+        return new ResponseEntity<>(menuItemRepository.save(menuItem), HttpStatus.CREATED);
     }
 
     public MenuItem getMenuItemByRestaurantAndUser(Long menuItemId, Long restaurantId, Long userId) {
@@ -129,21 +130,20 @@ public class MerchantService {
         return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
     }
 
-    public MenuItem getMenuItemByRestaurant(Long menuItemId, Long restaurantId) {
-        Restaurant restaurant = getRestaurant(restaurantId);
-        Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
-                .stream()
-                .filter(menuItem -> menuItem.getId().equals(menuItemId))
-                .findFirst();
-        return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
-    }
+//    public MenuItem getMenuItemByRestaurant(Long menuItemId, Long restaurantId) {
+//        Restaurant restaurant = getRestaurant(restaurantId);
+//        Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
+//                .stream()
+//                .filter(menuItem -> menuItem.getId().equals(menuItemId))
+//                .findFirst();
+//        return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+//    }
 
 
-    public ResponseEntity<String> updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
+    public ResponseEntity<MenuItem> updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
         MenuItem oldMenuItem = getMenuItemByRestaurantAndUser(menuItemId, restaurantId, getLoggedInUser().getId()); // handles RestaurantNotFound and MenuItemNotFound exceptions
         propertyCopier.copyNonNull(newMenuItem, oldMenuItem);
-        menuItemRepository.save(oldMenuItem);
-        return ResponseEntity.ok("Menu Item updated");
+        return new ResponseEntity<>(menuItemRepository.save(oldMenuItem), HttpStatus.OK);
     }
 
     public List<Order> getOwnedRestaurantOrders(Long restaurantId) {
@@ -157,10 +157,9 @@ public class MerchantService {
         return optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
     }
 
-    public ResponseEntity<String> markOrderComplete(Long restaurantId, Long orderId) {
+    public ResponseEntity<Order> markOrderComplete(Long restaurantId, Long orderId) {
         Order order = getOwnedRestaurantOrder(restaurantId, orderId);
         order.setCompleted(true);
-        orderRepository.save(order);
-        return ResponseEntity.ok("Order " + orderId + " marked complete");
+        return new ResponseEntity<>(orderRepository.save(order), HttpStatus.OK);
     }
 }

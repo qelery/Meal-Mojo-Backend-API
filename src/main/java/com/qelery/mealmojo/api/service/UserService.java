@@ -12,6 +12,7 @@ import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.net.URI;
 
 @Service
 public class UserService {
@@ -46,27 +49,25 @@ public class UserService {
         this.propertyCopier = propertyCopier;
     }
 
-    public ResponseEntity<String> createUserWithCustomerRole(User user) {
+    public ResponseEntity<User> createUserWithCustomerRole(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(Role.CUSTOMER);
             userRepository.save(user);
-            String message = "Registered user, " + user.getEmail() + ", with the Customer role.";
-            return ResponseEntity.status(201).body(message);
+            return new ResponseEntity<>(user, HttpStatus.CREATED);
         }
     }
 
-    public ResponseEntity<String> createUserWithMerchantRole(User user) {
+    public ResponseEntity<User> createUserWithMerchantRole(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(Role.MERCHANT);
             userRepository.save(user);
-            String message = "Registered user, " + user.getEmail() + ", with the Merchant role.";
-            return ResponseEntity.status(201).body(message);
+            return new ResponseEntity<>(user, HttpStatus.CREATED);
         }
     }
 
@@ -77,7 +78,7 @@ public class UserService {
         return ResponseEntity.ok(new LoginResponse(JWT));
     }
 
-    public ResponseEntity<String> updateUserInfo(UserInfoRequest updatedUserInfoRequest) {
+    public ResponseEntity<User> updateUserInfo(UserInfoRequest updatedUserInfoRequest) {
         User currentUserInfo = getLoggedInUser();
         if (updatedUserInfoRequest.getPassword() != null) {
             updatedUserInfoRequest.setPassword(passwordEncoder.encode(updatedUserInfoRequest.getPassword()));
@@ -90,7 +91,7 @@ public class UserService {
         }
         currentUserInfo.setAddress(currentAddress);
         userRepository.save(currentUserInfo);
-        return ResponseEntity.ok("User updated");
+        return new ResponseEntity<>(currentUserInfo, HttpStatus.OK);
     }
 
     private User getLoggedInUser() {
