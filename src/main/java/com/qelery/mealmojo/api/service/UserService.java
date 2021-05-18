@@ -22,8 +22,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-
 @Service
 public class UserService {
 
@@ -85,9 +83,10 @@ public class UserService {
         }
         Address currentAddress = currentUserInfo.getAddress();
         propertyCopier.copyNonNull(updatedUserInfoRequest, currentUserInfo);
-
         if (currentAddress != null) {
             propertyCopier.copyNonNull(updatedUserInfoRequest.getAddress(), currentAddress);
+        } else {
+            currentAddress = updatedUserInfoRequest.getAddress();
         }
         currentUserInfo.setAddress(currentAddress);
         userRepository.save(currentUserInfo);
