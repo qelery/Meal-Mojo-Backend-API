@@ -25,7 +25,8 @@ public class Restaurant {
     private String businessName;
     private String description;
     private String timeZone;
-    private String logoImageUrl;
+    private String logoUrl;
+    private String heroImageUrl;
     private Boolean deliveryAvailable;
     private Double deliveryFee;
     private Integer deliveryEtaMinutes;

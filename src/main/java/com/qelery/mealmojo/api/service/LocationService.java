@@ -41,9 +41,9 @@ public class LocationService {
         double a = Math.pow(Math.sin(dLatitude / 2), 2) + Math.cos(latitudeA) * Math.cos(latitudeB) * Math.pow(Math.sin(dLongitude / 2), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        double distance = radiusOfEarth * c; // km
-        System.out.println(radiusOfEarth * c);
-        return distance * 0.621371; // miles
+        double rawDistance = radiusOfEarth * c; // km
+        double approxDrivingDistance = rawDistance * 1.5; // km
+        return approxDrivingDistance * 0.621371; // miles
     }
 }
 
