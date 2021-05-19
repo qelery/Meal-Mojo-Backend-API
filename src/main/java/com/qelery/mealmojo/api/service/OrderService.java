@@ -140,6 +140,12 @@ public class OrderService {
         }
     }
 
+
+    public List<OrderLine> getCart() {
+        return orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
+                getLoggedInUser().getId());
+    }
+
     public Order checkoutCart(Order order) {
         List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
                                                                                            getLoggedInUser().getId());
@@ -173,4 +179,5 @@ public class OrderService {
                 .getPrincipal();
         return userDetails.getUser();
     }
+
 }

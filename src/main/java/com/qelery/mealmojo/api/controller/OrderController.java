@@ -19,6 +19,12 @@ public class OrderController {
         this.orderService = restaurantService;
     }
 
+    @GetMapping("/order/cart")
+    public List<OrderLine> getCart() {
+        return this.orderService.getCart();
+    }
+
+
     @PostMapping("/order/cart/checkout")
     public Order checkoutCart(@RequestBody Order order) {
         return this.orderService.checkoutCart(order);

@@ -28,7 +28,6 @@ public class OrderLine {
     @JoinColumn(name="order_id")
     private Order order;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="menu_item_id")
     private MenuItem menuItem;
