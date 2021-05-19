@@ -22,7 +22,7 @@ public class LocationService {
         List<Restaurant> allRestaurants = restaurantRepository.findAll();
         return allRestaurants.stream().filter(restaurant -> {
             double restaurantLongitude = restaurant.getAddress().getLongitude();
-            double restaurantLatitude = restaurant.getAddress().getLongitude();
+            double restaurantLatitude = restaurant.getAddress().getLatitude();
             double distance = distanceApartInMiles(originLatitude, originLongitude, restaurantLatitude, restaurantLongitude);
             return distance <= maxDistance;
         }).collect(Collectors.toList());
@@ -42,6 +42,7 @@ public class LocationService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         double distance = radiusOfEarth * c; // km
+        System.out.println(radiusOfEarth * c);
         return distance * 0.621371; // miles
     }
 }
