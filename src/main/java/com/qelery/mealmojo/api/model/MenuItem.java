@@ -27,4 +27,6 @@ public class MenuItem {
     @JoinColumn(name="restaurant_id")
     private Restaurant restaurant;
 
+    @Column(name="restaurant_id", insertable=false, nullable=false, updatable=false)
+    private Integer restaurantId;
 }

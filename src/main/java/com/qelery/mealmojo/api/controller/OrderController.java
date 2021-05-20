@@ -30,8 +30,8 @@ public class OrderController {
         return this.orderService.checkoutCart(order);
     }
 
-    @PostMapping("/order/cart/clear")
-    public ResponseEntity<String> clearCart() {
+    @DeleteMapping("/order/cart/clear")
+    public ResponseEntity<Void> clearCart() {
         return this.orderService.clearCart();
     }
 
@@ -88,9 +88,8 @@ public class OrderController {
         return this.orderService.deleteOrderLineFromCart(restaurantId, menuItemId);
     }
 
-    @GetMapping("/order/orders")
+    @GetMapping("/order/past")
     public List<Order> getOrders(@RequestParam(required=false) Long restaurantId) {
         return this.orderService.getOrders(restaurantId);
     }
-
 }

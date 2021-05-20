@@ -102,6 +102,7 @@ public class OrderService {
         } else {
             OrderLine orderLine = new OrderLine();
             orderLine.setRestaurant(menuItem.getRestaurant());
+            orderLine.setRestaurantName(menuItem.getRestaurant().getBusinessName());
             orderLine.setUser(getLoggedInUser());
             orderLine.setQuantity(quantity);
             orderLine.setPriceEach(menuItem.getPrice());
@@ -168,9 +169,9 @@ public class OrderService {
     }
 
 
-    public ResponseEntity<String> clearCart() {
+    public ResponseEntity<Void> clearCart() {
         orderLineRepository.deleteAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
-        return ResponseEntity.ok("Cart cleared");
+        return ResponseEntity.noContent().build();
     }
 
     private User getLoggedInUser() {

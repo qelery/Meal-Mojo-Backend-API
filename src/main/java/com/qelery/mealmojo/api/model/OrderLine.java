@@ -19,6 +19,10 @@ public class OrderLine {
     private Integer quantity;
     private Double priceEach;
 
+
+    @Column
+    private String restaurantName;
+
     @Column
     @Enumerated(EnumType.STRING)
     private PurchaseStatus purchaseStatus;
