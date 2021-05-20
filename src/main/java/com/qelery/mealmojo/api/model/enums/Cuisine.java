@@ -11,4 +11,6 @@ public enum Cuisine {
     MEXICAN,
     BREAKFAST,
     ITALIAN,
+    HEALTHY,
+    FAMILY,
 }

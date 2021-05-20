@@ -53,7 +53,7 @@ public class Restaurant {
     @Column(name="cuisine")
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-    private Set<Cuisine> cuisineSet = new HashSet<>();
+    private Set<Cuisine> cuisineSet;
 
     @JsonIgnore
     @ManyToOne

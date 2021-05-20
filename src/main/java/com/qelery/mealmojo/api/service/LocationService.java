@@ -21,6 +21,7 @@ public class LocationService {
     public List<Restaurant> findRestaurantsWithinDistance(double originLatitude, double originLongitude, int maxDistance) {
         List<Restaurant> allRestaurants = restaurantRepository.findAll();
         return allRestaurants.stream().filter(restaurant -> {
+            if (restaurant.getAddress() == null) return false;
             double restaurantLongitude = restaurant.getAddress().getLongitude();
             double restaurantLatitude = restaurant.getAddress().getLatitude();
             double distance = distanceApartInMiles(originLatitude, originLongitude, restaurantLatitude, restaurantLongitude);

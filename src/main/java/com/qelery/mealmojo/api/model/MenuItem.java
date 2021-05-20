@@ -6,7 +6,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @ToString
+@Getter @Setter @ToString(exclude={"restaurant"})
 @NoArgsConstructor @AllArgsConstructor
 public class MenuItem {
 

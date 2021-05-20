@@ -4,6 +4,7 @@ import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.OrderNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.*;
+import com.qelery.mealmojo.api.model.enums.Cuisine;
 import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class MerchantService {
@@ -82,7 +84,11 @@ public class MerchantService {
 
     public ResponseEntity<String> updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
         Restaurant oldRestaurant = getRestaurantByUser(restaurantId, getLoggedInUser().getId());
+        Set<Cuisine> oldCuisines = oldRestaurant.getCuisineSet();
         propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
+        if (newRestaurant.getCuisineSet().isEmpty()) {
+            oldRestaurant.setCuisineSet(oldCuisines);
+        }
         restaurantRepository.save(oldRestaurant);
         return ResponseEntity.ok("Restaurant updated");
     }

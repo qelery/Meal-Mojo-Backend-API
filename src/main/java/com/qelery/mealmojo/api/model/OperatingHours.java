@@ -9,7 +9,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
-@Getter @Setter @ToString
+@Getter @Setter @ToString(exclude={"restaurant"})
 @NoArgsConstructor @AllArgsConstructor
 public class OperatingHours {
 
@@ -30,5 +30,4 @@ public class OperatingHours {
     @ManyToOne
     @JoinColumn(name="restaurante_id")
     private Restaurant restaurant;
-
 }
