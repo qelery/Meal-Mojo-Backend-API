@@ -10,6 +10,7 @@ import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
+import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserDetailsService userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -34,7 +35,7 @@ public class UserService {
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       UserDetailsService userDetailsService,
+                       UserDetailsServiceImpl userDetailsService,
                        PasswordEncoder passwordEncoder,
                        JwtUtils jwtUtils,
                        AuthenticationManager authenticationManager,
@@ -71,9 +72,9 @@ public class UserService {
 
     public ResponseEntity<LoginResponse> loginUser(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+        final UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String JWT = jwtUtils.generateToken(userDetails);
-        return ResponseEntity.ok(new LoginResponse(JWT));
+        return ResponseEntity.ok(new LoginResponse(JWT, userDetails.getUser().getAddress()));
     }
 
     public ResponseEntity<User> updateUserInfo(UserInfoRequest updatedUserInfoRequest) {
