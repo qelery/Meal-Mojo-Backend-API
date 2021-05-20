@@ -36,19 +36,10 @@ class UserControllerTest {
     @Test
     void registerAcceptsUserObject() throws Exception {
         User userObject = new User("testuser93014@gmail.com", "password", Role.CUSTOMER);
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register")
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register/customer")
                 .content(asJsonString(userObject))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-    @Test
-    void registerReturns400WhenNonNullableValuesAreNull() throws Exception {
-        User userObject = new User(null, "password", Role.CUSTOMER);
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register")
-                .content(asJsonString(userObject))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test

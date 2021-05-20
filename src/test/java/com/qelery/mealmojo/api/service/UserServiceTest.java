@@ -45,24 +45,13 @@ class UserServiceTest {
         UserService userService = new UserService(userRepository, userDetailsService, passwordEncoder, jwtUtils, authenticationManager, propertyCopier);
         User user = new User("test@test.com", "password", Role.CUSTOMER);
 
-        String message = "Successfully registered new user with email address " + user.getEmail();
-        ResponseEntity<String> expectedResponse = ResponseEntity.status(201).body(message);
+        ResponseEntity<User> expectedResponse = new ResponseEntity<>(user, HttpStatus.CREATED);
         ResponseEntity<User> actualResponse = userService.createUserWithCustomerRole(user);
         assertEquals(expectedResponse, actualResponse);
 
         Mockito.verify(userRepository, Mockito.times(1)).save(userArgumentCaptor.capture());
 
         assertEquals("test@test.com", userArgumentCaptor.getValue().getEmail());
-    }
-
-    @Test
-    @DisplayName("Should login a user and return 200 response")
-    void loginUser() {
-
-        UserService userService = new UserService(userRepository, userDetailsService, passwordEncoder, jwtUtils, authenticationManager, propertyCopier);
-        LoginRequest loginRequest = new LoginRequest();
-        ResponseEntity<LoginResponse> actualResponse = userService.loginUser(loginRequest);
-        assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
     }
 
 }
