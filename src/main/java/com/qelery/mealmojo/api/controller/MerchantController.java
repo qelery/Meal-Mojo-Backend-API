@@ -19,21 +19,12 @@ public class MerchantController {
         this.merchantService = merchantService;
     }
 
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
+
     @GetMapping("/merchant/restaurants/all")
     public List<Restaurant> getAllRestaurantOwned() {
         return merchantService.getAllRestaurantsOwned();
     }
 
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
     @GetMapping("/merchant/restaurants/{restaurantId}")
     public Restaurant getRestaurantOwned(@PathVariable Long restaurantId) {
         return merchantService.getRestaurantOwned(restaurantId);
@@ -75,21 +66,12 @@ public class MerchantController {
         return merchantService.updateMenuItem(restaurantId, menuItemId, menuItem);
     }
 
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
+
     @GetMapping("/merchant/restaurants/{restaurantId}/orders")
     public List<Order> getOwnedRestaurantOrders(@PathVariable Long restaurantId) {
         return merchantService.getOwnedRestaurantOrders(restaurantId);
     }
 
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
-    // UNTESTED
     @GetMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}")
     public Order getOwnedRestaurantOrder(@PathVariable Long restaurantId,
                                                 @PathVariable Long orderId) {

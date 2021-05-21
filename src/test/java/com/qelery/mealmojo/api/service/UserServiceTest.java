@@ -2,8 +2,6 @@ package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.model.User;
 import com.qelery.mealmojo.api.model.enums.Role;
-import com.qelery.mealmojo.api.model.request.LoginRequest;
-import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;

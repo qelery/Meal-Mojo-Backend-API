@@ -47,7 +47,7 @@ public class User {
 
     @OneToMany(mappedBy="user")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Order> foodOrdersPlaced;   // this field will be NULL for users with MERCHANT role
+    private List<Order> foodOrdersPlaced;   // this field will be NULL for MERCHANT role
 
     public User(String email, String password, Role role) {
         this.email = email;

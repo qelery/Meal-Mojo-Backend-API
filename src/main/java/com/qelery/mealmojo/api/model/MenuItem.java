@@ -16,11 +16,9 @@ public class MenuItem {
 
     @Column
     private String name;
-    private String description;
     private Double price;
     private String imageUrl;
     private Boolean available = true;
-    private String category;
 
     @JsonIgnore
     @ManyToOne
