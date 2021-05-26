@@ -33,7 +33,6 @@ public class User {
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private Role role;  // CUSTOMER or MERCHANT
 
-
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="address_id")
     private Address address;
@@ -46,9 +45,9 @@ public class User {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<Order> foodOrdersPlaced;   // this field will be NULL for MERCHANT role
 
-    public User(String email, String password, Role role) {
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+//    public User(String email, String password, Role role) {
+//        this.email = email;
+//        this.password = password;
+//        this.role = role;
+//    }
 }

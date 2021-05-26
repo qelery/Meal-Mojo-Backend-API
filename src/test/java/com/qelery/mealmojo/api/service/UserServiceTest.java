@@ -1,22 +1,15 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.model.User;
-import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

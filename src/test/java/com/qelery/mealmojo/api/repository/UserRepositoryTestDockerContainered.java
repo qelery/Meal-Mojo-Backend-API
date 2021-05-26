@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace=AutoConfigureTestDatabase.Replace.NONE)
-class UserRepositoryTest extends DockerContaineredDatabaseTest {
+class UserRepositoryIntegrationTest extends DockerContaineredDatabaseTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -24,7 +24,7 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should save user information to database")
     void savesUserToDatabase() {
-        User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
+        User expectedUserObject = new User(1L, "testuser540@gmail.com", "password", Role.CUSTOMER, null, null, null);
         User actualUserObject = userRepository.save(expectedUserObject);
 
         assertEquals(expectedUserObject.getEmail(), actualUserObject.getEmail());
@@ -36,37 +36,39 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
     @Test
     @DisplayName("Should only save user to database if email address is unique")
     void onlySavesUniqueEmail() {
-        User user = new User("testuser793140@gmail.com", "password", Role.CUSTOMER);
-        User userWithNonUniqueEmail = new User("testuser793140@gmail.com", "password", Role.CUSTOMER);
-        User userWithDifferentEmail = new User("differentEmail@gmail.com", "password", Role.CUSTOMER);
+        User user = new User(1L, "testuser@gmail.com", "password", Role.CUSTOMER, null, null, null);
+        User userWithNonUniqueEmail = new User(2L, "testuser@gmail.com", "password", Role.CUSTOMER, null, null, null);
+        User userWithDifferentEmail = new User(3L, "differentEmail@gmail.com", "password", Role.CUSTOMER, null, null, null);
 
         userRepository.save(user);
         userRepository.save(userWithDifferentEmail);
 
-        assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(userWithNonUniqueEmail));
+        assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(userWithNonUniqueEmail));
     }
 
     @Test
-    @DisplayName("Should only save user to database if the email and password are not null")
-    void onlySavesUsersWithEmailsAndPasswords() {
-        User userWithNullEmail = new User(null, "password", Role.CUSTOMER);
-        User userWithNullPassword = new User("testuser7301985@gmail.com", null, Role.CUSTOMER);
-        User userWithAllRequiredFields = new User("testuser389210@gmail.com", "password", Role.CUSTOMER);
+    @DisplayName("Should only save user to database if the non-nullable fields, email and password are not null")
+    void savesWhenNonNullableFieldsAreNotNull() {
+        User userWithNullEmail = new User(1L, null, "password", Role.CUSTOMER, null, null, null);
+        User userWithNullPassword = new User(2L, "testuser730@gmail.com", null, Role.CUSTOMER, null, null, null);
+        User userWithAllRequiredFields = new User(3L, "testuser804@gmail.com", "password", Role.CUSTOMER, null, null, null);
 
         userRepository.save(userWithAllRequiredFields);
 
-        assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(userWithNullEmail));
-        assertThrows(DataIntegrityViolationException.class, () -> userRepository.save(userWithNullPassword));
+        assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(userWithNullEmail));
+        assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(userWithNullPassword));
     }
 
     @Test
     @DisplayName("Should find user in database given an email address")
-    void findByEmail() {
-        User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
+    void shouldBeAbleToFindUserByEmail() {
+        User expectedUserObject = new User(1L, "testuser@gmail.com", "password", Role.CUSTOMER, null, null, null);
         userRepository.save(expectedUserObject);
-        Optional<User> optionalActualUserObject = userRepository.findByEmail(expectedUserObject.getEmail());
 
-        if (optionalActualUserObject.isEmpty()) {
+        assertTrue(userRepository.existsByEmail(expectedUserObject.getEmail()));
+
+        Optional<User> optionalActualUserObject = userRepository.findByEmail(expectedUserObject.getEmail());
+        if (optionalActualUserObject.isEmpty())  {
             fail();
         }
 
@@ -74,17 +76,8 @@ class UserRepositoryTest extends DockerContaineredDatabaseTest {
 
         assertEquals(expectedUserObject.getEmail(), actualUserObject.getEmail());
         assertEquals(expectedUserObject.getPassword(), actualUserObject.getPassword());
+
         assertNotEquals("notTheEmailAddress@gmail.com", actualUserObject.getEmail());
         assertNotEquals("notThePassword", actualUserObject.getPassword());
-    }
-
-    @Test
-    @DisplayName("Should check if user with given email address exists in database")
-    void existsByEmail() {
-        User expectedUserObject = new User("testuser46782@gmail.com", "password", Role.CUSTOMER);
-        userRepository.save(expectedUserObject);
-
-        assertTrue(userRepository.existsByEmail(expectedUserObject.getEmail()));
-        assertFalse(userRepository.existsByEmail("notTheEmailAddress@gmail.com"));
     }
 }

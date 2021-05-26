@@ -32,14 +32,14 @@ class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    void registerAcceptsUserObject() throws Exception {
-        User userObject = new User("testuser93014@gmail.com", "password", Role.CUSTOMER);
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register/customer")
-                .content(asJsonString(userObject))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-    }
+//    @Test
+//    void registerAcceptsUserObject() throws Exception {
+//        User userObject = new User("testuser93014@gmail.com", "password", Role.CUSTOMER);
+//        mockMvc.perform(MockMvcRequestBuilders.post("/auth/users/register/customer")
+//                .content(asJsonString(userObject))
+//                .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(MockMvcResultMatchers.status().isOk());
+//    }
 
     @Test
     void loginUser() {
