@@ -13,4 +13,5 @@ public enum Cuisine {
     ITALIAN,
     HEALTHY,
     FAMILY,
+    VEGETARIAN,
 }

@@ -21,17 +21,19 @@ public class UserController {
     }
 
     @PostMapping("/register/customer")
-    public ResponseEntity<User> createUserWithCustomerRole(@RequestBody User user) {
-        return userService.createUserWithCustomerRole(user);
+    public ResponseEntity<Void> createUserWithCustomerRole(@RequestBody User user) {
+        userService.createUserWithCustomerRole(user);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/register/merchant")
-    public ResponseEntity<User> createUserWithMerchantRole(@RequestBody User user) {
-        return userService.createUserWithMerchantRole(user);
+    public ResponseEntity<Void> createUserWithMerchantRole(@RequestBody User user) {
+        userService.createUserWithMerchantRole(user);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest) {
+    public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
         return userService.loginUser(loginRequest);
     }
 

@@ -81,7 +81,7 @@ public class OrderService {
         }
     }
 
-    public ResponseEntity<OrderLine> addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
+    public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
         MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
 
         List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
@@ -98,7 +98,7 @@ public class OrderService {
         if (orderLineAlreadyInCart.isPresent()) {
             int quantityInCart = orderLineAlreadyInCart.get().getQuantity();
             orderLineAlreadyInCart.get().setQuantity(quantity + quantityInCart);
-            return new ResponseEntity<>(orderLineRepository.save(orderLineAlreadyInCart.get()), HttpStatus.CREATED);
+            return orderLineRepository.save(orderLineAlreadyInCart.get());
         } else {
             OrderLine orderLine = new OrderLine();
             orderLine.setRestaurant(menuItem.getRestaurant());
@@ -108,11 +108,11 @@ public class OrderService {
             orderLine.setPriceEach(menuItem.getPrice());
             orderLine.setMenuItem(menuItem);
             orderLine.setPurchaseStatus(PurchaseStatus.CART);
-            return new ResponseEntity<>(orderLineRepository.save(orderLine), HttpStatus.CREATED);
+            return orderLineRepository.save(orderLine);
         }
     }
 
-    public ResponseEntity<OrderLine> editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
+    public OrderLine editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
         MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
 
         List<OrderLine> itemsInCart =
@@ -122,7 +122,7 @@ public class OrderService {
 
         if (optionalOrderLine.isPresent()) {
             optionalOrderLine.get().setQuantity(quantity);
-            return new ResponseEntity<>(orderLineRepository.save(optionalOrderLine.get()), HttpStatus.OK);
+            return orderLineRepository.save(optionalOrderLine.get());
         } else {
             return addOrderLineToCart(restaurantId, menuItemId, quantity);
         }

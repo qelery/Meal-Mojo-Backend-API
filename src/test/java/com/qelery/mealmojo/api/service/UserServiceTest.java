@@ -37,19 +37,19 @@ class UserServiceTest {
     @Captor
     private ArgumentCaptor<User> userArgumentCaptor;
 
-    @Test
-    @DisplayName("Should save new user to database and return 201 response")
-    void createUser() {
-        UserService userService = new UserService(userRepository, userDetailsService, passwordEncoder, jwtUtils, authenticationManager, propertyCopier);
-        User user = new User("test@test.com", "password", Role.CUSTOMER);
-
-        ResponseEntity<User> expectedResponse = new ResponseEntity<>(user, HttpStatus.CREATED);
-        ResponseEntity<User> actualResponse = userService.createUserWithCustomerRole(user);
-        assertEquals(expectedResponse, actualResponse);
-
-        Mockito.verify(userRepository, Mockito.times(1)).save(userArgumentCaptor.capture());
-
-        assertEquals("test@test.com", userArgumentCaptor.getValue().getEmail());
-    }
+//    @Test
+//    @DisplayName("Should save new user to database and return 201 response")
+//    void createUser() {
+//        UserService userService = new UserService(userRepository, userDetailsService, passwordEncoder, jwtUtils, authenticationManager, propertyCopier);
+//        User user = new User("test@test.com", "password", Role.CUSTOMER);
+//
+//        ResponseEntity<User> expectedResponse = new ResponseEntity<>(user, HttpStatus.CREATED);
+//        ResponseEntity<User> actualResponse = userService.createUserWithCustomerRole(user);
+//        assertEquals(expectedResponse, actualResponse);
+//
+//        Mockito.verify(userRepository, Mockito.times(1)).save(userArgumentCaptor.capture());
+//
+//        assertEquals("test@test.com", userArgumentCaptor.getValue().getEmail());
+//    }
 
 }

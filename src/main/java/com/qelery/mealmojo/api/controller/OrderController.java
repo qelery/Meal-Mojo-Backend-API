@@ -3,6 +3,7 @@ package com.qelery.mealmojo.api.controller;
 import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,11 +68,12 @@ public class OrderController {
     public ResponseEntity<OrderLine> addOrderLineToCart(@PathVariable Long restaurantId,
                                         @PathVariable Long menuItemId,
                                         @PathVariable Integer quantity) {
-        return this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+        OrderLine orderLine = this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
+        return new ResponseEntity<>(orderLine, HttpStatus.CREATED);
     }
 
     @PutMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
-    public ResponseEntity<OrderLine> editOrderLineInCart(@PathVariable Long restaurantId,
+    public OrderLine editOrderLineInCart(@PathVariable Long restaurantId,
                                          @PathVariable Long menuItemId,
                                          @PathVariable Integer quantity) {
         return this.orderService.editOrderLineInCart(restaurantId, menuItemId, quantity);

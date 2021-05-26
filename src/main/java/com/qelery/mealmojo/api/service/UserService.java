@@ -48,34 +48,32 @@ public class UserService {
         this.propertyCopier = propertyCopier;
     }
 
-    public ResponseEntity<User> createUserWithCustomerRole(User user) {
+    public void createUserWithCustomerRole(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(Role.CUSTOMER);
             userRepository.save(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
         }
     }
 
-    public ResponseEntity<User> createUserWithMerchantRole(User user) {
+    public void createUserWithMerchantRole(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.setRole(Role.MERCHANT);
             userRepository.save(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
         }
     }
 
-    public ResponseEntity<LoginResponse> loginUser(LoginRequest loginRequest) {
+    public LoginResponse loginUser(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         final UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String JWT = jwtUtils.generateToken(userDetails);
         System.out.println(userDetails.getUser().getAddress());
-        return ResponseEntity.ok(new LoginResponse(JWT, userDetails.getUser().getAddress()));
+        return new LoginResponse(JWT, userDetails.getUser().getAddress());
     }
 
     public ResponseEntity<User> updateUserInfo(UserInfoRequest updatedUserInfoRequest) {

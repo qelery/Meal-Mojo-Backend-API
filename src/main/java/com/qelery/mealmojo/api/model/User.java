@@ -33,9 +33,6 @@ public class User {
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private Role role;  // CUSTOMER or MERCHANT
 
-    @Column
-    private String firstName;
-    private String lastName;
 
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="address_id")

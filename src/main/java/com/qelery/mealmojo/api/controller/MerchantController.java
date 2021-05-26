@@ -3,6 +3,7 @@ package com.qelery.mealmojo.api.controller;
 import com.qelery.mealmojo.api.model.*;
 import com.qelery.mealmojo.api.service.MerchantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,21 +23,22 @@ public class MerchantController {
 
     @GetMapping("/merchant/restaurants/all")
     public List<Restaurant> getAllRestaurantOwned() {
-        return merchantService.getAllRestaurantsOwned();
+        return merchantService.getAllRestaurantsByOwner();
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}")
     public Restaurant getRestaurantOwned(@PathVariable Long restaurantId) {
-        return merchantService.getRestaurantOwned(restaurantId);
+        return merchantService.getSingleRestaurantByOwner(restaurantId);
     }
 
     @PostMapping("/merchant/restaurants")
-    public Restaurant createRestaurant(@RequestBody Restaurant restaurant) {
-        return merchantService.createRestaurant(restaurant);
+    public ResponseEntity<Restaurant> createRestaurant(@RequestBody Restaurant restaurant) {
+        Restaurant newRestaurant = merchantService.createRestaurant(restaurant);
+        return new ResponseEntity<>(newRestaurant, HttpStatus.CREATED);
     }
 
     @PutMapping("/merchant/restaurants/{restaurantId}")
-    public ResponseEntity<String> updateRestaurant(@PathVariable Long restaurantId,
+    public Restaurant updateRestaurant(@PathVariable Long restaurantId,
                                                    @RequestBody Restaurant restaurant) {
         return merchantService.updateRestaurant(restaurantId, restaurant);
     }
@@ -69,13 +71,13 @@ public class MerchantController {
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders")
     public List<Order> getOwnedRestaurantOrders(@PathVariable Long restaurantId) {
-        return merchantService.getOwnedRestaurantOrders(restaurantId);
+        return merchantService.getAllOrdersForOwnedRestaurant(restaurantId);
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}")
     public Order getOwnedRestaurantOrder(@PathVariable Long restaurantId,
                                                 @PathVariable Long orderId) {
-        return merchantService.getOwnedRestaurantOrder(restaurantId, orderId);
+        return merchantService.getSingleOrderForOwnedRestaurant(restaurantId, orderId);
     }
 
     @PatchMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}/complete")
