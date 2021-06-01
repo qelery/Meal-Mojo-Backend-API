@@ -48,7 +48,7 @@ class UserRepositoryIntegrationTest extends DockerContaineredDatabaseTest {
 
     @Test
     @DisplayName("Should only save user to database if the non-nullable fields, email and password are not null")
-    void savesWhenNonNullableFieldsAreNotNull() {
+    void savesOnlyWhenNonNullableFieldsAreNotNull() {
         User userWithNullEmail = new User(1L, null, "password", Role.CUSTOMER, null, null, null);
         User userWithNullPassword = new User(2L, "testuser730@gmail.com", null, Role.CUSTOMER, null, null, null);
         User userWithAllRequiredFields = new User(3L, "testuser804@gmail.com", "password", Role.CUSTOMER, null, null, null);

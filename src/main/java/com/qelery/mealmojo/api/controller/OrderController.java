@@ -13,10 +13,10 @@ import java.util.List;
 @RequestMapping("/api")
 public class OrderController {
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     @Autowired
-    public void setOrderService(OrderService restaurantService) {
+    public OrderController(OrderService restaurantService) {
         this.orderService = restaurantService;
     }
 
