@@ -26,5 +26,5 @@ public class MenuItem {
     private Restaurant restaurant;
 
     @Column(name="restaurant_id", insertable=false, nullable=false, updatable=false)
-    private Integer restaurantId;
+    private Long restaurantId;
 }

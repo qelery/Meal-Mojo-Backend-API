@@ -60,7 +60,7 @@ public class OrderService {
         return restaurant.getMenuItems();
     }
 
-    public MenuItem getMenuItemByRestaurant(Long menuItemId, Long restaurantId) {
+    public MenuItem getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
         Restaurant restaurant = getRestaurant(restaurantId);
         Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
