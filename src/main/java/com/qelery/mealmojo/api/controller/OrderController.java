@@ -43,8 +43,8 @@ public class OrderController {
 
     @GetMapping(value="/order/restaurants", params={"latitude", "longitude", "maxDistance"})
     public List<Restaurant> getRestaurantsWithinDistance(@RequestParam double latitude,
-                                              @RequestParam double longitude,
-                                              @RequestParam(defaultValue="15") int maxDistance) {
+                                                         @RequestParam double longitude,
+                                                         @RequestParam(defaultValue="15") int maxDistance) {
         return orderService.getRestaurantsWithinDistance(latitude, longitude, maxDistance);
     }
 
