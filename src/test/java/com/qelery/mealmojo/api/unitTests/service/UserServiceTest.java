@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.service;
+package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.model.User;
 import com.qelery.mealmojo.api.repository.UserRepository;
@@ -6,7 +6,9 @@ import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
 import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;

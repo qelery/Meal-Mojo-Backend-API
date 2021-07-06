@@ -1,14 +1,15 @@
 package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
 import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @ToString
-@NoArgsConstructor @AllArgsConstructor
+@Data
+@Table(name="address")
 public class Address {
 
     @Id
@@ -18,12 +19,17 @@ public class Address {
     @Column
     private String street1;
     private String street2;
+    private String street3;
     private String city;
     private String zipcode;
     private Double latitude;
     private Double longitude;
 
+    @Enumerated
+    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+    private Country country;
+
     @Enumerated(EnumType.STRING)
-    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private State state;
 }

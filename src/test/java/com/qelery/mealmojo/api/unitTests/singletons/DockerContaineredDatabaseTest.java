@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.singletons;
+package com.qelery.mealmojo.api.unitTests.singletons;
 
 import org.testcontainers.containers.PostgreSQLContainer;
 

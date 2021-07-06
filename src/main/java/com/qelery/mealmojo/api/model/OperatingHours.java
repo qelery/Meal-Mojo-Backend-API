@@ -8,26 +8,23 @@ import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
+@Data
 @Entity
-@Getter @Setter @ToString(exclude={"restaurant"})
-@NoArgsConstructor @AllArgsConstructor
+@Table(name="operating_hours")
 public class OperatingHours {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
+    private LocalTime openTime;
+    private LocalTime closeTime;
 
-    @Column
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private DayOfWeek dayOfWeek;
 
-    @Column
-    private LocalTime openTime;
-    private LocalTime closeTime;
-
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="restaurante_id")
+    @JoinColumn(name="restaurant_id", referencedColumnName="id")
     private Restaurant restaurant;
 }

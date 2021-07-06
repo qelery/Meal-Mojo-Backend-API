@@ -10,6 +10,10 @@ CREATE TYPE PURCHASE_STATUS AS ENUM (
     'CART', 'PURCHASED'
     );
 
+CREATE TYPE ROLE AS ENUM (
+    'CUSTOMER', 'MERCHANT'
+    );
+
 CREATE TYPE STATE AS ENUM (
     'AK', 'AL', 'AR', 'AZ', 'CA',
     'CO', 'CT', 'DE', 'FL', 'GA',
@@ -33,6 +37,7 @@ CREATE TABLE ${schema}.users
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     email               VARCHAR(255) UNIQUE NOT NULL,
     password            VARCHAR(255)        NOT NULL,
+    role                ROLE NOT NULL,
     customer_profile_id BIGINT,
     merchant_profile_id BIGINT,
     PRIMARY KEY (id)
@@ -178,3 +183,5 @@ ALTER TABLE ${schema}.order_line
 ALTER TABLE ${schema}.restaurant_cuisine
     ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id),
     ADD CONSTRAINT fk_cuisine FOREIGN KEY (cuisine_id) REFERENCES ${schema}.cuisine (id);
+
+CREATE CAST (character varying AS role) WITH INOUT AS ASSIGNMENT;

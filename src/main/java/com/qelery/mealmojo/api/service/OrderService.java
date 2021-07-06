@@ -71,105 +71,110 @@ public class OrderService {
 
     public List<Order> getOrders(Long restaurantId) {
         if (restaurantId == null) {
-            return orderRepository.findAllByUserId(getLoggedInUser().getId());
+            return new ArrayList<>();
+//            return orderRepository.findAllByUserId(getLoggedInUser().getId());
         } else {
-            return getRestaurant(restaurantId).getOrders()
-                    .stream()
-                    .filter(o -> o.getUser().getId().equals(getLoggedInUser().getId()))
-                    .collect(Collectors.toList());
+            return new ArrayList<>();
+//            return getRestaurant(restaurantId).getOrders()
+//                    .stream()
+//                    .filter(o -> o.getUser().getId().equals(getLoggedInUser().getId()))
+//                    .collect(Collectors.toList());
         }
     }
 
     public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
-        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
-
-        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
-                                                                                           getLoggedInUser().getId());
-        boolean itemsFromOtherRestaurantCarted = itemsInCart.stream()
-                                                      .anyMatch(line -> !line.getRestaurant().getId().equals(restaurantId));
-        if (itemsFromOtherRestaurantCarted) {
-            clearCart();
-        }
-
-        Optional<OrderLine> orderLineAlreadyInCart = itemsInCart.stream()
-                                                        .filter(line -> line.getMenuItem().equals(menuItem))
-                                                        .findFirst();
-        if (orderLineAlreadyInCart.isPresent()) {
-            int quantityInCart = orderLineAlreadyInCart.get().getQuantity();
-            orderLineAlreadyInCart.get().setQuantity(quantity + quantityInCart);
-            return orderLineRepository.save(orderLineAlreadyInCart.get());
-        } else {
-            OrderLine orderLine = new OrderLine();
-            orderLine.setRestaurant(menuItem.getRestaurant());
-            orderLine.setRestaurantName(menuItem.getRestaurant().getBusinessName());
-            orderLine.setUser(getLoggedInUser());
-            orderLine.setQuantity(quantity);
-            orderLine.setPriceEach(menuItem.getPrice());
-            orderLine.setMenuItem(menuItem);
-            orderLine.setPurchaseStatus(PurchaseStatus.CART);
-            return orderLineRepository.save(orderLine);
-        }
+//        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
+//
+//        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
+//                                                                                           getLoggedInUser().getId());
+//        boolean itemsFromOtherRestaurantCarted = itemsInCart.stream()
+//                                                      .anyMatch(line -> !line.getRestaurant().getId().equals(restaurantId));
+//        if (itemsFromOtherRestaurantCarted) {
+//            clearCart();
+//        }
+//
+//        Optional<OrderLine> orderLineAlreadyInCart = itemsInCart.stream()
+//                                                        .filter(line -> line.getMenuItem().equals(menuItem))
+//                                                        .findFirst();
+//        if (orderLineAlreadyInCart.isPresent()) {
+//            int quantityInCart = orderLineAlreadyInCart.get().getQuantity();
+//            orderLineAlreadyInCart.get().setQuantity(quantity + quantityInCart);
+//            return orderLineRepository.save(orderLineAlreadyInCart.get());
+//        } else {
+//            OrderLine orderLine = new OrderLine();
+//            orderLine.setRestaurant(menuItem.getRestaurant());
+////            orderLine.setRestaurantName(menuItem.getRestaurant().getBusinessName());
+//            orderLine.setUser(getLoggedInUser());
+//            orderLine.setQuantity(quantity);
+//            orderLine.setPriceEach(menuItem.getPrice());
+//            orderLine.setMenuItem(menuItem);
+//            orderLine.setPurchaseStatus(PurchaseStatus.CART);
+//            return orderLineRepository.save(orderLine);
+//        }
+        return null;
     }
 
     public OrderLine editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
-        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
-
-        List<OrderLine> itemsInCart =
-                orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
-        Optional<OrderLine> optionalOrderLine = itemsInCart.stream()
-                .filter(item -> item.getMenuItem().equals(menuItem)).findFirst();
-
-        if (optionalOrderLine.isPresent()) {
-            optionalOrderLine.get().setQuantity(quantity);
-            return orderLineRepository.save(optionalOrderLine.get());
-        } else {
-            return addOrderLineToCart(restaurantId, menuItemId, quantity);
-        }
+        return null;
+//        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
+//
+//        List<OrderLine> itemsInCart =
+//                orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
+//        Optional<OrderLine> optionalOrderLine = itemsInCart.stream()
+//                .filter(item -> item.getMenuItem().equals(menuItem)).findFirst();
+//
+//        if (optionalOrderLine.isPresent()) {
+//            optionalOrderLine.get().setQuantity(quantity);
+//            return orderLineRepository.save(optionalOrderLine.get());
+//        } else {
+//            return addOrderLineToCart(restaurantId, menuItemId, quantity);
+//        }
     }
 
-    public ResponseEntity<Void> deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
-        Optional<OrderLine> optionalOrderLine =
-                orderLineRepository.findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus.CART,
-                                                                                   getLoggedInUser().getId(),
-                                                                                   menuItemId);
-        if (optionalOrderLine.isPresent()) {
-            orderLineRepository.delete(optionalOrderLine.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            throw new OrderLineNotFoundException(restaurantId, menuItemId);
-        }
+    public void deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
+//        Optional<OrderLine> optionalOrderLine =
+//                orderLineRepository.findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus.CART,
+//                                                                                   getLoggedInUser().getId(),
+//                                                                                   menuItemId);
+//        if (optionalOrderLine.isPresent()) {
+//            orderLineRepository.delete(optionalOrderLine.get());
+//        } else {
+//            throw new OrderLineNotFoundException(restaurantId, menuItemId);
+//        }
     }
 
 
     public List<OrderLine> getCart() {
-        return orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
-                getLoggedInUser().getId());
+        return null;
+//        return orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
+//                getLoggedInUser().getId());
     }
 
     public Order checkoutCart(Order order) {
-        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
-                                                                                           getLoggedInUser().getId());
-
-        if (itemsInCart.isEmpty()) {
-            throw new EmptyCartException();
-        }
-
-        order.setRestaurant(itemsInCart.get(0).getRestaurant());
-        order.setUser(getLoggedInUser());
-        order.setOrderLines(new ArrayList<>());
-        orderRepository.save(order);
-        for (OrderLine orderLine: itemsInCart) {
-            orderLine.setOrder(order);
-            orderLine.setPurchaseStatus(PurchaseStatus.PURCHASED);
-            orderLineRepository.save(orderLine);
-            order.getOrderLines().add(orderLine);
-        }
-        return orderRepository.save(order);
+//        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
+//                                                                                           getLoggedInUser().getId());
+//
+//        if (itemsInCart.isEmpty()) {
+//            throw new EmptyCartException();
+//        }
+//
+////        order.setRestaurant(itemsInCart.get(0).getRestaurant());
+////        order.setUser(getLoggedInUser());
+//        order.setOrderLines(new ArrayList<>());
+//        orderRepository.save(order);
+//        for (OrderLine orderLine: itemsInCart) {
+//            orderLine.setOrder(order);
+//            orderLine.setPurchaseStatus(PurchaseStatus.PURCHASED);
+//            orderLineRepository.save(orderLine);
+//            order.getOrderLines().add(orderLine);
+//        }
+//        return orderRepository.save(order);
+        return null;
     }
 
 
     public ResponseEntity<Void> clearCart() {
-        orderLineRepository.deleteAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
+//        orderLineRepository.deleteAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
         return ResponseEntity.noContent().build();
     }
 

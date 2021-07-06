@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface OrderLineRepository extends JpaRepository<OrderLine, Long> {
 
-    List<OrderLine> findAllByPurchaseStatusAndUserId(PurchaseStatus purchaseStatus, Long userId);
-    Optional<OrderLine> findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus purchaseStatus, Long userId, Long menuItemId);
-    void deleteAllByPurchaseStatusAndUserId(PurchaseStatus purchaseStatus, Long userId);
+//    List<OrderLine> findAllByPurchaseStatusAndUserId(PurchaseStatus purchaseStatus, Long userId);
+//    Optional<OrderLine> findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus purchaseStatus, Long userId, Long menuItemId);
+//    void deleteAllByPurchaseStatusAndUserId(PurchaseStatus purchaseStatus, Long userId);
 }

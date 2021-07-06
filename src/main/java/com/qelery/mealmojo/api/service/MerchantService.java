@@ -45,16 +45,18 @@ public class MerchantService {
 
 
     public List<Restaurant> getAllRestaurantsByOwner() {
-        return restaurantRepository.findAllByUserId(getLoggedInUser().getId());
+        return null;
+//        return restaurantRepository.findAllByUserId(getLoggedInUser().getId());
     }
 
     public Restaurant getSingleRestaurantByOwner(Long restaurantId) {
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, getLoggedInUser().getId());
-        if (optionalRestaurant.isPresent()) {
-            return optionalRestaurant.get();
-        } else {
-            throw new RestaurantNotFoundException(restaurantId);
-        }
+//        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, getLoggedInUser().getId());
+//        if (optionalRestaurant.isPresent()) {
+//            return optionalRestaurant.get();
+//        } else {
+//            throw new RestaurantNotFoundException(restaurantId);
+//        }
+        return null;
     }
 
     public Restaurant getRestaurantById(Long restaurantId) {
@@ -69,17 +71,17 @@ public class MerchantService {
 
     public Restaurant updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
         Restaurant oldRestaurant = getRestaurantByUserId(restaurantId, getLoggedInUser().getId());
-        Set<Cuisine> oldCuisines = oldRestaurant.getCuisineSet();
-        propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
-        if (newRestaurant.getCuisineSet().isEmpty()) {
-            oldRestaurant.setCuisineSet(oldCuisines);
-        }
+//        Set<Cuisine> oldCuisines = oldRestaurant.getCuisineSet();
+//        propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
+//        if (newRestaurant.getCuisineSet().isEmpty()) {
+//            oldRestaurant.setCuisineSet(oldCuisines);
+//        }
         return restaurantRepository.save(oldRestaurant);
     }
 
 
     public Restaurant createRestaurant(Restaurant restaurant) {
-        restaurant.setUser(getLoggedInUser());
+//        restaurant.setUser(getLoggedInUser());
         return restaurantRepository.save(restaurant);
     }
 
@@ -148,8 +150,9 @@ public class MerchantService {
 
 
     private Restaurant getRestaurantByUserId(Long restaurantId, Long userId) {
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, userId);
-        return optionalRestaurant.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
+//        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, userId);
+//        return optionalRestaurant.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
+        return null;
     }
 
 

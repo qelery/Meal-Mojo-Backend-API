@@ -2,7 +2,6 @@ package com.qelery.mealmojo.api.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.qelery.mealmojo.api.model.enums.DeliveryMethod;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
 import lombok.*;
 import org.hibernate.annotations.LazyCollection;
@@ -12,30 +11,22 @@ import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@Data
 @Entity
-@Table(name="orders")
-@Getter @Setter @ToString(exclude={"user", "restaurant"})
-@NoArgsConstructor @AllArgsConstructor
+@Table(name="order")
 public class Order {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-
-    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime dateTime = OffsetDateTime.now();
     private Double tip;
     private Boolean completed = false;
+    private Boolean delivery;
 
-    @Column
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private PaymentMethod paymentMethod;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-    private DeliveryMethod deliveryMethod;
 
     @OneToMany(mappedBy="order")
     @LazyCollection(LazyCollectionOption.FALSE)
@@ -43,11 +34,11 @@ public class Order {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="user_id")
-    private User user;
+    @JoinColumn(name="customer_profile_id", referencedColumnName="id")
+    private CustomerProfile customerProfile;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="restaurant_id")
+    @JoinColumn(name="restaurant_id", referencedColumnName="id")
     private Restaurant restaurant;
 }

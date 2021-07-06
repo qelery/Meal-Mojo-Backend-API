@@ -27,7 +27,7 @@ public class MerchantController {
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}")
-    public Restaurant getRestaurantOwned(@PathVariable Long restaurantId) {
+    public Restaurant getSingleRestaurantByOwner(@PathVariable Long restaurantId) {
         return merchantService.getSingleRestaurantByOwner(restaurantId);
     }
 

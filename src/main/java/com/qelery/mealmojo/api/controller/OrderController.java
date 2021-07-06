@@ -26,6 +26,8 @@ public class OrderController {
     }
 
 
+    //TODO: Do I need to pass in an Order object, or a new OrderOptions object?
+
     @PostMapping("/order/cart/checkout")
     public Order checkoutCart(@RequestBody Order order) {
         return this.orderService.checkoutCart(order);
@@ -66,8 +68,8 @@ public class OrderController {
 
     @PostMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines/{quantity}")
     public ResponseEntity<OrderLine> addOrderLineToCart(@PathVariable Long restaurantId,
-                                        @PathVariable Long menuItemId,
-                                        @PathVariable Integer quantity) {
+                                                        @PathVariable Long menuItemId,
+                                                        @PathVariable Integer quantity) {
         OrderLine orderLine = this.orderService.addOrderLineToCart(restaurantId, menuItemId, quantity);
         return new ResponseEntity<>(orderLine, HttpStatus.CREATED);
     }
@@ -81,8 +83,9 @@ public class OrderController {
 
     @DeleteMapping("/order/restaurants/{restaurantId}/menuitems/{menuItemId}/orderlines")
     public ResponseEntity<Void> deleteOrderLineFromCart(@PathVariable Long restaurantId,
-                                                          @PathVariable Long menuItemId) {
-        return this.orderService.deleteOrderLineFromCart(restaurantId, menuItemId);
+                                                        @PathVariable Long menuItemId) {
+        this.orderService.deleteOrderLineFromCart(restaurantId, menuItemId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/order/past")
