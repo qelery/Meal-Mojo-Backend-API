@@ -1,0 +1,15 @@
+INSERT INTO ${schema}.cuisine(category)
+VALUES ('PIZZA'),
+       ('BURGERS'),
+       ('SANDWICHES'),
+       ('CHICKEN'),
+       ('SEAFOOD'),
+       ('ASIAN'),
+       ('CHINESE'),
+       ('MEXICAN'),
+       ('BREAKFAST'),
+       ('ITALIAN'),
+       ('HEALTHY'),
+       ('FAMILY'),
+       ('VEGETARIAN'),
+       ('SALADS');

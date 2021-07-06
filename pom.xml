@@ -84,6 +84,11 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.24</version>
         </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-maven-plugin</artifactId>
+            <version>7.11.0</version>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>
@@ -101,8 +106,4 @@
             </plugin>
         </plugins>
     </build>
-
-
-
-
 </project>
