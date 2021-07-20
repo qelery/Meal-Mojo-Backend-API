@@ -1,7 +1,6 @@
-package com.qelery.mealmojo.api.model;
+package com.qelery.mealmojo.api.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 
@@ -19,7 +18,6 @@ public class MenuItem {
     private String imageUrl;
     private Boolean available = true;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="restaurant_id", referencedColumnName="id")
     private Restaurant restaurant;

@@ -3,7 +3,7 @@
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.qelery.mealmojo.api.controller.UserController;
 //import com.qelery.mealmojo.api.exception.GlobalExceptionHandler;
-//import com.qelery.mealmojo.api.model.User;
+//import com.qelery.mealmojo.api.model.entity.User;
 //import com.qelery.mealmojo.api.model.enums.Role;
 //import com.qelery.mealmojo.api.service.UserService;
 //import org.junit.jupiter.api.BeforeEach;

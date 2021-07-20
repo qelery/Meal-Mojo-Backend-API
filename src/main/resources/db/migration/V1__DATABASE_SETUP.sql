@@ -37,7 +37,7 @@ CREATE TABLE ${schema}.users
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     email               VARCHAR(255) UNIQUE NOT NULL,
     password            VARCHAR(255)        NOT NULL,
-    role                ROLE NOT NULL,
+    role                ROLE                NOT NULL,
     customer_profile_id BIGINT,
     merchant_profile_id BIGINT,
     PRIMARY KEY (id)
@@ -64,7 +64,7 @@ CREATE TABLE ${schema}.merchant_profile
 CREATE TABLE ${schema}.restaurant
 (
     id                   BIGINT GENERATED ALWAYS AS IDENTITY,
-    business_name        VARCHAR(255) NOT NULL,
+    name                 VARCHAR(255) NOT NULL,
     description          TEXT,
     pickup_available     BOOLEAN,
     pickup_eta_minutes   INT,
@@ -115,14 +115,14 @@ CREATE TABLE ${schema}.menu_item
     PRIMARY KEY (id)
 );
 
-CREATE TABLE ${schema}.order
+CREATE TABLE ${schema}.orders
 (
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     date_time           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     tip                 NUMERIC(7, 2),
-    completed           BOOLEAN                  NOT NULL DEFAULT FALSE,
+    is_completed        BOOLEAN                  NOT NULL DEFAULT FALSE,
     payment_method      PAYMENT_METHOD           NOT NULL,
-    delivery            BOOLEAN                  NOT NULL,
+    is_delivery         BOOLEAN                  NOT NULL,
     restaurant_id       BIGINT                   NOT NULL,
     customer_profile_id BIGINT                   NOT NULL,
     PRIMARY KEY (id)
@@ -130,12 +130,11 @@ CREATE TABLE ${schema}.order
 
 CREATE TABLE ${schema}.order_line
 (
-    id              BIGINT GENERATED ALWAYS AS IDENTITY,
-    quantity        INT             NOT NULL,
-    price_each      NUMERIC(7, 2)   NOT NULL,
-    purchase_status PURCHASE_STATUS NOT NULL,
-    menu_item_id    BIGINT          NOT NULL,
-    order_id        BIGINT          NOT NULL,
+    id           BIGINT GENERATED ALWAYS AS IDENTITY,
+    quantity     INT           NOT NULL,
+    price_each   NUMERIC(7, 2) NOT NULL,
+    menu_item_id BIGINT        NOT NULL,
+    order_id     BIGINT        NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -172,16 +171,18 @@ ALTER TABLE ${schema}.operating_hours
 ALTER TABLE ${schema}.menu_item
     ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id);
 
-ALTER TABLE ${schema}.order
+ALTER TABLE ${schema}.orders
     ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id),
     ADD CONSTRAINT fk_customer_profile FOREIGN KEY (customer_profile_id) REFERENCES ${schema}.customer_profile (id);
 
 ALTER TABLE ${schema}.order_line
     ADD CONSTRAINT fk_menu_item FOREIGN KEY (menu_item_id) REFERENCES ${schema}.menu_item (id),
-    ADD CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES ${schema}.order (id);
+    ADD CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES ${schema}.orders (id);
 
 ALTER TABLE ${schema}.restaurant_cuisine
     ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id),
     ADD CONSTRAINT fk_cuisine FOREIGN KEY (cuisine_id) REFERENCES ${schema}.cuisine (id);
 
 CREATE CAST (character varying AS role) WITH INOUT AS ASSIGNMENT;
+CREATE CAST (character varying AS state) WITH INOUT AS ASSIGNMENT;
+CREATE CAST (character varying AS country) WITH INOUT AS ASSIGNMENT;

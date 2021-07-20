@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.model;
+package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -16,7 +16,7 @@ public class Restaurant {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-    private String businessName;
+    private String name;
     private String description;
     private Boolean pickupAvailable;
     private Integer pickupEtaMinutes;

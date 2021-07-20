@@ -1,6 +1,6 @@
 package com.qelery.mealmojo.api.service;
 
-import com.qelery.mealmojo.api.model.Restaurant;
+import com.qelery.mealmojo.api.model.entity.Restaurant;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

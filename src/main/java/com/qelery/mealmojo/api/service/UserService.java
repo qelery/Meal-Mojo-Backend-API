@@ -1,23 +1,21 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
-import com.qelery.mealmojo.api.model.Address;
-import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.dto.UserDtoIn;
+import com.qelery.mealmojo.api.model.entity.CustomerProfile;
+import com.qelery.mealmojo.api.model.entity.MerchantProfile;
+import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.model.enums.Role;
-import com.qelery.mealmojo.api.model.request.UserInfoRequest;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
-import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
-import com.qelery.mealmojo.api.service.utility.PropertyCopier;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +27,7 @@ public class UserService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final PropertyCopier propertyCopier;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -37,35 +35,40 @@ public class UserService {
                        PasswordEncoder passwordEncoder,
                        JwtUtils jwtUtils,
                        AuthenticationManager authenticationManager,
-                       PropertyCopier propertyCopier) {
+                       ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.propertyCopier = propertyCopier;
+        this.modelMapper = modelMapper;
     }
 
-    public void createUser(User user) {
+    public void createUser(UserDtoIn userDtoIn) {
+        User user = modelMapper.map(userDtoIn, User.class);
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            if (user.getRole() == Role.CUSTOMER) {
+                CustomerProfile customerProfile = new CustomerProfile();
+                customerProfile.setFirstName(userDtoIn.getFirstName());
+                customerProfile.setLastName(userDtoIn.getLastName());
+                user.setCustomerProfile(customerProfile);
+            } else {
+                MerchantProfile merchantProfile = new MerchantProfile();
+                merchantProfile.setFirstName(userDtoIn.getFirstName());
+                merchantProfile.setLastName(userDtoIn.getLastName());
+                user.setMerchantProfile(merchantProfile);
+            }
             userRepository.save(user);
         }
     }
 
     public LoginResponse loginUser(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        final UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String JWT = jwtUtils.generateToken(userDetails);
-        return new LoginResponse(JWT, null);
-    }
-
-    private User getLoggedInUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
-                getAuthentication()
-                .getPrincipal();
-        return userDetails.getUser();
+        return new LoginResponse(JWT);
     }
 }

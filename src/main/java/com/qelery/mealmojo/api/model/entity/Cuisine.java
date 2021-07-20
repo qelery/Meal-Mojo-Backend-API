@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.model;
+package com.qelery.mealmojo.api.model.entity;
 
 import lombok.Data;
 

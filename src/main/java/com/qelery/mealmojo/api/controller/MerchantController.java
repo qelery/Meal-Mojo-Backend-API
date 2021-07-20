@@ -1,10 +1,9 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.*;
+import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.service.MerchantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,69 +19,77 @@ public class MerchantController {
         this.merchantService = merchantService;
     }
 
-
-    @GetMapping("/merchant/restaurants/all")
-    public List<Restaurant> getAllRestaurantOwned() {
+    @GetMapping("/merchant/restaurants")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RestaurantThinDtoOut> getAllRestaurantOwned() {
         return merchantService.getAllRestaurantsByOwner();
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}")
-    public Restaurant getSingleRestaurantByOwner(@PathVariable Long restaurantId) {
+    public RestaurantDto getSingleRestaurantByOwner(@PathVariable Long restaurantId) {
         return merchantService.getSingleRestaurantByOwner(restaurantId);
     }
 
     @PostMapping("/merchant/restaurants")
-    public ResponseEntity<Restaurant> createRestaurant(@RequestBody Restaurant restaurant) {
-        Restaurant newRestaurant = merchantService.createRestaurant(restaurant);
-        return new ResponseEntity<>(newRestaurant, HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.CREATED)
+    public RestaurantDto createRestaurant(@RequestBody RestaurantDto restaurantDto) {
+        return merchantService.createRestaurant(restaurantDto);
     }
 
     @PutMapping("/merchant/restaurants/{restaurantId}")
-    public Restaurant updateRestaurant(@PathVariable Long restaurantId,
-                                                   @RequestBody Restaurant restaurant) {
-        return merchantService.updateRestaurant(restaurantId, restaurant);
+    @ResponseStatus(HttpStatus.OK)
+    public RestaurantThinDtoOut updateRestaurantBasicInformation(@PathVariable Long restaurantId,
+                                                                   @RequestBody RestaurantThinDtoIn restaurantInfoDto) {
+        return merchantService.updateRestaurantBasicInformation(restaurantId, restaurantInfoDto);
     }
 
     @PatchMapping("/merchant/restaurants/{restaurantId}/hours")
-    public ResponseEntity<String> updateRestaurantHours(@PathVariable Long restaurantId,
-                                                        @RequestBody List<OperatingHours> hoursList) {
+    @ResponseStatus(HttpStatus.OK)
+    public RestaurantThinDtoOut updateRestaurantHours(@PathVariable Long restaurantId,
+                                                      @RequestBody List<OperatingHoursDto> hoursList) {
         return merchantService.updateRestaurantHours(restaurantId, hoursList);
     }
 
     @PatchMapping("/merchant/restaurants/{restaurantId}/address")
-    public ResponseEntity<String> updateRestaurantAddress(@PathVariable Long restaurantId,
-                                                          @RequestBody Address address) {
-        return merchantService.updateRestaurantAddress(restaurantId, address);
+    @ResponseStatus(HttpStatus.OK)
+    public RestaurantThinDtoOut updateRestaurantAddress(@PathVariable Long restaurantId,
+                                                        @RequestBody AddressDto addressDto) {
+        return merchantService.updateRestaurantAddress(restaurantId, addressDto);
     }
 
     @PostMapping("/merchant/restaurants/{restaurantId}/menuitems")
-    public ResponseEntity<MenuItem> createMenuItem(@PathVariable Long restaurantId,
-                                   @RequestBody MenuItem menuItem) {
-        return merchantService.createMenuItem(restaurantId, menuItem);
+    @ResponseStatus(HttpStatus.CREATED)
+    public MenuItemDto createMenuItem(@PathVariable Long restaurantId,
+                                      @RequestBody MenuItemDto menuItemDto) {
+        return merchantService.createMenuItem(restaurantId, menuItemDto);
     }
 
     @PutMapping("/merchant/restaurants/{restaurantId}/menuitems/{menuItemId}")
-    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable Long restaurantId,
-                                                 @PathVariable Long menuItemId,
-                                                 @RequestBody MenuItem menuItem) {
-        return merchantService.updateMenuItem(restaurantId, menuItemId, menuItem);
+    @ResponseStatus(HttpStatus.OK)
+    public MenuItemDto updateMenuItem(@PathVariable Long restaurantId,
+                                      @PathVariable Long menuItemId,
+                                      @RequestBody MenuItemDto menuItemDto) {
+        return merchantService.updateMenuItem(restaurantId, menuItemId, menuItemDto);
     }
 
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders")
-    public List<Order> getOwnedRestaurantOrders(@PathVariable Long restaurantId) {
+    @ResponseStatus(HttpStatus.OK)
+    public List<OrderDtoOut> getOwnedRestaurantOrders(@PathVariable Long restaurantId) {
         return merchantService.getAllOrdersForOwnedRestaurant(restaurantId);
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}")
-    public Order getOwnedRestaurantOrder(@PathVariable Long restaurantId,
-                                                @PathVariable Long orderId) {
+    @ResponseStatus(HttpStatus.OK)
+    public OrderDtoOut getOwnedRestaurantOrder(@PathVariable Long restaurantId,
+                                               @PathVariable Long orderId) {
         return merchantService.getSingleOrderForOwnedRestaurant(restaurantId, orderId);
     }
 
     @PatchMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}/complete")
-    public ResponseEntity<Order> markOrderComplete(@PathVariable Long restaurantId,
-                                                    @PathVariable Long orderId) {
+    @ResponseStatus(HttpStatus.OK)
+    public OrderDtoOut markOrderComplete(@PathVariable Long restaurantId,
+                                         @PathVariable Long orderId) {
         return merchantService.markOrderComplete(restaurantId, orderId);
     }
 }

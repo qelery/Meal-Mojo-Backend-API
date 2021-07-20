@@ -1,6 +1,6 @@
 //package com.qelery.mealmojo.api.integrationTests.repository;
 //
-//import com.qelery.mealmojo.api.model.User;
+//import com.qelery.mealmojo.api.model.entity.User;
 //import com.qelery.mealmojo.api.model.enums.Role;
 //import com.qelery.mealmojo.api.repository.UserRepository;
 //import org.junit.jupiter.api.DisplayName;

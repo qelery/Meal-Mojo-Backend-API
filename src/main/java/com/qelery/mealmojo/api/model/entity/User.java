@@ -1,8 +1,7 @@
-package com.qelery.mealmojo.api.model;
-import com.fasterxml.jackson.annotation.JsonFormat;
+package com.qelery.mealmojo.api.model.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.qelery.mealmojo.api.model.enums.Role;
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 
@@ -20,7 +19,6 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private Role role;
 
     @OneToOne(cascade=CascadeType.ALL)
@@ -29,5 +27,5 @@ public class User {
 
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="merchant_profile_id", referencedColumnName="id")
-    private CustomerProfile merchantProfile;
+    private MerchantProfile merchantProfile;
 }

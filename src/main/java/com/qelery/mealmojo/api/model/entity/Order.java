@@ -1,9 +1,8 @@
-package com.qelery.mealmojo.api.model;
+package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
-import lombok.*;
+import lombok.Data;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -13,7 +12,7 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name="order")
+@Table(name="orders")
 public class Order {
 
     @Id
@@ -21,8 +20,8 @@ public class Order {
     private Long id;
     private OffsetDateTime dateTime = OffsetDateTime.now();
     private Double tip;
-    private Boolean completed = false;
-    private Boolean delivery;
+    private Boolean isCompleted = false;
+    private Boolean isDelivery;
 
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
@@ -32,12 +31,10 @@ public class Order {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OrderLine> orderLines;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="customer_profile_id", referencedColumnName="id")
     private CustomerProfile customerProfile;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="restaurant_id", referencedColumnName="id")
     private Restaurant restaurant;

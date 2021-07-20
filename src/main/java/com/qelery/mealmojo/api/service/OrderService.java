@@ -1,188 +1,129 @@
 package com.qelery.mealmojo.api.service;
 
-import com.qelery.mealmojo.api.exception.*;
-import com.qelery.mealmojo.api.model.*;
-import com.qelery.mealmojo.api.model.enums.PurchaseStatus;
-import com.qelery.mealmojo.api.repository.OrderLineRepository;
+import com.qelery.mealmojo.api.exception.EmptyOrderException;
+import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
+import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
+import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
+import com.qelery.mealmojo.api.model.dto.*;
+import com.qelery.mealmojo.api.model.entity.*;
+import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class OrderService {
 
     private final RestaurantRepository restaurantRepository;
+    private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
-    private final OrderLineRepository orderLineRepository;
     private final LocationService locationService;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public OrderService(RestaurantRepository restaurantRepository,
-                             OrderRepository orderRepository,
-                             OrderLineRepository orderLineRepository,
-                             LocationService locationService) {
+                        MenuItemRepository menuItemRepository,
+                        OrderRepository orderRepository,
+                        LocationService locationService,
+                        ModelMapper modelMapper) {
         this.restaurantRepository = restaurantRepository;
+        this.menuItemRepository = menuItemRepository;
         this.orderRepository = orderRepository;
-        this.orderLineRepository = orderLineRepository;
         this.locationService = locationService;
+        this.modelMapper = modelMapper;
     }
 
     public List<Restaurant> getRestaurants() {
         return restaurantRepository.findAll();
     }
 
-    public List<Restaurant> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
-        return locationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
+    public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
+        List<Restaurant> restaurants = locationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
+        return restaurants.stream()
+                .map(restaurant -> modelMapper.map(restaurant, RestaurantThinDtoOut.class))
+                .collect(Collectors.toList());
     }
 
-    public Restaurant getRestaurant(Long restaurantId) {
+    public RestaurantDto getRestaurant(Long restaurantId) {
         Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
         if (restaurant.isPresent()) {
-            return restaurant.get();
+            return modelMapper.map(restaurant.get(), RestaurantDto.class);
         } else {
             throw new RestaurantNotFoundException(restaurantId);
         }
     }
 
-    public List<MenuItem> getMenuItemsByRestaurant(Long restaurantId) {
-        Restaurant restaurant = getRestaurant(restaurantId);
-        return restaurant.getMenuItems();
+    public List<MenuItemDto> getMenuItemsByRestaurant(Long restaurantId) {
+        RestaurantDto restaurant = getRestaurant(restaurantId);
+        return restaurant.getMenuItems()
+                .stream().map(menuItem -> modelMapper.map(menuItem, MenuItemDto.class))
+                .collect(Collectors.toList());
     }
 
-    public MenuItem getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
-        Restaurant restaurant = getRestaurant(restaurantId);
+    public MenuItemDto getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
+        RestaurantDto restaurant = getRestaurant(restaurantId);
         Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))
                 .findFirst();
-        return optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+        MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+        return modelMapper.map(menuItem, MenuItemDto.class);
     }
 
-    public List<Order> getOrders(Long restaurantId) {
+    public List<OrderDtoOut> getPlacedOrders(Long restaurantId) {
+        CustomerProfile customerProfile = getLoggedInUserProfile();
         if (restaurantId == null) {
-            return new ArrayList<>();
-//            return orderRepository.findAllByUserId(getLoggedInUser().getId());
+            return customerProfile.getPlacedOrders().stream().map(order -> modelMapper.map(order, OrderDtoOut.class)).collect(Collectors.toList());
         } else {
-            return new ArrayList<>();
-//            return getRestaurant(restaurantId).getOrders()
-//                    .stream()
-//                    .filter(o -> o.getUser().getId().equals(getLoggedInUser().getId()))
-//                    .collect(Collectors.toList());
+            return customerProfile.getPlacedOrders()
+                    .stream().filter(order -> order.getRestaurant().getId().equals(restaurantId))
+                    .map(order -> modelMapper.map(order, OrderDtoOut.class))
+                    .collect(Collectors.toList());
         }
     }
 
-    public OrderLine addOrderLineToCart(Long restaurantId, Long menuItemId, Integer quantity) {
-//        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
-//
-//        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
-//                                                                                           getLoggedInUser().getId());
-//        boolean itemsFromOtherRestaurantCarted = itemsInCart.stream()
-//                                                      .anyMatch(line -> !line.getRestaurant().getId().equals(restaurantId));
-//        if (itemsFromOtherRestaurantCarted) {
-//            clearCart();
-//        }
-//
-//        Optional<OrderLine> orderLineAlreadyInCart = itemsInCart.stream()
-//                                                        .filter(line -> line.getMenuItem().equals(menuItem))
-//                                                        .findFirst();
-//        if (orderLineAlreadyInCart.isPresent()) {
-//            int quantityInCart = orderLineAlreadyInCart.get().getQuantity();
-//            orderLineAlreadyInCart.get().setQuantity(quantity + quantityInCart);
-//            return orderLineRepository.save(orderLineAlreadyInCart.get());
-//        } else {
-//            OrderLine orderLine = new OrderLine();
-//            orderLine.setRestaurant(menuItem.getRestaurant());
-////            orderLine.setRestaurantName(menuItem.getRestaurant().getBusinessName());
-//            orderLine.setUser(getLoggedInUser());
-//            orderLine.setQuantity(quantity);
-//            orderLine.setPriceEach(menuItem.getPrice());
-//            orderLine.setMenuItem(menuItem);
-//            orderLine.setPurchaseStatus(PurchaseStatus.CART);
-//            return orderLineRepository.save(orderLine);
-//        }
-        return null;
+    public OrderDtoOut submitOrder(OrderDtoIn orderDtoIn) {
+        List<OrderLine> orderLines = new ArrayList<>();
+        orderDtoIn.getMenuItemQuantityMap().forEach((menuItemId, quantity) -> {
+            Optional<MenuItem> optionalMenuItem = menuItemRepository.findById(menuItemId);
+            MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+            OrderLine orderLine = new OrderLine();
+            orderLine.setMenuItem(menuItem);
+            orderLine.setQuantity(quantity);
+            orderLines.add(orderLine);
+        });
+
+        if (orderLines.isEmpty()) {
+            throw new EmptyOrderException();
+        }
+
+        Order order = modelMapper.map(orderDtoIn, Order.class);
+        order.setCustomerProfile(getLoggedInUserProfile());
+        order.setRestaurant(orderLines.get(0).getMenuItem().getRestaurant());
+
+        orderRepository.save(order);
+        return modelMapper.map(order, OrderDtoOut.class);
     }
 
-    public OrderLine editOrderLineInCart(Long restaurantId, Long menuItemId, Integer quantity) {
-        return null;
-//        MenuItem menuItem = this.getMenuItemByRestaurant(menuItemId, restaurantId);
-//
-//        List<OrderLine> itemsInCart =
-//                orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
-//        Optional<OrderLine> optionalOrderLine = itemsInCart.stream()
-//                .filter(item -> item.getMenuItem().equals(menuItem)).findFirst();
-//
-//        if (optionalOrderLine.isPresent()) {
-//            optionalOrderLine.get().setQuantity(quantity);
-//            return orderLineRepository.save(optionalOrderLine.get());
-//        } else {
-//            return addOrderLineToCart(restaurantId, menuItemId, quantity);
-//        }
-    }
-
-    public void deleteOrderLineFromCart(Long restaurantId, Long menuItemId) {
-//        Optional<OrderLine> optionalOrderLine =
-//                orderLineRepository.findAllByPurchaseStatusAndUserIdAndMenuItemId(PurchaseStatus.CART,
-//                                                                                   getLoggedInUser().getId(),
-//                                                                                   menuItemId);
-//        if (optionalOrderLine.isPresent()) {
-//            orderLineRepository.delete(optionalOrderLine.get());
-//        } else {
-//            throw new OrderLineNotFoundException(restaurantId, menuItemId);
-//        }
-    }
-
-
-    public List<OrderLine> getCart() {
-        return null;
-//        return orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
-//                getLoggedInUser().getId());
-    }
-
-    public Order checkoutCart(Order order) {
-//        List<OrderLine> itemsInCart = orderLineRepository.findAllByPurchaseStatusAndUserId(PurchaseStatus.CART,
-//                                                                                           getLoggedInUser().getId());
-//
-//        if (itemsInCart.isEmpty()) {
-//            throw new EmptyCartException();
-//        }
-//
-////        order.setRestaurant(itemsInCart.get(0).getRestaurant());
-////        order.setUser(getLoggedInUser());
-//        order.setOrderLines(new ArrayList<>());
-//        orderRepository.save(order);
-//        for (OrderLine orderLine: itemsInCart) {
-//            orderLine.setOrder(order);
-//            orderLine.setPurchaseStatus(PurchaseStatus.PURCHASED);
-//            orderLineRepository.save(orderLine);
-//            order.getOrderLines().add(orderLine);
-//        }
-//        return orderRepository.save(order);
-        return null;
-    }
-
-
-    public ResponseEntity<Void> clearCart() {
-//        orderLineRepository.deleteAllByPurchaseStatusAndUserId(PurchaseStatus.CART, getLoggedInUser().getId());
-        return ResponseEntity.noContent().build();
-    }
-
-    private User getLoggedInUser() {
+    private CustomerProfile getLoggedInUserProfile() {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
                 getAuthentication()
                 .getPrincipal();
-        return userDetails.getUser();
+        CustomerProfile customerProfile = userDetails.getUser().getCustomerProfile();
+        if (customerProfile == null) {
+            throw new ProfileNotFoundException();
+        }
+        else {
+            return customerProfile;
+        }
     }
-
 }

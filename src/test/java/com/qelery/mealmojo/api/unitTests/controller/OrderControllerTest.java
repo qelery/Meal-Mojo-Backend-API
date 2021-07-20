@@ -5,10 +5,10 @@
 //import com.qelery.mealmojo.api.exception.GlobalExceptionHandler;
 //import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 //import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
-//import com.qelery.mealmojo.api.model.MenuItem;
-//import com.qelery.mealmojo.api.model.Order;
-//import com.qelery.mealmojo.api.model.OrderLine;
-//import com.qelery.mealmojo.api.model.Restaurant;
+//import com.qelery.mealmojo.api.model.entity.MenuItem;
+//import com.qelery.mealmojo.api.model.entity.Order;
+//import com.qelery.mealmojo.api.model.entity.OrderLine;
+//import com.qelery.mealmojo.api.model.entity.Restaurant;
 //import com.qelery.mealmojo.api.model.enums.PaymentMethod;
 //import com.qelery.mealmojo.api.model.enums.PurchaseStatus;
 //import com.qelery.mealmojo.api.service.OrderService;

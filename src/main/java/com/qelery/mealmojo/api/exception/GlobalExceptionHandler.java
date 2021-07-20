@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(EmptyCartException.class)
-    public ResponseEntity<Object> handleException(EmptyCartException ex, WebRequest request) {
+    @ExceptionHandler(EmptyOrderException.class)
+    public ResponseEntity<Object> handleException(EmptyOrderException ex, WebRequest request) {
         ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.BAD_REQUEST, request);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
@@ -53,6 +53,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleException(EmailExistsException ex, WebRequest request) {
         ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.CONFLICT, request);
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(ProfileNotFoundException.class)
+    public ResponseEntity<Object> handleException(ProfileNotFoundException ex, WebRequest request) {
+        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

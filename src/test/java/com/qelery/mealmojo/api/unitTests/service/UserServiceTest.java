@@ -1,6 +1,6 @@
 package com.qelery.mealmojo.api.unitTests.service;
 
-import com.qelery.mealmojo.api.model.User;
+import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;

@@ -1,22 +1,22 @@
 package com.qelery.mealmojo.api.service;
 
+
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.OrderNotFoundException;
+import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
-import com.qelery.mealmojo.api.model.*;
-import com.qelery.mealmojo.api.model.enums.Cuisine;
+import com.qelery.mealmojo.api.model.dto.*;
+import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
-import com.qelery.mealmojo.api.service.utility.PropertyCopier;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MerchantService {
@@ -26,7 +26,7 @@ public class MerchantService {
     private final OrderRepository orderRepository;
     private final OperatingHoursRepository operatingHoursRepository;
     private final AddressRepository addressRepository;
-    private final PropertyCopier propertyCopier;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public MerchantService(RestaurantRepository restaurantRepository,
@@ -34,132 +34,132 @@ public class MerchantService {
                            OrderRepository orderRepository,
                            OperatingHoursRepository operatingHoursRepository,
                            AddressRepository addressRepository,
-                           PropertyCopier propertyCopier) {
+                           ModelMapper modelMapper) {
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
         this.operatingHoursRepository = operatingHoursRepository;
         this.addressRepository = addressRepository;
-        this.propertyCopier = propertyCopier;
+        this.modelMapper = modelMapper;
     }
 
 
-    public List<Restaurant> getAllRestaurantsByOwner() {
-        return null;
-//        return restaurantRepository.findAllByUserId(getLoggedInUser().getId());
+    public List<RestaurantThinDtoOut> getAllRestaurantsByOwner() {
+        MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
+        List<Restaurant> restaurantsOwned = restaurantRepository.findAllByMerchantProfileId(merchantProfile.getId());
+        return restaurantsOwned.stream()
+                .map(restaurant -> modelMapper.map(restaurant, RestaurantThinDtoOut.class))
+                .collect(Collectors.toList());
     }
 
-    public Restaurant getSingleRestaurantByOwner(Long restaurantId) {
-//        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, getLoggedInUser().getId());
-//        if (optionalRestaurant.isPresent()) {
-//            return optionalRestaurant.get();
-//        } else {
-//            throw new RestaurantNotFoundException(restaurantId);
-//        }
-        return null;
+    public RestaurantDto getSingleRestaurantByOwner(Long restaurantId) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
+        return modelMapper.map(restaurant, RestaurantDto.class);
     }
 
-    public Restaurant getRestaurantById(Long restaurantId) {
-        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
-        if (restaurant.isPresent()) {
-            return restaurant.get();
-        } else {
-            throw new RestaurantNotFoundException(restaurantId);
-        }
+    public RestaurantDto createRestaurant(RestaurantDto restaurantDto) {
+        Restaurant restaurant = modelMapper.map(restaurantDto, Restaurant.class);
+        restaurant.setMerchantProfile(getLoggedInUserMerchantProfile());
+        restaurantRepository.save(restaurant);
+        return modelMapper.map(restaurant, RestaurantDto.class);
     }
 
-
-    public Restaurant updateRestaurant(Long restaurantId, Restaurant newRestaurant) {
-        Restaurant oldRestaurant = getRestaurantByUserId(restaurantId, getLoggedInUser().getId());
-//        Set<Cuisine> oldCuisines = oldRestaurant.getCuisineSet();
-//        propertyCopier.copyNonNull(newRestaurant, oldRestaurant);
-//        if (newRestaurant.getCuisineSet().isEmpty()) {
-//            oldRestaurant.setCuisineSet(oldCuisines);
-//        }
-        return restaurantRepository.save(oldRestaurant);
+    public RestaurantThinDtoOut updateRestaurantBasicInformation(Long restaurantId, RestaurantThinDtoIn newRestaurantInfoDto) {
+        Restaurant oldRestaurantInfo = getRestaurantByMerchantProfile(restaurantId);
+        Restaurant newRestaurantInfo = modelMapper.map(newRestaurantInfoDto, Restaurant.class);
+        modelMapper.map(newRestaurantInfo, oldRestaurantInfo);
+        restaurantRepository.save(oldRestaurantInfo);
+        return modelMapper.map(oldRestaurantInfo, RestaurantThinDtoOut.class);
     }
 
+    public RestaurantThinDtoOut updateRestaurantHours(Long restaurantId, List<OperatingHoursDto> newHoursListDto) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
 
-    public Restaurant createRestaurant(Restaurant restaurant) {
-//        restaurant.setUser(getLoggedInUser());
-        return restaurantRepository.save(restaurant);
-    }
-
-
-    public ResponseEntity<String> updateRestaurantHours(Long restaurantId, List<OperatingHours> newHoursList) {
-        Restaurant restaurant = getRestaurantByUserId(restaurantId, getLoggedInUser().getId());
-
-        for (OperatingHours newHours: newHoursList) {
-            Optional<OperatingHours> hours = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurantId, newHours.getDayOfWeek());
-            if (hours.isPresent()) {
-                OperatingHours oldHours = hours.get();
-                propertyCopier.copyNonNull(newHours, oldHours);
+        for (OperatingHoursDto newHoursDto: newHoursListDto) {
+            OperatingHours newHours = modelMapper.map(newHoursDto, OperatingHours.class);
+            newHours.setRestaurant(restaurant);
+            Optional<OperatingHours> oldHoursForThatDay = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurant.getId(), newHours.getDayOfWeek());
+            if (oldHoursForThatDay.isPresent()) {
+                OperatingHours oldHours = oldHoursForThatDay.get();
+                modelMapper.map(newHours, oldHours);
                 operatingHoursRepository.save(oldHours);
             } else {
                 newHours.setRestaurant(restaurant);
                 operatingHoursRepository.save(newHours);
             }
         }
-        return ResponseEntity.ok("Hours updated");
+        return modelMapper.map(restaurant, RestaurantThinDtoOut.class);
     }
 
-    public ResponseEntity<String> updateRestaurantAddress(Long restaurantId, Address newAddress) {
-        Restaurant restaurant = getRestaurantByUserId(restaurantId, getLoggedInUser().getId());
-
-
+    public RestaurantThinDtoOut updateRestaurantAddress(Long restaurantId, AddressDto newAddressDto) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
+        Address newAddress = modelMapper.map(newAddressDto, Address.class);
         Address oldAddress = restaurant.getAddress();
-        propertyCopier.copyNonNull(newAddress, oldAddress);
+        modelMapper.map(newAddress, oldAddress);
         addressRepository.save(oldAddress);
-
-        return ResponseEntity.ok("Address updated");
+        return modelMapper.map(restaurant, RestaurantThinDtoOut.class);
     }
 
-    public ResponseEntity<MenuItem> createMenuItem(Long restaurantId, MenuItem menuItem) {
-        Restaurant restaurant = getRestaurantByUserId(restaurantId, getLoggedInUser().getId());
+    public MenuItemDto createMenuItem(Long restaurantId, MenuItemDto menuItemDto) {
+        MenuItem menuItem = modelMapper.map(menuItemDto, MenuItem.class);
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
         menuItem.setRestaurant(restaurant);
-        return new ResponseEntity<>(menuItemRepository.save(menuItem), HttpStatus.CREATED);
+        menuItemRepository.save(menuItem);
+        return modelMapper.map(menuItem, MenuItemDto.class);
     }
 
-    public ResponseEntity<MenuItem> updateMenuItem(Long restaurantId, Long menuItemId, MenuItem newMenuItem) {
-        Restaurant restaurant = getRestaurantByUserId(restaurantId, getLoggedInUser().getId());
+    public MenuItemDto updateMenuItem(Long restaurantId, Long menuItemId, MenuItemDto newMenuItemDto) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
+        MenuItem newMenuItem = modelMapper.map(newMenuItemDto, MenuItem.class);
         Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))
                 .findFirst();
         MenuItem oldMenuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
-        propertyCopier.copyNonNull(newMenuItem, oldMenuItem);
-        return new ResponseEntity<>(menuItemRepository.save(oldMenuItem), HttpStatus.OK);
+        modelMapper.map(newMenuItem, oldMenuItem);
+        menuItemRepository.save(oldMenuItem);
+        return modelMapper.map(oldMenuItem, MenuItemDto.class);
     }
 
-    public List<Order> getAllOrdersForOwnedRestaurant(Long restaurantId) {
-        Restaurant restaurant = getSingleRestaurantByOwner(restaurantId);
-        return orderRepository.findAllByRestaurantId(restaurant.getId());
+    public List<OrderDtoOut> getAllOrdersForOwnedRestaurant(Long restaurantId) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
+        List<Order> orders = orderRepository.findAllByRestaurantId(restaurant.getId());
+        return orders.stream().map(order -> modelMapper.map(order, OrderDtoOut.class)).collect(Collectors.toList());
     }
 
-    public Order getSingleOrderForOwnedRestaurant(Long restaurantId, Long orderId) {
-        Restaurant restaurant = getRestaurantById(restaurantId);
+    public OrderDtoOut getSingleOrderForOwnedRestaurant(Long restaurantId, Long orderId) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
         Optional<Order> optionalOrder = orderRepository.findByIdAndRestaurantId(orderId, restaurant.getId());
-        return optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
+        return modelMapper.map(order, OrderDtoOut.class);
     }
 
-    public ResponseEntity<Order> markOrderComplete(Long restaurantId, Long orderId) {
-        Order order = getSingleOrderForOwnedRestaurant(restaurantId, orderId);
-        order.setCompleted(true);
-        return new ResponseEntity<>(orderRepository.save(order), HttpStatus.OK);
+    public OrderDtoOut markOrderComplete(Long restaurantId, Long orderId) {
+        Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
+        Optional<Order> optionalOrder = orderRepository.findByIdAndRestaurantId(orderId, restaurant.getId());
+        Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
+        order.setIsCompleted(true);
+        orderRepository.save(order);
+        return modelMapper.map(order, OrderDtoOut.class);
     }
 
-
-    private Restaurant getRestaurantByUserId(Long restaurantId, Long userId) {
-//        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndUserId(restaurantId, userId);
-//        return optionalRestaurant.orElseThrow(() ->  new RestaurantNotFoundException(restaurantId));
-        return null;
+    private Restaurant getRestaurantByMerchantProfile(Long restaurantId) {
+        MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndMerchantProfileId(restaurantId, merchantProfile.getId());
+        return optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
     }
 
-
-    private User getLoggedInUser() {
+    private MerchantProfile getLoggedInUserMerchantProfile() {
+        System.out.println(SecurityContextHolder.getContext().
+                getAuthentication()
+                .getPrincipal());
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
                 getAuthentication()
                 .getPrincipal();
-        return userDetails.getUser();
+        MerchantProfile merchantProfile = userDetails.getUser().getMerchantProfile();
+        if (merchantProfile == null) {
+            throw new ProfileNotFoundException();
+        }
+        return merchantProfile;
     }
 }

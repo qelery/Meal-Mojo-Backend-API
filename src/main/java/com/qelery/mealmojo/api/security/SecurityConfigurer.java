@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,14 +40,11 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("**").permitAll()
                 .antMatchers("/auth/users/register/**").permitAll()
                 .antMatchers("/auth/users/login").permitAll()
-                .antMatchers( "/api/order/**").hasAnyAuthority("CUSTOMER", "MERCHANT")
-                .antMatchers(HttpMethod.GET, "/api/order/restaurants").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/order/restaurants/**").permitAll()
-                .antMatchers("/api/merchant").hasAuthority("MERCHANT")
                 .antMatchers("/api/merchant/**").hasAuthority("MERCHANT")
+                .antMatchers( "/api/order/submit", "/api/order/past").hasAnyAuthority("CUSTOMER")
+                .antMatchers("/api/order/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

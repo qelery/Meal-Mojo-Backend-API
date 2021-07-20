@@ -1,8 +1,7 @@
-package com.qelery.mealmojo.api.model;
+package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.qelery.mealmojo.api.model.enums.PurchaseStatus;
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
 
@@ -16,9 +15,6 @@ public class OrderLine {
     private Long id;
     private Integer quantity;
     private Double priceEach;
-
-    @Enumerated(EnumType.STRING)
-    private PurchaseStatus purchaseStatus;
 
     @ManyToOne
     @JoinColumn(name="menu_item_id", referencedColumnName="id")
