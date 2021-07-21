@@ -9,7 +9,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RestaurantDto {
+public class RestaurantDtoOut {
 
     private String name;
     private String description;

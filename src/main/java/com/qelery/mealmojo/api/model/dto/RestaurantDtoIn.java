@@ -3,7 +3,7 @@ package com.qelery.mealmojo.api.model.dto;
 import lombok.Data;
 
 @Data
-public class RestaurantThinDtoIn {
+public class RestaurantDtoIn {
 
     private String businessName;
     private String description;

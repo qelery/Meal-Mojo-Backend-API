@@ -44,7 +44,7 @@ public class MerchantService {
     }
 
 
-    public List<RestaurantThinDtoOut> getAllRestaurantsByOwner() {
+    public List<RestaurantThinDtoOut> getAllRestaurantsOwned() {
         MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
         List<Restaurant> restaurantsOwned = restaurantRepository.findAllByMerchantProfileId(merchantProfile.getId());
         return restaurantsOwned.stream()
@@ -52,19 +52,19 @@ public class MerchantService {
                 .collect(Collectors.toList());
     }
 
-    public RestaurantDto getSingleRestaurantByOwner(Long restaurantId) {
+    public RestaurantDtoOut getSingleRestaurantOwned(Long restaurantId) {
         Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
-        return modelMapper.map(restaurant, RestaurantDto.class);
+        return modelMapper.map(restaurant, RestaurantDtoOut.class);
     }
 
-    public RestaurantDto createRestaurant(RestaurantDto restaurantDto) {
-        Restaurant restaurant = modelMapper.map(restaurantDto, Restaurant.class);
+    public RestaurantDtoOut createRestaurant(RestaurantDtoIn restaurantDtoIn) {
+        Restaurant restaurant = modelMapper.map(restaurantDtoIn, Restaurant.class);
         restaurant.setMerchantProfile(getLoggedInUserMerchantProfile());
         restaurantRepository.save(restaurant);
-        return modelMapper.map(restaurant, RestaurantDto.class);
+        return modelMapper.map(restaurant, RestaurantDtoOut.class);
     }
 
-    public RestaurantThinDtoOut updateRestaurantBasicInformation(Long restaurantId, RestaurantThinDtoIn newRestaurantInfoDto) {
+    public RestaurantThinDtoOut updateRestaurantBasicInformation(Long restaurantId, RestaurantDtoIn newRestaurantInfoDto) {
         Restaurant oldRestaurantInfo = getRestaurantByMerchantProfile(restaurantId);
         Restaurant newRestaurantInfo = modelMapper.map(newRestaurantInfoDto, Restaurant.class);
         modelMapper.map(newRestaurantInfo, oldRestaurantInfo);

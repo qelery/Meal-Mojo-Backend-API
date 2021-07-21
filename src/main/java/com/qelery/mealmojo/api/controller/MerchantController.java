@@ -12,34 +12,34 @@ import java.util.List;
 @RequestMapping("/api")
 public class MerchantController {
 
-    private MerchantService merchantService;
+    private final MerchantService merchantService;
 
     @Autowired
-    public void setMerchantService(MerchantService merchantService) {
+    public MerchantController(MerchantService merchantService) {
         this.merchantService = merchantService;
     }
 
     @GetMapping("/merchant/restaurants")
     @ResponseStatus(HttpStatus.OK)
-    public List<RestaurantThinDtoOut> getAllRestaurantOwned() {
-        return merchantService.getAllRestaurantsByOwner();
+    public List<RestaurantThinDtoOut> getAllRestaurantsOwned() {
+        return merchantService.getAllRestaurantsOwned();
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}")
-    public RestaurantDto getSingleRestaurantByOwner(@PathVariable Long restaurantId) {
-        return merchantService.getSingleRestaurantByOwner(restaurantId);
+    public RestaurantDtoOut getSingleRestaurantOwned(@PathVariable Long restaurantId) {
+        return merchantService.getSingleRestaurantOwned(restaurantId);
     }
 
     @PostMapping("/merchant/restaurants")
     @ResponseStatus(HttpStatus.CREATED)
-    public RestaurantDto createRestaurant(@RequestBody RestaurantDto restaurantDto) {
-        return merchantService.createRestaurant(restaurantDto);
+    public RestaurantDtoOut createRestaurant(@RequestBody RestaurantDtoIn restaurantDtoIn) {
+        return merchantService.createRestaurant(restaurantDtoIn);
     }
 
     @PutMapping("/merchant/restaurants/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
     public RestaurantThinDtoOut updateRestaurantBasicInformation(@PathVariable Long restaurantId,
-                                                                   @RequestBody RestaurantThinDtoIn restaurantInfoDto) {
+                                                                   @RequestBody RestaurantDtoIn restaurantInfoDto) {
         return merchantService.updateRestaurantBasicInformation(restaurantId, restaurantInfoDto);
     }
 
@@ -75,13 +75,13 @@ public class MerchantController {
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderDtoOut> getOwnedRestaurantOrders(@PathVariable Long restaurantId) {
+    public List<OrderDtoOut> getAllOrdersForOwnedRestaurant(@PathVariable Long restaurantId) {
         return merchantService.getAllOrdersForOwnedRestaurant(restaurantId);
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders/{orderId}")
     @ResponseStatus(HttpStatus.OK)
-    public OrderDtoOut getOwnedRestaurantOrder(@PathVariable Long restaurantId,
+    public OrderDtoOut getSingleOrderForOwnedRestaurant(@PathVariable Long restaurantId,
                                                @PathVariable Long orderId) {
         return merchantService.getSingleOrderForOwnedRestaurant(restaurantId, orderId);
     }

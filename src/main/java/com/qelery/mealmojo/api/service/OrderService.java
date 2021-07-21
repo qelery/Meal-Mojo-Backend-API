@@ -42,8 +42,11 @@ public class OrderService {
         this.modelMapper = modelMapper;
     }
 
-    public List<Restaurant> getRestaurants() {
-        return restaurantRepository.findAll();
+    public List<RestaurantThinDtoOut> getAllRestaurants() {
+        return restaurantRepository.findAll()
+                .stream()
+                .map(restaurant -> modelMapper.map(restaurant, RestaurantThinDtoOut.class))
+                .collect(Collectors.toList());
     }
 
     public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
@@ -53,24 +56,24 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public RestaurantDto getRestaurant(Long restaurantId) {
+    public RestaurantDtoOut getRestaurant(Long restaurantId) {
         Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
         if (restaurant.isPresent()) {
-            return modelMapper.map(restaurant.get(), RestaurantDto.class);
+            return modelMapper.map(restaurant.get(), RestaurantDtoOut.class);
         } else {
             throw new RestaurantNotFoundException(restaurantId);
         }
     }
 
-    public List<MenuItemDto> getMenuItemsByRestaurant(Long restaurantId) {
-        RestaurantDto restaurant = getRestaurant(restaurantId);
+    public List<MenuItemDto> getAllMenuItemsByRestaurant(Long restaurantId) {
+        RestaurantDtoOut restaurant = getRestaurant(restaurantId);
         return restaurant.getMenuItems()
                 .stream().map(menuItem -> modelMapper.map(menuItem, MenuItemDto.class))
                 .collect(Collectors.toList());
     }
 
     public MenuItemDto getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
-        RestaurantDto restaurant = getRestaurant(restaurantId);
+        RestaurantDtoOut restaurant = getRestaurant(restaurantId);
         Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))

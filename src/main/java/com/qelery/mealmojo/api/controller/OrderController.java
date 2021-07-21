@@ -1,7 +1,6 @@
 package com.qelery.mealmojo.api.controller;
 
 import com.qelery.mealmojo.api.model.dto.*;
-import com.qelery.mealmojo.api.model.entity.Restaurant;
 import com.qelery.mealmojo.api.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +21,8 @@ public class OrderController {
 
     @GetMapping("/order/restaurants")
     @ResponseStatus(HttpStatus.OK)
-    public List<Restaurant> getRestaurants() {
-        return orderService.getRestaurants();
+    public List<RestaurantThinDtoOut> getAllRestaurants() {
+        return orderService.getAllRestaurants();
     }
 
     @GetMapping(value="/order/restaurants", params={"latitude", "longitude", "maxDistance"})
@@ -35,14 +34,14 @@ public class OrderController {
 
     @GetMapping("/order/restaurants/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
-    public RestaurantDto getRestaurant(@PathVariable Long restaurantId) {
+    public RestaurantDtoOut getRestaurant(@PathVariable Long restaurantId) {
         return orderService.getRestaurant(restaurantId);
     }
 
     @GetMapping("/order/restaurants/{restaurantId}/menuitems")
     @ResponseStatus(HttpStatus.OK)
-    public List<MenuItemDto> getMenuItemsByRestaurant(@PathVariable Long restaurantId) {
-        return orderService.getMenuItemsByRestaurant(restaurantId);
+    public List<MenuItemDto> getAllMenuItemsByRestaurant(@PathVariable Long restaurantId) {
+        return orderService.getAllMenuItemsByRestaurant(restaurantId);
     }
 
     @GetMapping("/order/restaurants/{restaurantId}/menuitems/{menuitemId}")

@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.unitTests;
+package com.qelery.mealmojo.api.integrationtests;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

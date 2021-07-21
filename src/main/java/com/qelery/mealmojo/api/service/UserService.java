@@ -2,6 +2,7 @@ package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.model.dto.UserDtoIn;
+import com.qelery.mealmojo.api.model.dto.UserDtoOut;
 import com.qelery.mealmojo.api.model.entity.CustomerProfile;
 import com.qelery.mealmojo.api.model.entity.MerchantProfile;
 import com.qelery.mealmojo.api.model.entity.User;
@@ -44,7 +45,7 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
-    public void createUser(UserDtoIn userDtoIn) {
+    public UserDtoOut createUser(UserDtoIn userDtoIn) {
         User user = modelMapper.map(userDtoIn, User.class);
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
@@ -62,6 +63,7 @@ public class UserService {
                 user.setMerchantProfile(merchantProfile);
             }
             userRepository.save(user);
+            return modelMapper.map(user, UserDtoOut.class);
         }
     }
 
