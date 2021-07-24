@@ -17,11 +17,11 @@ public class RestaurantDtoOut {
     private Integer pickupEtaMinutes;
     private Boolean deliveryAvailable;
     private Integer deliveryEtaMinutes;
-    private Double deliveryFree;
+    private Double deliveryFee;
     private String logoImageUrl;
     private String heroImageUrl;
     private Address address;
-    private OperatingHours operatingHours;
+    private List<OperatingHours> operatingHoursList;
     private List<MenuItem> menuItems;
     private List<Order> orders;
 }

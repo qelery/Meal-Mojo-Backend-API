@@ -1,6 +1,5 @@
-package com.qelery.mealmojo.api.unittests.controller;
+package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.controller.OrderController;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.service.OrderService;
 import org.junit.jupiter.api.DisplayName;

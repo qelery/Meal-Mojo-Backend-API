@@ -23,8 +23,8 @@ public class Address {
     private Double longitude;
 
     @Enumerated(EnumType.STRING)
-    private Country country;
+    private State state;
 
     @Enumerated(EnumType.STRING)
-    private State state;
+    private Country country;
 }

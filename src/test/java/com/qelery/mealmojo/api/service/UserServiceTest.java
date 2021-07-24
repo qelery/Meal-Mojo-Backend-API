@@ -1,10 +1,9 @@
-package com.qelery.mealmojo.api.unittests.service;
+package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
-import com.qelery.mealmojo.api.service.utility.PropertyCopier;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -26,8 +25,7 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private AuthenticationManager authenticationManager;
-    @Mock
-    private PropertyCopier propertyCopier;
+
 
     @Captor
     private ArgumentCaptor<User> userArgumentCaptor;

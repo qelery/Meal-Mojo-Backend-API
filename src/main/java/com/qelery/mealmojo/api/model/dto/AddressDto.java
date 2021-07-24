@@ -14,4 +14,6 @@ public class AddressDto {
     private State state;
     private String zipcode;
     private Country country;
+    private Double latitude;
+    private Double longitude;
 }

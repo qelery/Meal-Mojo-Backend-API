@@ -110,7 +110,7 @@ CREATE TABLE ${schema}.menu_item
     description   VARCHAR(255),
     price         NUMERIC(7, 2) NOT NULL,
     image_url     VARCHAR(255),
-    available     BOOLEAN       NOT NULL DEFAULT TRUE,
+    is_available  BOOLEAN       NOT NULL DEFAULT TRUE,
     restaurant_id BIGINT        NOT NULL,
     PRIMARY KEY (id)
 );

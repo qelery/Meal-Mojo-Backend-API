@@ -12,7 +12,7 @@ import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
-import org.modelmapper.ModelMapper;
+import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +28,7 @@ public class UserService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final ModelMapper modelMapper;
+    private final ObjectMapperUtils mapperUtils;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -36,17 +36,17 @@ public class UserService {
                        PasswordEncoder passwordEncoder,
                        JwtUtils jwtUtils,
                        AuthenticationManager authenticationManager,
-                       ModelMapper modelMapper) {
+                       ObjectMapperUtils mapperUtils) {
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.modelMapper = modelMapper;
+        this.mapperUtils = mapperUtils;
     }
 
     public UserDtoOut createUser(UserDtoIn userDtoIn) {
-        User user = modelMapper.map(userDtoIn, User.class);
+        User user = mapperUtils.map(userDtoIn, User.class);
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
@@ -63,7 +63,7 @@ public class UserService {
                 user.setMerchantProfile(merchantProfile);
             }
             userRepository.save(user);
-            return modelMapper.map(user, UserDtoOut.class);
+            return mapperUtils.map(user, UserDtoOut.class);
         }
     }
 

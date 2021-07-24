@@ -10,7 +10,7 @@ import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
-import org.modelmapper.ModelMapper;
+import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,39 +27,35 @@ public class OrderService {
     private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
     private final LocationService locationService;
-    private final ModelMapper modelMapper;
+    private final ObjectMapperUtils mapperUtils;
 
     @Autowired
     public OrderService(RestaurantRepository restaurantRepository,
                         MenuItemRepository menuItemRepository,
                         OrderRepository orderRepository,
                         LocationService locationService,
-                        ModelMapper modelMapper) {
+                        ObjectMapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
         this.orderRepository = orderRepository;
         this.locationService = locationService;
-        this.modelMapper = modelMapper;
+        this.mapperUtils = mapperUtils;
     }
 
     public List<RestaurantThinDtoOut> getAllRestaurants() {
-        return restaurantRepository.findAll()
-                .stream()
-                .map(restaurant -> modelMapper.map(restaurant, RestaurantThinDtoOut.class))
-                .collect(Collectors.toList());
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        return mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
     }
 
     public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
         List<Restaurant> restaurants = locationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
-        return restaurants.stream()
-                .map(restaurant -> modelMapper.map(restaurant, RestaurantThinDtoOut.class))
-                .collect(Collectors.toList());
+        return mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
     }
 
     public RestaurantDtoOut getRestaurant(Long restaurantId) {
         Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
         if (restaurant.isPresent()) {
-            return modelMapper.map(restaurant.get(), RestaurantDtoOut.class);
+            return mapperUtils.map(restaurant.get(), RestaurantDtoOut.class);
         } else {
             throw new RestaurantNotFoundException(restaurantId);
         }
@@ -67,9 +63,7 @@ public class OrderService {
 
     public List<MenuItemDto> getAllMenuItemsByRestaurant(Long restaurantId) {
         RestaurantDtoOut restaurant = getRestaurant(restaurantId);
-        return restaurant.getMenuItems()
-                .stream().map(menuItem -> modelMapper.map(menuItem, MenuItemDto.class))
-                .collect(Collectors.toList());
+        return mapperUtils.mapAll(restaurant.getMenuItems(), MenuItemDto.class);
     }
 
     public MenuItemDto getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
@@ -79,24 +73,24 @@ public class OrderService {
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))
                 .findFirst();
         MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
-        return modelMapper.map(menuItem, MenuItemDto.class);
+        return mapperUtils.map(menuItem, MenuItemDto.class);
     }
 
     public List<OrderDtoOut> getPlacedOrders(Long restaurantId) {
         CustomerProfile customerProfile = getLoggedInUserProfile();
         if (restaurantId == null) {
-            return customerProfile.getPlacedOrders().stream().map(order -> modelMapper.map(order, OrderDtoOut.class)).collect(Collectors.toList());
+            return mapperUtils.mapAll(customerProfile.getPlacedOrders(), OrderDtoOut.class);
         } else {
             return customerProfile.getPlacedOrders()
                     .stream().filter(order -> order.getRestaurant().getId().equals(restaurantId))
-                    .map(order -> modelMapper.map(order, OrderDtoOut.class))
+                    .map(order -> mapperUtils.map(order, OrderDtoOut.class))
                     .collect(Collectors.toList());
         }
     }
 
     public OrderDtoOut submitOrder(OrderDtoIn orderDtoIn) {
         List<OrderLine> orderLines = new ArrayList<>();
-        orderDtoIn.getMenuItemQuantityMap().forEach((menuItemId, quantity) -> {
+        orderDtoIn.getMenuItemIdQuantityMap().forEach((menuItemId, quantity) -> {
             Optional<MenuItem> optionalMenuItem = menuItemRepository.findById(menuItemId);
             MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
             OrderLine orderLine = new OrderLine();
@@ -109,12 +103,12 @@ public class OrderService {
             throw new EmptyOrderException();
         }
 
-        Order order = modelMapper.map(orderDtoIn, Order.class);
+        Order order = mapperUtils.map(orderDtoIn, Order.class);
         order.setCustomerProfile(getLoggedInUserProfile());
         order.setRestaurant(orderLines.get(0).getMenuItem().getRestaurant());
 
         orderRepository.save(order);
-        return modelMapper.map(order, OrderDtoOut.class);
+        return mapperUtils.map(order, OrderDtoOut.class);
     }
 
     private CustomerProfile getLoggedInUserProfile() {

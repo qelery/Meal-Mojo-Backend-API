@@ -9,5 +9,5 @@ public class MenuItemDto {
     private String description;
     private Double price;
     private String imageUrl;
-    private Boolean available;
+    private Boolean isAvailable;
 }
