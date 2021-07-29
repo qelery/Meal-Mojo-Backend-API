@@ -150,9 +150,6 @@ public class MerchantService {
     }
 
     private MerchantProfile getLoggedInUserMerchantProfile() {
-        System.out.println(SecurityContextHolder.getContext().
-                getAuthentication()
-                .getPrincipal());
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
                 getAuthentication()
                 .getPrincipal();

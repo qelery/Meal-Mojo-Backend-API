@@ -40,11 +40,11 @@ class UserControllerTest {
     @Test
     @DisplayName("Should return LoginResponse/JWT from service after logging in user")
     void loginUser() {
-        LoginResponse expectedResponse = new LoginResponse("myJwt");
+        LoginResponse expectedResponse = new LoginResponse("myJwtToken");
         when(mockUserService.loginUser(any(LoginRequest.class)))
                 .thenReturn(expectedResponse);
 
-        LoginResponse actualResponse = userController.loginUser(new LoginRequest());
+        LoginResponse actualResponse = userController.loginUser(new LoginRequest("john@example.org", "password"));
 
         assertEquals(expectedResponse, actualResponse);
     }
