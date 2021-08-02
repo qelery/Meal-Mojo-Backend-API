@@ -1,7 +1,9 @@
 package com.qelery.mealmojo.api.service.utility;
 
 import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.User;
+import org.modelmapper.Conditions;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -24,9 +26,9 @@ public class ObjectMapperUtils {
                 .setMatchingStrategy(MatchingStrategies.STANDARD)
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setSkipNullEnabled(true)
+                .setPropertyCondition(Conditions.isNotNull())
                 .setAmbiguityIgnored(false);
-        sourceToDestination(modelMapper);
+        setAdditionalConverters(modelMapper);
     }
 
     public <D, T> D map(final T obj, Class<D> outclass) {
@@ -45,31 +47,29 @@ public class ObjectMapperUtils {
         return objList.stream().map(obj -> map(obj, outClass)).collect(Collectors.toSet());
     }
 
-    private void sourceToDestination(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(User.class, UserDtoOut.class)
-                .addMappings(mapper -> mapper.using(firstNameConverter).map(user -> user, UserDtoOut::setFirstName))
-                .addMappings(mapper -> mapper.using(lastNameConverter).map(user -> user, UserDtoOut::setLastName));
+    private void setAdditionalConverters(ModelMapper modelMapper) {
+        modelMapper.createTypeMap(User.class, UserDtoOut.class).setPreConverter(nameConverter);
+        modelMapper.createTypeMap(Address.class, Address.class).setPreConverter(streetsConverter);
     }
 
-    Converter<User, String> firstNameConverter = mappingContext -> {
-        User user = mappingContext.getSource();
-        if (user.getCustomerProfile() != null) {
-            return user.getCustomerProfile().getFirstName();
-        } else if (user.getMerchantProfile() != null) {
-            return user.getMerchantProfile().getFirstName();
-        } else {
-            return null;
+    Converter<User, UserDtoOut> nameConverter = mappingContext -> {
+        User source = mappingContext.getSource();
+        UserDtoOut destination = mappingContext.getDestination();
+        if (source.getCustomerProfile() != null) {
+            destination.setFirstName(source.getCustomerProfile().getFirstName());
+            destination.setLastName(source.getCustomerProfile().getLastName());
+        } else if (source.getMerchantProfile() != null) {
+            destination.setFirstName(source.getMerchantProfile().getFirstName());
+            destination.setLastName(source.getMerchantProfile().getLastName());
         }
+        return destination;
     };
 
-    Converter<User, String> lastNameConverter = mappingContext -> {
-        User user = mappingContext.getSource();
-        if (user.getCustomerProfile() != null) {
-            return user.getCustomerProfile().getLastName();
-        } else if (user.getMerchantProfile() != null) {
-            return user.getMerchantProfile().getLastName();
-        } else {
-            return null;
-        }
+    Converter<Address, Address> streetsConverter = mappingContext -> {
+        Address source = mappingContext.getSource();
+        Address destination = mappingContext.getDestination();
+        destination.setStreet2(source.getStreet2());
+        destination.setStreet3(source.getStreet3());
+        return destination;
     };
 }

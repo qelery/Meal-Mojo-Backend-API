@@ -2,6 +2,7 @@ package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
+import com.sun.istack.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;

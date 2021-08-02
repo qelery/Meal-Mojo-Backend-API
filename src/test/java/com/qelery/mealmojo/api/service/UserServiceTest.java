@@ -37,17 +37,17 @@ class UserServiceTest {
     UserService userService;
 
     @Mock
-    UserRepository mockUserRepository;
+    UserRepository userRepository;
     @Mock
-    UserDetailsServiceImpl mockUserDetailsService;
+    UserDetailsServiceImpl userDetailsService;
     @Mock
-    PasswordEncoder mockPasswordEncoder;
+    PasswordEncoder passwordEncoder;
     @Mock
-    JwtUtils mockJwtUtils;
+    JwtUtils jwtUtils;
     @Mock
-    AuthenticationManager mockAuthenticationManager;
+    AuthenticationManager authenticationManager;
     @Spy
-    ObjectMapperUtils spyMapperUtils;
+    ObjectMapperUtils mapperUtils;
 
     @Captor
     ArgumentCaptor<User> userCaptor;
@@ -77,10 +77,10 @@ class UserServiceTest {
 
             UserDtoOut userDtoOut = userService.createUser(userDtoIn);
 
-            verify(mockPasswordEncoder).encode(userDtoIn.getPassword());
-            verify(mockUserRepository).save(userCaptor.capture());
+            verify(passwordEncoder).encode(userDtoIn.getPassword());
+            verify(userRepository).save(userCaptor.capture());
             User userSavedToDatabase = userCaptor.getValue();
-            verify(spyMapperUtils).map(userSavedToDatabase, UserDtoOut.class);
+            verify(mapperUtils).map(userSavedToDatabase, UserDtoOut.class);
 
             assertEquals(userDtoIn.getEmail(), userSavedToDatabase.getEmail());
             assertEquals(userDtoIn.getRole(), userSavedToDatabase.getRole());
@@ -100,10 +100,10 @@ class UserServiceTest {
 
             UserDtoOut userDtoOut = userService.createUser(userDtoIn);
 
-            verify(mockPasswordEncoder).encode(userDtoIn.getPassword());
-            verify(mockUserRepository).save(userCaptor.capture());
+            verify(passwordEncoder).encode(userDtoIn.getPassword());
+            verify(userRepository).save(userCaptor.capture());
             User userSavedToDatabase = userCaptor.getValue();
-            verify(spyMapperUtils).map(userSavedToDatabase, UserDtoOut.class);
+            verify(mapperUtils).map(userSavedToDatabase, UserDtoOut.class);
 
             assertEquals(userDtoIn.getEmail(), userSavedToDatabase.getEmail());
             assertEquals(userDtoIn.getRole(), userSavedToDatabase.getRole());
@@ -119,7 +119,7 @@ class UserServiceTest {
         @Test
         @DisplayName("only if one doesn't already exist with that email")
         void createUserEmailExistsException() {
-            when(mockUserRepository.existsByEmail(anyString()))
+            when(userRepository.existsByEmail(anyString()))
                     .thenReturn(true);
             Exception exception = assertThrows(EmailExistsException.class, () -> {
                 userService.createUser(userDtoIn);
@@ -133,16 +133,16 @@ class UserServiceTest {
     void loginUser() {
         LoginRequest loginRequest = new LoginRequest("john@example.org", "password");
         UserDetails userDetails = new UserDetailsImpl(new User());
-        when(mockUserDetailsService.loadUserByUsername(anyString()))
+        when(userDetailsService.loadUserByUsername(anyString()))
                 .thenReturn(userDetails);
-        when(mockJwtUtils.generateToken(any(UserDetails.class)))
+        when(jwtUtils.generateToken(any(UserDetails.class)))
                 .thenReturn("myJwtToken");
 
         LoginResponse actualLoginResponse = userService.loginUser(loginRequest);
 
-        verify(mockAuthenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(mockUserDetailsService).loadUserByUsername(usernameCaptor.capture());
-        verify(mockJwtUtils).generateToken(userDetailsCaptor.capture());
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userDetailsService).loadUserByUsername(usernameCaptor.capture());
+        verify(jwtUtils).generateToken(userDetailsCaptor.capture());
 
         assertEquals(loginRequest.getEmail(), usernameCaptor.getValue());
         assertEquals(userDetails, userDetailsCaptor.getValue());

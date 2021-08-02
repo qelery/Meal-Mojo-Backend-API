@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ObjectMapperUtilsTest {
 
-    ObjectMapperUtils objectMapperUtils = new ObjectMapperUtils();
+    ObjectMapperUtils mapperUtils = new ObjectMapperUtils();
 
     Address addressEntity;
     CustomerProfile customerProfileEntity;
@@ -55,7 +55,7 @@ class ObjectMapperUtilsTest {
         incomingAddressInfo.setState(null);
         incomingAddressInfo.setCountry(null);
 
-        this.objectMapperUtils.map(incomingAddressInfo, existingAddressInfo);
+        this.mapperUtils.map(incomingAddressInfo, existingAddressInfo);
 
         assertEquals(incomingAddressInfo.getStreet1(), existingAddressInfo.getStreet1());
         assertEquals(incomingAddressInfo.getStreet2(), existingAddressInfo.getStreet2());
@@ -71,7 +71,7 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map Address entity to AddressDto")
     void mapAddressToAddressDto() {
-        AddressDto addressDto = this.objectMapperUtils.map(addressEntity, AddressDto.class);
+        AddressDto addressDto = this.mapperUtils.map(addressEntity, AddressDto.class);
 
         assertEquals(addressEntity.getStreet1(), addressDto.getStreet1());
         assertEquals(addressEntity.getStreet2(), addressDto.getStreet2());
@@ -85,9 +85,37 @@ class ObjectMapperUtilsTest {
     }
 
     @Test
+    @DisplayName("Should have null property mapping disabled for objects in general")
+    void shouldDisableNullPropertyMapping() {
+        MenuItem updatedMenuItem = new MenuItem();
+        updatedMenuItem.setName("Cheeseburger");
+        updatedMenuItem.setPrice(null);
+
+        mapperUtils.map(updatedMenuItem, menuItemEntity);
+
+        assertEquals(updatedMenuItem.getName(), menuItemEntity.getName());
+        assertNotNull(menuItemEntity.getPrice());
+    }
+
+    @Test
+    @DisplayName("Should have null property mapping enabled for street2 and street3 fields in the Address object")
+    void mapAddressToAddressStreet2And3Null() {
+        Address updatedAddress = new Address();
+        updatedAddress.setStreet1("5700 S lake Shore Dr");
+        updatedAddress.setStreet2(null);
+        updatedAddress.setStreet3(null);
+
+        mapperUtils.map(updatedAddress, addressEntity);
+
+        assertEquals(updatedAddress.getStreet1(), addressEntity.getStreet1());
+        assertNull(addressEntity.getStreet2());
+        assertNull(addressEntity.getStreet3());
+    }
+
+    @Test
     @DisplayName("Should map User entity to UserDtoOut")
     void mapUserToUserOutDto() {
-        UserDtoOut userDtoOut = objectMapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
+        UserDtoOut userDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
 
         assertEquals(userEntityWithCustomerProfile.getEmail(), userDtoOut.getEmail());
         assertEquals(userEntityWithCustomerProfile.getRole(), userDtoOut.getRole());
@@ -98,20 +126,20 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should pull first and last name from correct profile when mapping to UserDtoOut")
     void mapNameForUserDtoOut() {
-        UserDtoOut userDtoOut = objectMapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
+        UserDtoOut userDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
 
         assertEquals(userEntityWithCustomerProfile.getCustomerProfile().getFirstName(), userDtoOut.getFirstName());
         assertEquals(userEntityWithCustomerProfile.getCustomerProfile().getLastName(), userDtoOut.getLastName());
 
 
-        userDtoOut = objectMapperUtils.map(userEntityWithMerchantProfile, UserDtoOut.class);
+        userDtoOut = mapperUtils.map(userEntityWithMerchantProfile, UserDtoOut.class);
 
         assertEquals(userEntityWithMerchantProfile.getMerchantProfile().getFirstName(), userDtoOut.getFirstName());
         assertEquals(userEntityWithMerchantProfile.getMerchantProfile().getLastName(), userDtoOut.getLastName());
 
 
         User userEntityNoProfile = new User();
-        userDtoOut = objectMapperUtils.map(userEntityNoProfile, UserDtoOut.class);
+        userDtoOut = mapperUtils.map(userEntityNoProfile, UserDtoOut.class);
 
         assertNull(userDtoOut.getFirstName());
         assertNull(userDtoOut.getLastName());
@@ -120,14 +148,14 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map CustomerProfile and MerchantProfile entities to ProfileDto")
     void mapProfileToProfileDto() {
-        ProfileDto profileDto = objectMapperUtils.map(customerProfileEntity, ProfileDto.class);
+        ProfileDto profileDto = mapperUtils.map(customerProfileEntity, ProfileDto.class);
 
         assertEquals(customerProfileEntity.getFirstName(), profileDto.getFirstName());
         assertEquals(customerProfileEntity.getLastName(), profileDto.getLastName());
         assertEquals(customerProfileEntity.getAddress(), profileDto.getAddress());
 
 
-        profileDto = objectMapperUtils.map(merchantProfileEntity, ProfileDto.class);
+        profileDto = mapperUtils.map(merchantProfileEntity, ProfileDto.class);
 
         assertEquals(merchantProfileEntity.getFirstName(), profileDto.getFirstName());
         assertEquals(merchantProfileEntity.getLastName(), profileDto.getLastName());
@@ -137,7 +165,7 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map OperatingHours entity to OperatingHoursDto")
     void mapOperatingHoursToOperatingHoursDto() {
-        OperatingHoursDto operatingHoursDto = objectMapperUtils.map(operatingHoursMondayEntity, OperatingHoursDto.class);
+        OperatingHoursDto operatingHoursDto = mapperUtils.map(operatingHoursMondayEntity, OperatingHoursDto.class);
 
         assertEquals(operatingHoursMondayEntity.getOpenTime(), operatingHoursDto.getOpenTime());
         assertEquals(operatingHoursMondayEntity.getCloseTime(), operatingHoursDto.getCloseTime());
@@ -147,7 +175,7 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map MenuItem entity to MenuItemDto")
     void mapMenuItemToMenuItemDto() {
-        MenuItemDto menuItemDto = objectMapperUtils.map(menuItemEntity, MenuItemDto.class);
+        MenuItemDto menuItemDto = mapperUtils.map(menuItemEntity, MenuItemDto.class);
 
         assertEquals(menuItemEntity.getName(), menuItemDto.getName());
         assertEquals(menuItemEntity.getDescription(), menuItemDto.getDescription());
@@ -159,7 +187,7 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map Restaurant entity to RestaurantDtoOut")
     void mapRestaurantToRestaurantDtoOut() {
-        RestaurantDtoOut restaurantDtoOut = objectMapperUtils.map(restaurantEntity, RestaurantDtoOut.class);
+        RestaurantDtoOut restaurantDtoOut = mapperUtils.map(restaurantEntity, RestaurantDtoOut.class);
 
         assertEquals(restaurantEntity.getName(), restaurantDtoOut.getName());
         assertEquals(restaurantEntity.getDescription(), restaurantDtoOut.getDescription());
@@ -179,7 +207,7 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map Restaurant entity to RestaurantThinDtoOut")
     void mapRestaurantToRestaurantThinDtoOut() {
-        RestaurantThinDtoOut restaurantThinDtoOut = objectMapperUtils.map(restaurantEntity, RestaurantThinDtoOut.class);
+        RestaurantThinDtoOut restaurantThinDtoOut = mapperUtils.map(restaurantEntity, RestaurantThinDtoOut.class);
 
         assertEquals(restaurantEntity.getName(), restaurantThinDtoOut.getName());
         assertEquals(restaurantEntity.getDescription(), restaurantThinDtoOut.getDescription());
@@ -197,7 +225,7 @@ class ObjectMapperUtilsTest {
     @Test
     @DisplayName("Should map Order entity to OrderDtoOut")
     void mapOrderToOrderDtoOut() {
-        OrderDtoOut orderDtoOut = objectMapperUtils.map(orderEntity, OrderDtoOut.class);
+        OrderDtoOut orderDtoOut = mapperUtils.map(orderEntity, OrderDtoOut.class);
 
         assertEquals(orderEntity.getTip(), orderDtoOut.getTip());
         assertEquals(orderEntity.getIsCompleted(), orderDtoOut.getIsCompleted());
@@ -213,7 +241,7 @@ class ObjectMapperUtilsTest {
     @DisplayName("Should map a list of an entity to a list of a dto class")
     void mapEntityListToDtoList() {
         List<OperatingHours> operatingHoursEntityList = List.of(operatingHoursMondayEntity, operatingHoursTuesdayEntity);
-        List<OperatingHoursDto> operatingHoursDtoList = this.objectMapperUtils.mapAll(
+        List<OperatingHoursDto> operatingHoursDtoList = this.mapperUtils.mapAll(
                 operatingHoursEntityList,
                 OperatingHoursDto.class
         );
@@ -231,7 +259,7 @@ class ObjectMapperUtilsTest {
     @DisplayName("Should map a set of an entity to a set of a dto class")
     void mapEntitySetToDtoSet() {
         Set<OperatingHours> operatingHoursEntitySet = Set.of(operatingHoursMondayEntity, operatingHoursTuesdayEntity);
-        Set<OperatingHoursDto> operatingHoursDtoSet = this.objectMapperUtils.mapAll(
+        Set<OperatingHoursDto> operatingHoursDtoSet = this.mapperUtils.mapAll(
                 operatingHoursEntitySet,
                 OperatingHoursDto.class
         );
@@ -251,15 +279,16 @@ class ObjectMapperUtilsTest {
 
     private void initializeEntities() {
         addressEntity = new Address();
-        addressEntity.setStreet1("Street 1");
-        addressEntity.setStreet1("Street 2");
-        addressEntity.setStreet1("Street 3");
+        addressEntity.setStreet1("1 " +
+                "400 S Lake Shore Dr");
+        addressEntity.setStreet2("Field Museum");
+        addressEntity.setStreet3("Office 3B");
         addressEntity.setCity("Chicago");
         addressEntity.setState(State.IL);
-        addressEntity.setZipcode("60007");
+        addressEntity.setZipcode("60605");
         addressEntity.setCountry(Country.US);
-        addressEntity.setLatitude(41.8781);
-        addressEntity.setLongitude(-87.6298);
+        addressEntity.setLatitude(41.866265);
+        addressEntity.setLongitude(-87.6191692);
 
         customerProfileEntity = new CustomerProfile();
         customerProfileEntity.setFirstName("Chris");

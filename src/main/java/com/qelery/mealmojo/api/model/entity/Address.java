@@ -2,6 +2,7 @@ package com.qelery.mealmojo.api.model.entity;
 
 import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
+import com.sun.istack.NotNull;
 import lombok.Data;
 
 import javax.persistence.*;

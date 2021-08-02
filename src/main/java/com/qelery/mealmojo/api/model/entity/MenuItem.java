@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.model.entity;
 
+import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.ToString;
 

@@ -23,13 +23,13 @@ class UserControllerTest {
     private UserController userController;
 
     @Mock
-    private UserService mockUserService;
+    private UserService userService;
 
     @Test
     @DisplayName("Should return user dto from service after creating user")
     void createUser() {
         UserDtoOut expectedDto = new UserDtoOut();
-        when(mockUserService.createUser(any(UserDtoIn.class)))
+        when(userService.createUser(any(UserDtoIn.class)))
                 .thenReturn(expectedDto);
 
         UserDtoOut actualDto = userController.createUser(new UserDtoIn());
@@ -41,7 +41,7 @@ class UserControllerTest {
     @DisplayName("Should return LoginResponse/JWT from service after logging in user")
     void loginUser() {
         LoginResponse expectedResponse = new LoginResponse("myJwtToken");
-        when(mockUserService.loginUser(any(LoginRequest.class)))
+        when(userService.loginUser(any(LoginRequest.class)))
                 .thenReturn(expectedResponse);
 
         LoginResponse actualResponse = userController.loginUser(new LoginRequest("john@example.org", "password"));
