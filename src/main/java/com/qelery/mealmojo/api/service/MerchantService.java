@@ -39,7 +39,7 @@ public class MerchantService {
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
         this.operatingHoursRepository = operatingHoursRepository;
-`        this.addressRepository = addressRepository;
+        this.addressRepository = addressRepository;
         this.mapperUtils = mapperUtils;
     }
 

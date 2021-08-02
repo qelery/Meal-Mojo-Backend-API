@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.service;
 
+import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Country;
@@ -73,7 +74,13 @@ class MerchantServiceTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
    }
 
+    @Test
+    @DisplayName("Should throw exception if user trying to retrieve information does not have a merchant profile")
+    void shouldThrowProfileNotFoundException() {
+        user.setMerchantProfile(null);
 
+        assertThrows(ProfileNotFoundException.class, () -> merchantService.getAllRestaurantsOwned());
+    }
 
     @Test
     @DisplayName("Should return all restaurants owned by the logged in merchant user")
