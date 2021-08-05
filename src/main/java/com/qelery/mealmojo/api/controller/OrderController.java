@@ -51,15 +51,15 @@ public class OrderController {
         return orderService.getMenuItemByRestaurant(restaurantId, menuitemId);
     }
 
-    @PostMapping("/order/submit")
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderDtoOut submitOrder(@RequestBody OrderDtoIn orderDtoIn) {
-        return this.orderService.submitOrder(orderDtoIn);
-    }
-
     @GetMapping("/order/past")
     @ResponseStatus(HttpStatus.OK)
     public List<OrderDtoOut> getOrders(@RequestParam(required=false) Long restaurantId) {
         return this.orderService.getPlacedOrders(restaurantId);
+    }
+
+    @PostMapping("/order/submit")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderDtoOut submitOrder(@RequestBody OrderDtoIn orderDtoIn) {
+        return this.orderService.submitOrder(orderDtoIn);
     }
 }

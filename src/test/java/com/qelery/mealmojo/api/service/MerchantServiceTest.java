@@ -7,7 +7,7 @@ import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
-import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
+import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,19 +48,15 @@ class MerchantServiceTest {
     @Mock
     Authentication authentication;
     @Spy
-    ObjectMapperUtils mapperUtils;
+    MapperUtils mapperUtils;
 
-    User user;
+    User loggedInUser;
     MerchantProfile merchantProfile;
     Restaurant restaurant1;
     Restaurant restaurant2;
 
     @BeforeEach
     void setUp() {
-        this.user = new User();
-        this.merchantProfile = new MerchantProfile();
-        merchantProfile.setId(1L);
-        this.user.setMerchantProfile(merchantProfile);
         this.restaurant1 = new Restaurant();
         restaurant1.setId(1L);
         restaurant1.setName("Restaurant1");
@@ -70,14 +66,18 @@ class MerchantServiceTest {
         restaurant2.setId(2L);
         restaurant2.setName("Restaurant2");
 
-        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(user));
+        this.merchantProfile = new MerchantProfile();
+        merchantProfile.setId(1L);
+        this.loggedInUser = new User();
+        loggedInUser.setMerchantProfile(merchantProfile);
+        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(loggedInUser));
         SecurityContextHolder.getContext().setAuthentication(authentication);
    }
 
     @Test
     @DisplayName("Should throw exception if user trying to retrieve information does not have a merchant profile")
     void shouldThrowProfileNotFoundException() {
-        user.setMerchantProfile(null);
+        loggedInUser.setMerchantProfile(null);
 
         assertThrows(ProfileNotFoundException.class, () -> merchantService.getAllRestaurantsOwned());
     }

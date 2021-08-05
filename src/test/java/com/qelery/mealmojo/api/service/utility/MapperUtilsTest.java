@@ -18,9 +18,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ObjectMapperUtilsTest {
+class MapperUtilsTest {
 
-    ObjectMapperUtils mapperUtils = new ObjectMapperUtils();
+    MapperUtils mapperUtils = new MapperUtils();
 
     Address addressEntity;
     CustomerProfile customerProfileEntity;

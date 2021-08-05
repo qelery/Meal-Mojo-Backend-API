@@ -15,12 +15,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class ObjectMapperUtils {
+public class MapperUtils {
 
     private final ModelMapper modelMapper;
 
     @Autowired
-    public ObjectMapperUtils() {
+    public MapperUtils() {
         this.modelMapper = new ModelMapper();
         this.modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STANDARD)

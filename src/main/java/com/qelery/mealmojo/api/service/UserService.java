@@ -12,7 +12,7 @@ import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
-import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
+import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +28,7 @@ public class UserService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final ObjectMapperUtils mapperUtils;
+    private final MapperUtils mapperUtils;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -36,7 +36,7 @@ public class UserService {
                        PasswordEncoder passwordEncoder,
                        JwtUtils jwtUtils,
                        AuthenticationManager authenticationManager,
-                       ObjectMapperUtils mapperUtils) {
+                       MapperUtils mapperUtils) {
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
         this.jwtUtils = jwtUtils;

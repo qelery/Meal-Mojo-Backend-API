@@ -10,7 +10,8 @@ import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
-import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
+import com.qelery.mealmojo.api.service.utility.DistanceUtils;
+import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,19 +27,19 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
-    private final LocationService locationService;
-    private final ObjectMapperUtils mapperUtils;
+    private final DistanceUtils distanceUtils;
+    private final MapperUtils mapperUtils;
 
     @Autowired
     public OrderService(RestaurantRepository restaurantRepository,
                         MenuItemRepository menuItemRepository,
                         OrderRepository orderRepository,
-                        LocationService locationService,
-                        ObjectMapperUtils mapperUtils) {
+                        DistanceUtils distanceUtils,
+                        MapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
         this.orderRepository = orderRepository;
-        this.locationService = locationService;
+        this.distanceUtils = distanceUtils;
         this.mapperUtils = mapperUtils;
     }
 
@@ -48,7 +49,7 @@ public class OrderService {
     }
 
     public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
-        List<Restaurant> restaurants = locationService.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
+        List<Restaurant> restaurants = distanceUtils.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
         return mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
     }
 
@@ -90,7 +91,7 @@ public class OrderService {
 
     public OrderDtoOut submitOrder(OrderDtoIn orderDtoIn) {
         List<OrderLine> orderLines = new ArrayList<>();
-        orderDtoIn.getMenuItemIdQuantityMap().forEach((menuItemId, quantity) -> {
+        orderDtoIn.getMenuItemQuantitiesMap().forEach((menuItemId, quantity) -> {
             Optional<MenuItem> optionalMenuItem = menuItemRepository.findById(menuItemId);
             MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
             OrderLine orderLine = new OrderLine();
@@ -104,6 +105,7 @@ public class OrderService {
         }
 
         Order order = mapperUtils.map(orderDtoIn, Order.class);
+        order.setOrderLines(orderLines);
         order.setCustomerProfile(getLoggedInUserProfile());
         order.setRestaurant(orderLines.get(0).getMenuItem().getRestaurant());
 

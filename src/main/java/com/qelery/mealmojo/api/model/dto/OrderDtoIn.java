@@ -11,5 +11,5 @@ public class OrderDtoIn {
     private Double tip;
     private Boolean isDelivery;
     private PaymentMethod paymentMethod;
-    private Map<Long, Integer> menuItemIdQuantityMap;
+    private Map<Long, Integer> menuItemQuantitiesMap;
 }

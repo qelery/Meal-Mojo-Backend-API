@@ -11,7 +11,7 @@ import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
-import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
+import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,7 +47,7 @@ class UserServiceTest {
     @Mock
     AuthenticationManager authenticationManager;
     @Spy
-    ObjectMapperUtils mapperUtils;
+    MapperUtils mapperUtils;
 
     @Captor
     ArgumentCaptor<User> userCaptor;

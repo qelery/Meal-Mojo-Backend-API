@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.service;
+package com.qelery.mealmojo.api.service.utility;
 
 import com.qelery.mealmojo.api.model.entity.Restaurant;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
@@ -9,23 +9,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class LocationService {
+public class DistanceUtils {
 
     private final RestaurantRepository restaurantRepository;
 
     @Autowired
-    public LocationService(RestaurantRepository restaurantRepository) {
+    public DistanceUtils(RestaurantRepository restaurantRepository) {
         this.restaurantRepository = restaurantRepository;
     }
 
-    public List<Restaurant> findRestaurantsWithinDistance(double originLatitude, double originLongitude, int maxDistance) {
+    public List<Restaurant> findRestaurantsWithinDistance(double originLatitude, double originLongitude, int maxDistanceMiles) {
         List<Restaurant> allRestaurants = restaurantRepository.findAll();
         return allRestaurants.stream().filter(restaurant -> {
             if (restaurant.getAddress() == null) return false;
             double restaurantLongitude = restaurant.getAddress().getLongitude();
             double restaurantLatitude = restaurant.getAddress().getLatitude();
             double distance = distanceApartInMiles(originLatitude, originLongitude, restaurantLatitude, restaurantLongitude);
-            return distance <= maxDistance;
+            return distance <= maxDistanceMiles;
         }).collect(Collectors.toList());
     }
 
@@ -42,9 +42,8 @@ public class LocationService {
         double a = Math.pow(Math.sin(dLatitude / 2), 2) + Math.cos(latitudeA) * Math.cos(latitudeB) * Math.pow(Math.sin(dLongitude / 2), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        double rawDistance = radiusOfEarth * c; // km
-        double approxDrivingDistance = rawDistance * 1.5; // km
-        return approxDrivingDistance * 0.621371; // miles
+        double distanceInKilometers = radiusOfEarth * c;
+        return distanceInKilometers * 0.621371;
     }
 }
 

@@ -9,7 +9,7 @@ import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.repository.*;
 import com.qelery.mealmojo.api.security.UserDetailsImpl;
-import com.qelery.mealmojo.api.service.utility.ObjectMapperUtils;
+import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class MerchantService {
     private final OrderRepository orderRepository;
     private final OperatingHoursRepository operatingHoursRepository;
     private final AddressRepository addressRepository;
-    private final ObjectMapperUtils mapperUtils;
+    private final MapperUtils mapperUtils;
 
     @Autowired
     public MerchantService(RestaurantRepository restaurantRepository,
@@ -34,7 +34,7 @@ public class MerchantService {
                            OrderRepository orderRepository,
                            OperatingHoursRepository operatingHoursRepository,
                            AddressRepository addressRepository,
-                           ObjectMapperUtils mapperUtils) {
+                           MapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
