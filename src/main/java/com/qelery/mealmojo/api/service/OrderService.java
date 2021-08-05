@@ -9,7 +9,6 @@ import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
-import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,10 +113,10 @@ public class OrderService {
     }
 
     private CustomerProfile getLoggedInUserProfile() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
-                getAuthentication()
-                .getPrincipal();
-        CustomerProfile customerProfile = userDetails.getUser().getCustomerProfile();
+        User user = (User) SecurityContextHolder.getContext()
+                                                .getAuthentication()
+                                                .getPrincipal();
+        CustomerProfile customerProfile = user.getCustomerProfile();
         if (customerProfile == null) {
             throw new ProfileNotFoundException();
         }

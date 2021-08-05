@@ -8,7 +8,6 @@ import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.repository.*;
-import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -150,10 +149,10 @@ public class MerchantService {
     }
 
     private MerchantProfile getLoggedInUserMerchantProfile() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().
+        User user = (User) SecurityContextHolder.getContext().
                 getAuthentication()
                 .getPrincipal();
-        MerchantProfile merchantProfile = userDetails.getUser().getMerchantProfile();
+        MerchantProfile merchantProfile = user.getMerchantProfile();
         if (merchantProfile == null) {
             throw new ProfileNotFoundException();
         }

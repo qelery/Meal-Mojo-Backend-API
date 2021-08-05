@@ -8,7 +8,6 @@ import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
-import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -165,7 +164,7 @@ class OrderServiceTest {
         order2.setRestaurant(restaurant2);
         List<Order> orders = List.of(order1, order2);
         loggedInUser.getCustomerProfile().setPlacedOrders(orders);
-        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(loggedInUser));
+        when(authentication.getPrincipal()).thenReturn(loggedInUser);
 
         List<OrderDtoOut> orderDtoOutList = orderService.getPlacedOrders(null);
 
@@ -185,7 +184,7 @@ class OrderServiceTest {
         order2.setRestaurant(restaurant2);
         List<Order> orders = List.of(order1, order2);
         loggedInUser.getCustomerProfile().setPlacedOrders(orders);
-        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(loggedInUser));
+        when(authentication.getPrincipal()).thenReturn(loggedInUser);
 
         List<OrderDtoOut> actualOrderDtoOutList = orderService.getPlacedOrders(restaurant1.getId());
 
@@ -204,7 +203,7 @@ class OrderServiceTest {
         orderDtoIn.setTip(6.00);
         orderDtoIn.setMenuItemQuantitiesMap(quantityMap);
 
-        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(loggedInUser));
+        when(authentication.getPrincipal()).thenReturn(loggedInUser);
         when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
         when(menuItemRepository.findById(menuItem2.getId())).thenReturn(Optional.ofNullable(menuItem2));
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
@@ -245,7 +244,7 @@ class OrderServiceTest {
         OrderDtoIn orderDtoIn = new OrderDtoIn();
         orderDtoIn.setMenuItemQuantitiesMap(quantityMap);
 
-        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(loggedInUser));
+        when(authentication.getPrincipal()).thenReturn(loggedInUser);
         when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
 
         assertThrows(ProfileNotFoundException.class, () -> orderService.submitOrder(orderDtoIn));

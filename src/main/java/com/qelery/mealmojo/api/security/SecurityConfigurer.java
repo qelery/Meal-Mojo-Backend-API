@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.security;
 
+import com.qelery.mealmojo.api.model.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
@@ -70,8 +71,8 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Bean
     @Scope(value= WebApplicationContext.SCOPE_REQUEST, proxyMode=ScopedProxyMode.TARGET_CLASS)
-    public UserDetailsImpl userDetailsImpl() {
-        return (UserDetailsImpl) SecurityContextHolder.getContext()
+    public User userDetailsImpl() {
+        return (User) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
     }

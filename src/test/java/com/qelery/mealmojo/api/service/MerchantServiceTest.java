@@ -6,7 +6,6 @@ import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.repository.*;
-import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,7 +69,7 @@ class MerchantServiceTest {
         merchantProfile.setId(1L);
         this.loggedInUser = new User();
         loggedInUser.setMerchantProfile(merchantProfile);
-        when(authentication.getPrincipal()).thenReturn(new UserDetailsImpl(loggedInUser));
+        when(authentication.getPrincipal()).thenReturn(loggedInUser);
         SecurityContextHolder.getContext().setAuthentication(authentication);
    }
 

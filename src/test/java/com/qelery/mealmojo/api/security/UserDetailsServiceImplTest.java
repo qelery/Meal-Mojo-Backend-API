@@ -28,15 +28,14 @@ class UserDetailsServiceImplTest {
     UserRepository userRepository;
 
     @Test
-    @DisplayName("Should return UserDetails for given email")
+    @DisplayName("Should return user for given email")
     void loadUserByUsername() {
-        User user = new User();
-        UserDetails expectedUserDetails = new UserDetailsImpl(user);
-        when(userRepository.findByEmail(anyString())).thenReturn(java.util.Optional.of(user));
+        User expectedUser = new User();
+        when(userRepository.findByEmail(anyString())).thenReturn(java.util.Optional.of(expectedUser));
 
         UserDetails actualUserDetails = userDetailsService.loadUserByUsername("example@google.com");
 
-        assertEquals(actualUserDetails, expectedUserDetails);
+        assertEquals(actualUserDetails, expectedUser);
     }
 
     @Test

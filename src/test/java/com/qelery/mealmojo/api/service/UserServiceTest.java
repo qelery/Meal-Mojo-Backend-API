@@ -9,7 +9,6 @@ import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
-import com.qelery.mealmojo.api.security.UserDetailsImpl;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -132,9 +132,9 @@ class UserServiceTest {
     @DisplayName("Should login user and return JWT")
     void loginUser() {
         LoginRequest loginRequest = new LoginRequest("john@example.org", "password");
-        UserDetails userDetails = new UserDetailsImpl(new User());
+        User user = new User();
         when(userDetailsService.loadUserByUsername(anyString()))
-                .thenReturn(userDetails);
+                .thenReturn(user);
         when(jwtUtils.generateToken(any(UserDetails.class)))
                 .thenReturn("myJwtToken");
 
@@ -145,7 +145,7 @@ class UserServiceTest {
         verify(jwtUtils).generateToken(userDetailsCaptor.capture());
 
         assertEquals(loginRequest.getEmail(), usernameCaptor.getValue());
-        assertEquals(userDetails, userDetailsCaptor.getValue());
+        assertEquals(user, userDetailsCaptor.getValue());
         assertEquals("myJwtToken", actualLoginResponse.getJWT());
     }
 }
