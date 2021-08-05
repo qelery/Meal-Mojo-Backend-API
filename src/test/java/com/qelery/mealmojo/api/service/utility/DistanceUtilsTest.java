@@ -1,9 +1,8 @@
-package com.qelery.mealmojo.api.service;
+package com.qelery.mealmojo.api.service.utility;
 
 import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.Restaurant;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
-import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

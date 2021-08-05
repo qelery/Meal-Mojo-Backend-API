@@ -1,4 +1,4 @@
-package unittests.com.qelery.mealmojo.api;
+package integration;
 
 import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.repository.UserRepository;
