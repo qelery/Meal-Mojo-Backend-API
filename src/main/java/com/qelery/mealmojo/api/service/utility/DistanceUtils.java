@@ -1,8 +1,6 @@
 package com.qelery.mealmojo.api.service.utility;
 
 import com.qelery.mealmojo.api.model.entity.Restaurant;
-import com.qelery.mealmojo.api.repository.RestaurantRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,16 +9,11 @@ import java.util.stream.Collectors;
 @Service
 public class DistanceUtils {
 
-    private final RestaurantRepository restaurantRepository;
-
-    @Autowired
-    public DistanceUtils(RestaurantRepository restaurantRepository) {
-        this.restaurantRepository = restaurantRepository;
-    }
-
-    public List<Restaurant> findRestaurantsWithinDistance(double originLatitude, double originLongitude, int maxDistanceMiles) {
-        List<Restaurant> allRestaurants = restaurantRepository.findAll();
-        return allRestaurants.stream().filter(restaurant -> {
+    public List<Restaurant> filterWithinDistance(List<Restaurant> restaurants,
+                                                 double originLatitude,
+                                                 double originLongitude,
+                                                 int maxDistanceMiles) {
+        return restaurants.stream().filter(restaurant -> {
             if (restaurant.getAddress() == null) return false;
             double restaurantLongitude = restaurant.getAddress().getLongitude();
             double restaurantLatitude = restaurant.getAddress().getLatitude();

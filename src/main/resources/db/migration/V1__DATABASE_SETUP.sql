@@ -38,7 +38,7 @@ CREATE TABLE ${schema}.users
     email               VARCHAR(255) UNIQUE NOT NULL,
     password            VARCHAR(255)        NOT NULL,
     role                ROLE                NOT NULL,
-    is_deleted          BOOLEAN             NOT NULL DEFAULT FALSE,
+    is_deactivated      BOOLEAN             NOT NULL DEFAULT FALSE,
     customer_profile_id BIGINT,
     merchant_profile_id BIGINT,
     PRIMARY KEY (id)
@@ -74,6 +74,7 @@ CREATE TABLE ${schema}.restaurant
     delivery_fee         NUMERIC(6, 2),
     logo_image_url       VARCHAR(255),
     hero_image_url       VARCHAR(255),
+    is_active            BOOLEAN      NOT NULL DEFAULT TRUE,
     address_id           BIGINT       NOT NULL,
     merchant_profile_id  BIGINT       NOT NULL,
     PRIMARY KEY (id)
@@ -120,7 +121,7 @@ CREATE TABLE ${schema}.orders
 (
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     date_time           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    tip                 NUMERIC(7, 2),
+    tip                 NUMERIC(7, 2)            NOT NULL DEFAULT 0.00,
     is_completed        BOOLEAN                  NOT NULL DEFAULT FALSE,
     payment_method      PAYMENT_METHOD           NOT NULL,
     is_delivery         BOOLEAN                  NOT NULL,

@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class OrderDtoOut {
 
+    private Long id;
     private Double tip;
     private Boolean isCompleted;
     private Boolean isDelivery;

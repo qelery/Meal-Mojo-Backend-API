@@ -43,12 +43,15 @@ public class OrderService {
     }
 
     public List<RestaurantThinDtoOut> getAllRestaurants() {
-        List<Restaurant> restaurants = restaurantRepository.findAll();
-        return mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
+        List<Restaurant> activeRestaurants = restaurantRepository.findAllByIsActive(true);
+        return mapperUtils.mapAll(activeRestaurants, RestaurantThinDtoOut.class);
     }
 
-    public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(double latitude, double longitude, int maxDistance) {
-        List<Restaurant> restaurants = distanceUtils.findRestaurantsWithinDistance(latitude, longitude, maxDistance);
+    public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(double latitude,
+                                                                   double longitude,
+                                                                   int maxDistanceMiles) {
+        List<Restaurant> activeRestaurants = restaurantRepository.findAllByIsActive(true);
+        List<Restaurant> restaurants = distanceUtils.filterWithinDistance(activeRestaurants, latitude, longitude, maxDistanceMiles);
         return mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
     }
 
@@ -114,13 +117,12 @@ public class OrderService {
 
     private CustomerProfile getLoggedInUserProfile() {
         User user = (User) SecurityContextHolder.getContext()
-                                                .getAuthentication()
-                                                .getPrincipal();
+                .getAuthentication()
+                .getPrincipal();
         CustomerProfile customerProfile = user.getCustomerProfile();
         if (customerProfile == null) {
             throw new ProfileNotFoundException();
-        }
-        else {
+        } else {
             return customerProfile;
         }
     }

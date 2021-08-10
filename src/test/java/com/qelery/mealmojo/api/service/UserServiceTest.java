@@ -63,7 +63,7 @@ class UserServiceTest {
         userDtoIn = new UserDtoIn();
         userDtoIn.setFirstName("John");
         userDtoIn.setLastName("Smith");
-        userDtoIn.setEmail("john@example.org");
+        userDtoIn.setEmail("john@example.com");
         userDtoIn.setPassword("password");
     }
 
@@ -131,7 +131,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Should login user and return JWT")
     void loginUser() {
-        LoginRequest loginRequest = new LoginRequest("john@example.org", "password");
+        LoginRequest loginRequest = new LoginRequest("john@example.com", "password");
         User user = new User();
         when(userDetailsService.loadUserByUsername(anyString()))
                 .thenReturn(user);

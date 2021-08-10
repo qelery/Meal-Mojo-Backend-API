@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
+    List<Restaurant> findAllByIsActive(Boolean isActive);
+
     List<Restaurant> findAllByMerchantProfileId(Long merchantProfileId);
 
     Optional<Restaurant> findByIdAndMerchantProfileId(Long restaurantId, Long merchantProfileId);

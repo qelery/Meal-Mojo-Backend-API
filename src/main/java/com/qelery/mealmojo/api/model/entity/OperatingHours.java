@@ -1,9 +1,8 @@
 package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.NotNull;
-import lombok.*;
+import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
@@ -24,9 +23,4 @@ public class OperatingHours {
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
     private DayOfWeek dayOfWeek;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="restaurant_id", referencedColumnName="id")
-    private Restaurant restaurant;
 }

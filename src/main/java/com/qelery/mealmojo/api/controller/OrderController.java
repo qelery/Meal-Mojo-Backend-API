@@ -25,11 +25,11 @@ public class OrderController {
         return orderService.getAllRestaurants();
     }
 
-    @GetMapping(value="/order/restaurants", params={"latitude", "longitude", "maxDistance"})
+    @GetMapping(value="/order/restaurants/nearby", params={"latitude", "longitude", "maxDistanceMiles"})
     public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(@RequestParam double latitude,
                                                                    @RequestParam double longitude,
-                                                                   @RequestParam(defaultValue="15") int maxDistance) {
-        return orderService.getRestaurantsWithinDistance(latitude, longitude, maxDistance);
+                                                                   @RequestParam(defaultValue="15") int maxDistanceMiles) {
+        return orderService.getRestaurantsWithinDistance(latitude, longitude, maxDistanceMiles);
     }
 
     @GetMapping("/order/restaurants/{restaurantId}")

@@ -14,7 +14,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DistanceUtilsTest {
@@ -26,8 +25,8 @@ class DistanceUtilsTest {
     RestaurantRepository restaurantRepository;
 
     @Test
-    @DisplayName("Should return restaurants who's coordinates are within the specified distance")
-    void findRestaurantsWithinDistance() {
+    @DisplayName("Should filter restaurants whose coordinates are within the specified distance")
+    void filterWithinDistance() {
         // About 9 miles away
         Address address1 = new Address();
         address1.setLatitude(41.90062674742116);
@@ -42,12 +41,12 @@ class DistanceUtilsTest {
         Restaurant restaurant2 = new Restaurant();
         restaurant2.setAddress(address2);
 
-        when(restaurantRepository.findAll()).thenReturn(List.of(restaurant1, restaurant2));
+        List<Restaurant> activeRestaurants = List.of(restaurant1, restaurant2);
 
 
         double latitude = 41.8995656315562;
         double longitude = -87.80507288205651;
-        List<Restaurant> actualRestaurants = distanceUtils.findRestaurantsWithinDistance(latitude, longitude, 10);
+        List<Restaurant> actualRestaurants = distanceUtils.filterWithinDistance(activeRestaurants, latitude, longitude, 10);
 
 
         assertEquals(1, actualRestaurants.size());

@@ -23,7 +23,6 @@ public class MerchantService {
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
-    private final OperatingHoursRepository operatingHoursRepository;
     private final AddressRepository addressRepository;
     private final MapperUtils mapperUtils;
 
@@ -31,13 +30,11 @@ public class MerchantService {
     public MerchantService(RestaurantRepository restaurantRepository,
                            MenuItemRepository menuItemRepository,
                            OrderRepository orderRepository,
-                           OperatingHoursRepository operatingHoursRepository,
                            AddressRepository addressRepository,
                            MapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
-        this.operatingHoursRepository = operatingHoursRepository;
         this.addressRepository = addressRepository;
         this.mapperUtils = mapperUtils;
     }
@@ -76,16 +73,17 @@ public class MerchantService {
 
         for (OperatingHoursDto newHoursDto: newHoursListDto) {
             OperatingHours newHours = mapperUtils.map(newHoursDto, OperatingHours.class);
-            newHours.setRestaurant(restaurant);
-            Optional<OperatingHours> oldHoursForThatDay = operatingHoursRepository.findByRestaurantIdAndDayOfWeek(restaurant.getId(), newHours.getDayOfWeek());
+            Optional<OperatingHours> oldHoursForThatDay = restaurant.getOperatingHoursList()
+                    .stream()
+                    .filter(hours -> hours.getDayOfWeek().equals(newHours.getDayOfWeek()))
+                    .findFirst();
             if (oldHoursForThatDay.isPresent()) {
                 OperatingHours oldHours = oldHoursForThatDay.get();
                 mapperUtils.map(newHours, oldHours);
-                operatingHoursRepository.save(oldHours);
             } else {
-                newHours.setRestaurant(restaurant);
-                operatingHoursRepository.save(newHours);
+                restaurant.getOperatingHoursList().add(newHours);
             }
+            restaurantRepository.save(restaurant);
         }
         return mapperUtils.map(restaurant, RestaurantThinDtoOut.class);
     }

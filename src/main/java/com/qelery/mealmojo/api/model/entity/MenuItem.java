@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.ToString;
 
@@ -20,6 +21,7 @@ public class MenuItem {
     private String imageUrl;
     private Boolean isAvailable = true;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="restaurant_id", referencedColumnName="id")
     private Restaurant restaurant;

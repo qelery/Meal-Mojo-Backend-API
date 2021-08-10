@@ -2,14 +2,17 @@ package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Entity
+@ToString(exclude = {"merchantProfile"})
 @Table(name="restaurant")
 public class Restaurant {
 
@@ -25,8 +28,9 @@ public class Restaurant {
     private Double deliveryFee;
     private String logoImageUrl;
     private String heroImageUrl;
+    private Boolean isActive = true;
 
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(cascade=CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name="address_id", referencedColumnName="id")
     private Address address;
 
@@ -35,15 +39,16 @@ public class Restaurant {
     @JoinColumn(name="merchant_profile_id", referencedColumnName="id")
     private MerchantProfile merchantProfile;
 
-    @OneToMany(mappedBy="restaurant")
+    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @JoinColumn(name = "restaurant_id")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<OperatingHours> operatingHoursList;
+    private List<OperatingHours> operatingHoursList = new ArrayList<>();
 
-    @OneToMany(mappedBy="restaurant")
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy="restaurant")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<MenuItem> menuItems;
+    private List<MenuItem> menuItems = new ArrayList<>();
 
-    @OneToMany(mappedBy="restaurant")
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy="restaurant")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Order> orders;
+    private List<Order> orders = new ArrayList<>();
 }

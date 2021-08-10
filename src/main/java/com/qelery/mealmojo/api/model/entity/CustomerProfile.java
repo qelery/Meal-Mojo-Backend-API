@@ -1,11 +1,11 @@
 package com.qelery.mealmojo.api.model.entity;
 
-import com.sun.istack.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -25,5 +25,5 @@ public class CustomerProfile {
 
     @OneToMany(mappedBy="customerProfile")
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Order> placedOrders;
+    private List<Order> placedOrders = new ArrayList<>();
 }

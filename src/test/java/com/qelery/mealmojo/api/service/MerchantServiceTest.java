@@ -41,8 +41,6 @@ class MerchantServiceTest {
     @Mock
     OrderRepository orderRepository;
     @Mock
-    OperatingHoursRepository operatingHoursRepository;
-    @Mock
     AddressRepository addressRepository;
     @Mock
     Authentication authentication;
@@ -166,16 +164,23 @@ class MerchantServiceTest {
         tuesdayHoursDto.setCloseTime(LocalTime.of(20, 0));
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
-        ArgumentCaptor<OperatingHours> hoursCaptor = ArgumentCaptor.forClass(OperatingHours.class);
+        ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
+
 
         merchantService.updateRestaurantHours(restaurant1.getId(), List.of(tuesdayHoursDto));
 
 
-        verify(operatingHoursRepository).save(hoursCaptor.capture());
-        OperatingHours savedOperatingHours = hoursCaptor.getValue();
-        assertEquals(tuesdayHoursDto.getDayOfWeek(), savedOperatingHours.getDayOfWeek());
-        assertEquals(tuesdayHoursDto.getOpenTime(), savedOperatingHours.getOpenTime());
-        assertEquals(tuesdayHoursDto.getCloseTime(), savedOperatingHours.getCloseTime());
+        verify(restaurantRepository).save(restaurantCaptor.capture());
+        Optional<OperatingHours> optionalHours = restaurantCaptor.getValue()
+                .getOperatingHoursList()
+                .stream()
+                .filter(hours -> hours.getDayOfWeek() == DayOfWeek.TUESDAY)
+                .findFirst();
+        assertTrue(optionalHours.isPresent());
+        OperatingHours savedTuesdayHours = optionalHours.get();
+        assertEquals(tuesdayHoursDto.getDayOfWeek(), savedTuesdayHours.getDayOfWeek());
+        assertEquals(tuesdayHoursDto.getOpenTime(), savedTuesdayHours.getOpenTime());
+        assertEquals(tuesdayHoursDto.getCloseTime(), savedTuesdayHours.getCloseTime());
     }
 
     @Test
@@ -194,16 +199,20 @@ class MerchantServiceTest {
 
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
-        when(operatingHoursRepository.findByRestaurantIdAndDayOfWeek(anyLong(), any(DayOfWeek.class)))
-                .thenReturn(Optional.of(currentTuesdayHours));
-        ArgumentCaptor<OperatingHours> hoursCaptor = ArgumentCaptor.forClass(OperatingHours.class);
+        ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
 
         merchantService.updateRestaurantHours(restaurant1.getId(), List.of(updatedTuesdayHoursDto));
 
 
-        verify(operatingHoursRepository).save(hoursCaptor.capture());
-        OperatingHours savedTuesdayHours = hoursCaptor.getValue();
+        verify(restaurantRepository).save(restaurantCaptor.capture());
+        Optional<OperatingHours> optionalHours = restaurantCaptor.getValue()
+                .getOperatingHoursList()
+                .stream()
+                .filter(hours -> hours.getDayOfWeek() == DayOfWeek.TUESDAY)
+                .findFirst();
+        assertTrue(optionalHours.isPresent());
+        OperatingHours savedTuesdayHours = optionalHours.get();
         assertEquals(updatedTuesdayHoursDto.getDayOfWeek(), savedTuesdayHours.getDayOfWeek());
         assertEquals(updatedTuesdayHoursDto.getOpenTime(), savedTuesdayHours.getOpenTime());
         assertEquals(updatedTuesdayHoursDto.getCloseTime(), savedTuesdayHours.getCloseTime());

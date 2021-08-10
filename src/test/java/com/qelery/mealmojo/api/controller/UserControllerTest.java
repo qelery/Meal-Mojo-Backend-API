@@ -44,7 +44,7 @@ class UserControllerTest {
         when(userService.loginUser(any(LoginRequest.class)))
                 .thenReturn(expectedResponse);
 
-        LoginResponse actualResponse = userController.loginUser(new LoginRequest("john@example.org", "password"));
+        LoginResponse actualResponse = userController.loginUser(new LoginRequest("john@example.com", "password"));
 
         assertEquals(expectedResponse, actualResponse);
     }

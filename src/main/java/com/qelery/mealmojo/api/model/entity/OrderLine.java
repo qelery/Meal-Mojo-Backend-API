@@ -1,7 +1,5 @@
 package com.qelery.mealmojo.api.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.NotNull;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,9 +18,4 @@ public class OrderLine {
     @ManyToOne
     @JoinColumn(name="menu_item_id", referencedColumnName="id")
     private MenuItem menuItem;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="order_id", referencedColumnName="id")
-    private Order order;
 }

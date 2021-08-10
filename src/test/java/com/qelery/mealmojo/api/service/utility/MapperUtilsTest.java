@@ -302,12 +302,12 @@ class MapperUtilsTest {
 
         userEntityWithCustomerProfile = new User();
         userEntityWithCustomerProfile.setRole(Role.CUSTOMER);
-        userEntityWithCustomerProfile.setEmail("chris@example.org");
+        userEntityWithCustomerProfile.setEmail("chris@example.com");
         userEntityWithCustomerProfile.setCustomerProfile(customerProfileEntity);
 
         userEntityWithMerchantProfile = new User();
         userEntityWithMerchantProfile.setRole(Role.MERCHANT);
-        userEntityWithMerchantProfile.setEmail("melissa@example.org");
+        userEntityWithMerchantProfile.setEmail("melissa@example.com");
         userEntityWithMerchantProfile.setMerchantProfile(merchantProfileEntity);
 
         operatingHoursMondayEntity = new OperatingHours();

@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 public class RestaurantDtoOut {
 
+    private Long id;
     private String name;
     private String description;
     private Boolean pickUpAvailable;

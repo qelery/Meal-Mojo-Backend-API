@@ -66,6 +66,7 @@ class OrderServiceTest {
         this.restaurant2 = new Restaurant();
         restaurant2.setId(2L);
         restaurant2.setName("Restaurant2");
+        restaurant2.setIsActive(false);
 
         this.menuItem1 = new MenuItem();
         menuItem1.setId(1L);
@@ -86,21 +87,21 @@ class OrderServiceTest {
     }
 
     @Test
-    @DisplayName("Should get all restaurants")
+    @DisplayName("Should get all active restaurants")
     void getAllRestaurants() {
-        List<Restaurant> expectedRestaurantEntities = List.of(restaurant1, restaurant2);
-        when(restaurantRepository.findAll()).thenReturn(expectedRestaurantEntities);
+        Restaurant activeRestaurant = restaurant1;
+        when(restaurantRepository.findAllByIsActive(true)).thenReturn(List.of(activeRestaurant));
 
         List<RestaurantThinDtoOut> actualRestaurantDtos = orderService.getAllRestaurants();
 
-        for (Restaurant expected: expectedRestaurantEntities) {
-            assertTrue(actualRestaurantDtos.stream().anyMatch(actualDto -> actualDto.getName().equals(expected.getName())));
-        }
+        assertEquals(1, actualRestaurantDtos.size());
+        assertEquals(activeRestaurant.getName(), actualRestaurantDtos.get(0).getName());
     }
 
     @Test
+    @DisplayName("Should get all active restaurants within specified distance")
     void getRestaurantsWithinDistance() {
-        when(distanceUtils.findRestaurantsWithinDistance(anyDouble(), anyDouble(), anyInt()))
+        when(distanceUtils.filterWithinDistance(anyList(), anyDouble(), anyDouble(), anyInt()))
                 .thenReturn(List.of(restaurant1));
 
         List<RestaurantThinDtoOut> actualRestaurantDtoOut = orderService.getRestaurantsWithinDistance(41.9, -87.6, 10);
