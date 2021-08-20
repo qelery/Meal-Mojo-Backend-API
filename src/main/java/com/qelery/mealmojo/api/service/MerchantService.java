@@ -24,18 +24,22 @@ public class MerchantService {
     private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
     private final AddressRepository addressRepository;
+    private final OperatingHoursRepository operatingHoursRepository;
     private final MapperUtils mapperUtils;
+
 
     @Autowired
     public MerchantService(RestaurantRepository restaurantRepository,
                            MenuItemRepository menuItemRepository,
                            OrderRepository orderRepository,
                            AddressRepository addressRepository,
+                           OperatingHoursRepository operatingHoursRepository,
                            MapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.orderRepository = orderRepository;
         this.menuItemRepository = menuItemRepository;
         this.addressRepository = addressRepository;
+        this.operatingHoursRepository = operatingHoursRepository;
         this.mapperUtils = mapperUtils;
     }
 
@@ -81,6 +85,7 @@ public class MerchantService {
                 OperatingHours oldHours = oldHoursForThatDay.get();
                 mapperUtils.map(newHours, oldHours);
             } else {
+                operatingHoursRepository.save(newHours);
                 restaurant.getOperatingHoursList().add(newHours);
             }
             restaurantRepository.save(restaurant);

@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.service;
+package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
@@ -6,6 +6,7 @@ import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.repository.*;
+import com.qelery.mealmojo.api.service.MerchantService;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,8 @@ class MerchantServiceTest {
     OrderRepository orderRepository;
     @Mock
     AddressRepository addressRepository;
+    @Mock
+    OperatingHoursRepository operatingHoursRepository;
     @Mock
     Authentication authentication;
     @Spy
@@ -164,6 +167,8 @@ class MerchantServiceTest {
         tuesdayHoursDto.setCloseTime(LocalTime.of(20, 0));
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
+        when(operatingHoursRepository.save(any(OperatingHours.class)))
+                .thenReturn(new OperatingHours());
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
 
@@ -240,10 +245,10 @@ class MerchantServiceTest {
 
 
         RestaurantThinDtoOut restaurantDto = merchantService.updateRestaurantAddress(restaurant1.getId(), updatedAddressDto);
-        Address savedAddress = restaurantDto.getAddress();
+        AddressDto savedAddress = restaurantDto.getAddress();
 
 
-        verify(addressRepository).save(savedAddress);
+        verify(addressRepository).save(any(Address.class));
         assertEquals(updatedAddressDto.getStreet1(), savedAddress.getStreet1());
         assertEquals(updatedAddressDto.getZipcode(), savedAddress.getZipcode());
         assertNotNull(savedAddress.getCity());

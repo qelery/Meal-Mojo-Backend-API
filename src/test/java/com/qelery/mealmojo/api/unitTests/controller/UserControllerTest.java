@@ -1,5 +1,6 @@
-package com.qelery.mealmojo.api.controller;
+package com.qelery.mealmojo.api.unitTests.controller;
 
+import com.qelery.mealmojo.api.controller.UserController;
 import com.qelery.mealmojo.api.model.dto.UserDtoIn;
 import com.qelery.mealmojo.api.model.dto.UserDtoOut;
 import com.qelery.mealmojo.api.model.request.LoginRequest;

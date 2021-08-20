@@ -26,6 +26,7 @@ public class OrderController {
     }
 
     @GetMapping(value="/order/restaurants/nearby", params={"latitude", "longitude", "maxDistanceMiles"})
+    @ResponseStatus(HttpStatus.OK)
     public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(@RequestParam double latitude,
                                                                    @RequestParam double longitude,
                                                                    @RequestParam(defaultValue="15") int maxDistanceMiles) {

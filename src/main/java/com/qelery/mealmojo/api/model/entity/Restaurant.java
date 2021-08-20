@@ -39,7 +39,7 @@ public class Restaurant {
     @JoinColumn(name="merchant_profile_id", referencedColumnName="id")
     private MerchantProfile merchantProfile;
 
-    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "restaurant_id")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OperatingHours> operatingHoursList = new ArrayList<>();

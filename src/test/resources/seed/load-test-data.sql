@@ -21,7 +21,6 @@ VALUES (1, 'john_customer@example.com', 'password', FALSE, 'CUSTOMER', 1, null),
        (3, 'sam_merchant@example.com', 'password', FALSE, 'MERCHANT', null, 1),
        (4, 'rebecca_merchant@example.com', 'password', FALSE, 'MERCHANT', null, 2);
 
-
 INSERT INTO restaurant (id, name, description, pickup_available, pickup_eta_minutes, delivery_available,
                         delivery_eta_minutes, delivery_fee, logo_image_url, hero_image_url, is_active, address_id,
                         merchant_profile_id)
@@ -34,7 +33,6 @@ VALUES (1, 'Portillo''s Hot Dogs',
        (4, 'Daley''s Restaurant',
         'Historic diner serving up a variety of homestyle classics & soul food, from waffles to pork chops.', true, 30,
         false, null, null, null, null, false, 6, 2);
-
 
 INSERT INTO menu_item (id, name, description, price, image_url, is_available, restaurant_id)
 VALUES (1, 'Chicago-Style Hot Dog', 'Hot dog with relish, onions, tomatoes, peppers, and mustard', null, TRUE, 3.5, 1),

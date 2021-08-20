@@ -1,7 +1,5 @@
 package com.qelery.mealmojo.api.model.dto;
 
-import com.qelery.mealmojo.api.model.entity.Address;
-import com.qelery.mealmojo.api.model.entity.OperatingHours;
 import lombok.Data;
 
 import java.util.List;
@@ -19,6 +17,6 @@ public class RestaurantThinDtoOut {
     private Double deliveryFee;
     private String logoImageUrl;
     private String heroImageUrl;
-    private Address address;
-    private List<OperatingHours> operatingHoursList;
+    private AddressDto address;
+    private List<OperatingHoursDto> operatingHoursList;
 }

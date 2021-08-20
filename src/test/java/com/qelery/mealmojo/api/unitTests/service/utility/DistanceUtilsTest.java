@@ -1,8 +1,9 @@
-package com.qelery.mealmojo.api.service.utility;
+package com.qelery.mealmojo.api.unitTests.service.utility;
 
 import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.Restaurant;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
+import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

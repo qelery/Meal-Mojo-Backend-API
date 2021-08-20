@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.service;
+package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmptyOrderException;
 import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
@@ -8,6 +8,7 @@ import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
+import com.qelery.mealmojo.api.service.OrderService;
 import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.service.utility;
+package com.qelery.mealmojo.api.unitTests.service.utility;
 
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
@@ -6,6 +6,7 @@ import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.model.enums.State;
+import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MapperUtilsTest {
 
@@ -57,15 +58,10 @@ class MapperUtilsTest {
 
         this.mapperUtils.map(incomingAddressInfo, existingAddressInfo);
 
-        assertEquals(incomingAddressInfo.getStreet1(), existingAddressInfo.getStreet1());
-        assertEquals(incomingAddressInfo.getStreet2(), existingAddressInfo.getStreet2());
-        assertEquals(incomingAddressInfo.getStreet3(), existingAddressInfo.getStreet3());
-        assertEquals(incomingAddressInfo.getCity(), existingAddressInfo.getCity());
-        assertEquals(incomingAddressInfo.getZipcode(), existingAddressInfo.getZipcode());
-        assertEquals(incomingAddressInfo.getLatitude(), existingAddressInfo.getLatitude());
-        assertEquals(incomingAddressInfo.getLongitude(), existingAddressInfo.getLongitude());
-        assertNotNull(existingAddressInfo.getState());
-        assertNotNull(existingAddressInfo.getCountry());
+        assertThat(incomingAddressInfo).usingRecursiveComparison()
+                .ignoringFields("state", "country").isEqualTo(existingAddressInfo);
+        assertThat(existingAddressInfo.getState()).isNotNull();
+        assertThat(existingAddressInfo.getCountry()).isNotNull();
     }
 
     @Test
@@ -73,15 +69,7 @@ class MapperUtilsTest {
     void mapAddressToAddressDto() {
         AddressDto addressDto = this.mapperUtils.map(addressEntity, AddressDto.class);
 
-        assertEquals(addressEntity.getStreet1(), addressDto.getStreet1());
-        assertEquals(addressEntity.getStreet2(), addressDto.getStreet2());
-        assertEquals(addressEntity.getStreet3(), addressDto.getStreet3());
-        assertEquals(addressEntity.getCity(), addressDto.getCity());
-        assertEquals(addressEntity.getZipcode(), addressDto.getZipcode());
-        assertEquals(addressEntity.getState(), addressDto.getState());
-        assertEquals(addressEntity.getCountry(), addressDto.getCountry());
-        assertEquals(addressEntity.getLatitude(), addressDto.getLatitude());
-        assertEquals(addressEntity.getLongitude(), addressDto.getLongitude());
+        assertThat(addressDto).usingRecursiveComparison().isEqualTo(addressEntity);
     }
 
     @Test
@@ -93,8 +81,8 @@ class MapperUtilsTest {
 
         mapperUtils.map(updatedMenuItem, menuItemEntity);
 
-        assertEquals(updatedMenuItem.getName(), menuItemEntity.getName());
-        assertNotNull(menuItemEntity.getPrice());
+        assertThat(menuItemEntity.getName()).isEqualTo(updatedMenuItem.getName());
+        assertThat(menuItemEntity.getPrice()).isNotNull();
     }
 
     @Test
@@ -107,9 +95,9 @@ class MapperUtilsTest {
 
         mapperUtils.map(updatedAddress, addressEntity);
 
-        assertEquals(updatedAddress.getStreet1(), addressEntity.getStreet1());
-        assertNull(addressEntity.getStreet2());
-        assertNull(addressEntity.getStreet3());
+        assertThat(addressEntity.getStreet1()).isEqualTo(updatedAddress.getStreet1());
+        assertThat(addressEntity.getStreet2()).isNull();
+        assertThat(addressEntity.getStreet3()).isNull();
     }
 
     @Test
@@ -117,59 +105,47 @@ class MapperUtilsTest {
     void mapUserToUserOutDto() {
         UserDtoOut userDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
 
-        assertEquals(userEntityWithCustomerProfile.getEmail(), userDtoOut.getEmail());
-        assertEquals(userEntityWithCustomerProfile.getRole(), userDtoOut.getRole());
-        assertEquals(userEntityWithCustomerProfile.getCustomerProfile().getFirstName(), userDtoOut.getFirstName());
-        assertEquals(userEntityWithCustomerProfile.getCustomerProfile().getLastName(), userDtoOut.getLastName());
+        assertThat(userDtoOut.getEmail()).isEqualTo(userEntityWithCustomerProfile.getEmail());
+        assertThat(userDtoOut.getRole()).isEqualTo(userEntityWithCustomerProfile.getRole());
+        assertThat(userDtoOut.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
+        assertThat(userDtoOut.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
     }
 
     @Test
     @DisplayName("Should pull first and last name from correct profile when mapping to UserDtoOut")
     void mapNameForUserDtoOut() {
         UserDtoOut userDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
-
-        assertEquals(userEntityWithCustomerProfile.getCustomerProfile().getFirstName(), userDtoOut.getFirstName());
-        assertEquals(userEntityWithCustomerProfile.getCustomerProfile().getLastName(), userDtoOut.getLastName());
+        assertThat(userDtoOut.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
+        assertThat(userDtoOut.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
 
 
         userDtoOut = mapperUtils.map(userEntityWithMerchantProfile, UserDtoOut.class);
-
-        assertEquals(userEntityWithMerchantProfile.getMerchantProfile().getFirstName(), userDtoOut.getFirstName());
-        assertEquals(userEntityWithMerchantProfile.getMerchantProfile().getLastName(), userDtoOut.getLastName());
+        assertThat(userDtoOut.getFirstName()).isEqualTo(userEntityWithMerchantProfile.getMerchantProfile().getFirstName());
+        assertThat(userDtoOut.getLastName()).isEqualTo(userEntityWithMerchantProfile.getMerchantProfile().getLastName());
 
 
         User userEntityNoProfile = new User();
         userDtoOut = mapperUtils.map(userEntityNoProfile, UserDtoOut.class);
-
-        assertNull(userDtoOut.getFirstName());
-        assertNull(userDtoOut.getLastName());
+        assertThat(userDtoOut.getFirstName()).isNull();
+        assertThat(userDtoOut.getLastName()).isNull();
     }
 
     @Test
     @DisplayName("Should map CustomerProfile and MerchantProfile entities to ProfileDto")
     void mapProfileToProfileDto() {
         ProfileDto profileDto = mapperUtils.map(customerProfileEntity, ProfileDto.class);
-
-        assertEquals(customerProfileEntity.getFirstName(), profileDto.getFirstName());
-        assertEquals(customerProfileEntity.getLastName(), profileDto.getLastName());
-        assertEquals(customerProfileEntity.getAddress(), profileDto.getAddress());
+        assertThat(profileDto).usingRecursiveComparison().isEqualTo(customerProfileEntity);
 
 
         profileDto = mapperUtils.map(merchantProfileEntity, ProfileDto.class);
-
-        assertEquals(merchantProfileEntity.getFirstName(), profileDto.getFirstName());
-        assertEquals(merchantProfileEntity.getLastName(), profileDto.getLastName());
-        assertEquals(merchantProfileEntity.getAddress(), profileDto.getAddress());
+        assertThat(profileDto).usingRecursiveComparison().isEqualTo(merchantProfileEntity);
     }
 
     @Test
     @DisplayName("Should map OperatingHours entity to OperatingHoursDto")
     void mapOperatingHoursToOperatingHoursDto() {
         OperatingHoursDto operatingHoursDto = mapperUtils.map(operatingHoursMondayEntity, OperatingHoursDto.class);
-
-        assertEquals(operatingHoursMondayEntity.getOpenTime(), operatingHoursDto.getOpenTime());
-        assertEquals(operatingHoursMondayEntity.getCloseTime(), operatingHoursDto.getCloseTime());
-        assertEquals(operatingHoursMondayEntity.getDayOfWeek(), operatingHoursDto.getDayOfWeek());
+        assertThat(operatingHoursDto).usingRecursiveComparison().isEqualTo(operatingHoursMondayEntity);
     }
 
     @Test
@@ -177,11 +153,11 @@ class MapperUtilsTest {
     void mapMenuItemToMenuItemDto() {
         MenuItemDto menuItemDto = mapperUtils.map(menuItemEntity, MenuItemDto.class);
 
-        assertEquals(menuItemEntity.getName(), menuItemDto.getName());
-        assertEquals(menuItemEntity.getDescription(), menuItemDto.getDescription());
-        assertEquals(menuItemEntity.getPrice(), menuItemDto.getPrice());
-        assertEquals(menuItemEntity.getImageUrl(), menuItemDto.getImageUrl());
-        assertEquals(menuItemEntity.getIsAvailable(), menuItemDto.getIsAvailable());
+        assertThat(menuItemDto.getName()).isEqualTo(menuItemEntity.getName());
+        assertThat(menuItemDto.getDescription()).isEqualTo(menuItemEntity.getDescription());
+        assertThat(menuItemDto.getPrice()).isEqualTo(menuItemEntity.getPrice());
+        assertThat(menuItemDto.getImageUrl()).isEqualTo(menuItemEntity.getImageUrl());
+        assertThat(menuItemDto.getIsAvailable()).isEqualTo(menuItemEntity.getIsAvailable());
     }
 
     @Test
@@ -189,37 +165,38 @@ class MapperUtilsTest {
     void mapRestaurantToRestaurantDtoOut() {
         RestaurantDtoOut restaurantDtoOut = mapperUtils.map(restaurantEntity, RestaurantDtoOut.class);
 
-        assertEquals(restaurantEntity.getName(), restaurantDtoOut.getName());
-        assertEquals(restaurantEntity.getDescription(), restaurantDtoOut.getDescription());
-        assertEquals(restaurantEntity.getPickupAvailable(), restaurantDtoOut.getPickUpAvailable());
-        assertEquals(restaurantEntity.getPickupEtaMinutes(), restaurantDtoOut.getPickupEtaMinutes());
-        assertEquals(restaurantEntity.getDeliveryAvailable(), restaurantDtoOut.getDeliveryAvailable());
-        assertEquals(restaurantEntity.getDeliveryEtaMinutes(), restaurantDtoOut.getDeliveryEtaMinutes());
-        assertEquals(restaurantEntity.getDeliveryFee(), restaurantDtoOut.getDeliveryFee());
-        assertEquals(restaurantEntity.getLogoImageUrl(), restaurantDtoOut.getLogoImageUrl());
-        assertEquals(restaurantEntity.getHeroImageUrl(), restaurantDtoOut.getHeroImageUrl());
-        assertEquals(restaurantEntity.getAddress(), restaurantDtoOut.getAddress());
-        assertEquals(restaurantEntity.getOperatingHoursList(), restaurantDtoOut.getOperatingHoursList());
-        assertEquals(restaurantEntity.getMenuItems(), restaurantDtoOut.getMenuItems());
-        assertEquals(restaurantEntity.getOrders(), restaurantDtoOut.getOrders());
+        assertThat(restaurantDtoOut.getName()).isEqualTo(restaurantEntity.getName());
+        assertThat(restaurantDtoOut.getDescription()).isEqualTo(restaurantEntity.getDescription());
+        assertThat(restaurantDtoOut.getPickUpAvailable()).isEqualTo(restaurantEntity.getPickupAvailable());
+        assertThat(restaurantDtoOut.getPickupEtaMinutes()).isEqualTo(restaurantEntity.getPickupEtaMinutes());
+        assertThat(restaurantDtoOut.getDeliveryAvailable()).isEqualTo(restaurantEntity.getDeliveryAvailable());
+        assertThat(restaurantDtoOut.getDeliveryEtaMinutes()).isEqualTo(restaurantEntity.getDeliveryEtaMinutes());
+        assertThat(restaurantDtoOut.getDeliveryFee()).isEqualTo(restaurantEntity.getDeliveryFee());
+        assertThat(restaurantDtoOut.getLogoImageUrl()).isEqualTo(restaurantEntity.getLogoImageUrl());
+        assertThat(restaurantDtoOut.getHeroImageUrl()).isEqualTo(restaurantEntity.getHeroImageUrl());
+
+        Address entityAddress = restaurantEntity.getAddress();
+        AddressDto dtoAddress = restaurantDtoOut.getAddress();
+        assertThat(dtoAddress).usingRecursiveComparison().isEqualTo(entityAddress);
     }
 
     @Test
     @DisplayName("Should map Restaurant entity to RestaurantThinDtoOut")
     void mapRestaurantToRestaurantThinDtoOut() {
         RestaurantThinDtoOut restaurantThinDtoOut = mapperUtils.map(restaurantEntity, RestaurantThinDtoOut.class);
+        assertThat(restaurantThinDtoOut.getName()).isEqualTo(restaurantEntity.getName());
+        assertThat(restaurantThinDtoOut.getDescription()).isEqualTo(restaurantEntity.getDescription());
+        assertThat(restaurantThinDtoOut.getPickUpAvailable()).isEqualTo(restaurantEntity.getPickupAvailable());
+        assertThat(restaurantThinDtoOut.getPickupEtaMinutes()).isEqualTo(restaurantEntity.getPickupEtaMinutes());
+        assertThat(restaurantThinDtoOut.getDeliveryAvailable()).isEqualTo(restaurantEntity.getDeliveryAvailable());
+        assertThat(restaurantThinDtoOut.getDeliveryEtaMinutes()).isEqualTo(restaurantEntity.getDeliveryEtaMinutes());
+        assertThat(restaurantThinDtoOut.getDeliveryFee()).isEqualTo(restaurantEntity.getDeliveryFee());
+        assertThat(restaurantThinDtoOut.getLogoImageUrl()).isEqualTo(restaurantEntity.getLogoImageUrl());
+        assertThat(restaurantThinDtoOut.getHeroImageUrl()).isEqualTo(restaurantEntity.getHeroImageUrl());
 
-        assertEquals(restaurantEntity.getName(), restaurantThinDtoOut.getName());
-        assertEquals(restaurantEntity.getDescription(), restaurantThinDtoOut.getDescription());
-        assertEquals(restaurantEntity.getPickupAvailable(), restaurantThinDtoOut.getPickUpAvailable());
-        assertEquals(restaurantEntity.getPickupEtaMinutes(), restaurantThinDtoOut.getPickupEtaMinutes());
-        assertEquals(restaurantEntity.getDeliveryAvailable(), restaurantThinDtoOut.getDeliveryAvailable());
-        assertEquals(restaurantEntity.getDeliveryEtaMinutes(), restaurantThinDtoOut.getDeliveryEtaMinutes());
-        assertEquals(restaurantEntity.getDeliveryFee(), restaurantThinDtoOut.getDeliveryFee());
-        assertEquals(restaurantEntity.getLogoImageUrl(), restaurantThinDtoOut.getLogoImageUrl());
-        assertEquals(restaurantEntity.getHeroImageUrl(), restaurantThinDtoOut.getHeroImageUrl());
-        assertEquals(restaurantEntity.getAddress(), restaurantThinDtoOut.getAddress());
-        assertEquals(restaurantEntity.getOperatingHoursList(), restaurantThinDtoOut.getOperatingHoursList());
+        Address entityAddress = restaurantEntity.getAddress();
+        AddressDto dtoAddress = restaurantThinDtoOut.getAddress();
+        assertThat(dtoAddress).usingRecursiveComparison().isEqualTo(entityAddress);
     }
 
     @Test
@@ -227,14 +204,14 @@ class MapperUtilsTest {
     void mapOrderToOrderDtoOut() {
         OrderDtoOut orderDtoOut = mapperUtils.map(orderEntity, OrderDtoOut.class);
 
-        assertEquals(orderEntity.getTip(), orderDtoOut.getTip());
-        assertEquals(orderEntity.getIsCompleted(), orderDtoOut.getIsCompleted());
-        assertEquals(orderEntity.getIsDelivery(), orderDtoOut.getIsDelivery());
-        assertEquals(orderEntity.getPaymentMethod(), orderDtoOut.getPaymentMethod());
-        assertEquals(orderEntity.getRestaurant().getName(), orderDtoOut.getRestaurantName());
-        assertEquals(orderEntity.getRestaurant().getLogoImageUrl(), orderDtoOut.getRestaurantLogoImageUrl());
-        assertEquals(orderEntity.getCustomerProfile().getFirstName(), orderDtoOut.getCustomerProfileFirstName());
-        assertEquals(orderEntity.getCustomerProfile().getLastName(), orderDtoOut.getCustomerProfileLastName());
+        assertThat(orderDtoOut.getTip()).isEqualTo(orderEntity.getTip());
+        assertThat(orderDtoOut.getIsCompleted()).isEqualTo(orderEntity.getIsCompleted());
+        assertThat(orderDtoOut.getIsDelivery()).isEqualTo(orderEntity.getIsDelivery());
+        assertThat(orderDtoOut.getPaymentMethod()).isEqualTo(orderEntity.getPaymentMethod());
+        assertThat(orderDtoOut.getRestaurantName()).isEqualTo(orderEntity.getRestaurant().getName());
+        assertThat(orderDtoOut.getRestaurantLogoImageUrl()).isEqualTo(orderEntity.getRestaurant().getLogoImageUrl());
+        assertThat(orderDtoOut.getCustomerProfileFirstName()).isEqualTo(orderEntity.getCustomerProfile().getFirstName());
+        assertThat(orderDtoOut.getCustomerProfileLastName()).isEqualTo(orderEntity.getCustomerProfile().getLastName());
     }
 
     @Test
@@ -249,9 +226,9 @@ class MapperUtilsTest {
         for (int i = 0; i < operatingHoursDtoList.size(); i++) {
             OperatingHours entity = operatingHoursEntityList.get(i);
             OperatingHoursDto dto = operatingHoursDtoList.get(i);
-            assertEquals(entity.getDayOfWeek(), dto.getDayOfWeek());
-            assertEquals(entity.getOpenTime(), dto.getOpenTime());
-            assertEquals(entity.getCloseTime(), dto.getCloseTime());
+            assertThat(dto.getDayOfWeek()).isEqualTo(entity.getDayOfWeek());
+            assertThat(dto.getOpenTime()).isEqualTo(entity.getOpenTime());
+            assertThat(dto.getCloseTime()).isEqualTo(entity.getCloseTime());
         }
     }
 
@@ -269,11 +246,11 @@ class MapperUtilsTest {
                     .filter(e -> e.getDayOfWeek().equals(dto.getDayOfWeek()))
                     .findFirst();
 
-            assertTrue(optionalEntity.isPresent());
+            assertThat(optionalEntity).isPresent();
             OperatingHours entity = optionalEntity.get();
-            assertEquals(entity.getDayOfWeek(), dto.getDayOfWeek());
-            assertEquals(entity.getOpenTime(), dto.getOpenTime());
-            assertEquals(entity.getCloseTime(), dto.getCloseTime());
+            assertThat(dto.getDayOfWeek()).isEqualTo(entity.getDayOfWeek());
+            assertThat(dto.getOpenTime()).isEqualTo(entity.getOpenTime());
+            assertThat(dto.getCloseTime()).isEqualTo(entity.getCloseTime());
         }
     }
 

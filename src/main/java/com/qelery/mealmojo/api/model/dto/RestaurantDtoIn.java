@@ -14,4 +14,5 @@ public class RestaurantDtoIn {
     private Double deliveryFee;
     private String logoImageUrl;
     private String heroImageUrl;
+    private AddressDto address;
 }

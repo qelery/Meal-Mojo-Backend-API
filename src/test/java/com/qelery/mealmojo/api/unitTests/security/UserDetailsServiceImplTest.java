@@ -1,7 +1,8 @@
-package com.qelery.mealmojo.api.security;
+package com.qelery.mealmojo.api.unitTests.security;
 
 import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.repository.UserRepository;
+import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

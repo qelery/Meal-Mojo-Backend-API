@@ -6,10 +6,8 @@ import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth/users")
@@ -23,11 +21,13 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
     public UserDtoOut createUser(@RequestBody UserDtoIn userDto) {
         return userService.createUser(userDto);
     }
 
     @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
     public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
         return userService.loginUser(loginRequest);
     }

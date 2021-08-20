@@ -1,5 +1,6 @@
-package com.qelery.mealmojo.api.exception;
+package com.qelery.mealmojo.api.exception.global;
 
+import com.qelery.mealmojo.api.exception.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,49 +16,49 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RestaurantNotFoundException.class)
     public ResponseEntity<Object> handleException(RestaurantNotFoundException ex, WebRequest request)  {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MenuItemNotFoundException.class)
     public ResponseEntity<Object> handleException(MenuItemNotFoundException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<Object> handleException(OrderNotFoundException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(OrderLineNotFoundException.class)
     public ResponseEntity<Object> handleException(OrderLineNotFoundException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EmptyOrderException.class)
     public ResponseEntity<Object> handleException(EmptyOrderException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.BAD_REQUEST, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.BAD_REQUEST, request);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Object> handleException(BadCredentialsException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.FORBIDDEN, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.FORBIDDEN, request);
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(EmailExistsException.class)
     public ResponseEntity<Object> handleException(EmailExistsException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.CONFLICT, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.CONFLICT, request);
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ProfileNotFoundException.class)
     public ResponseEntity<Object> handleException(ProfileNotFoundException ex, WebRequest request) {
-        ExceptionResponseBody body = new ExceptionResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 

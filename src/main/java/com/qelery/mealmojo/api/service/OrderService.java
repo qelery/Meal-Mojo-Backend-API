@@ -71,11 +71,11 @@ public class OrderService {
 
     public MenuItemDto getMenuItemByRestaurant(Long restaurantId, Long menuItemId) {
         RestaurantDtoOut restaurant = getRestaurant(restaurantId);
-        Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
+        Optional<MenuItemDto> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
                 .filter(menuItem -> menuItem.getId().equals(menuItemId))
                 .findFirst();
-        MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
+        MenuItemDto menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
         return mapperUtils.map(menuItem, MenuItemDto.class);
     }
 

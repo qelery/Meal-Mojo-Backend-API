@@ -1,4 +1,4 @@
-package com.qelery.mealmojo.api.service;
+package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.model.dto.UserDtoIn;
@@ -10,6 +10,7 @@ import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
+import com.qelery.mealmojo.api.service.UserService;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

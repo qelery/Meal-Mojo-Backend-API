@@ -26,6 +26,7 @@ public class MerchantController {
     }
 
     @GetMapping("/merchant/restaurants/{restaurantId}")
+    @ResponseStatus(HttpStatus.OK)
     public RestaurantDtoOut getSingleRestaurantOwned(@PathVariable Long restaurantId) {
         return merchantService.getSingleRestaurantOwned(restaurantId);
     }
@@ -36,7 +37,7 @@ public class MerchantController {
         return merchantService.createRestaurant(restaurantDtoIn);
     }
 
-    @PutMapping("/merchant/restaurants/{restaurantId}")
+    @PatchMapping("/merchant/restaurants/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
     public RestaurantThinDtoOut updateRestaurantBasicInformation(@PathVariable Long restaurantId,
                                                                    @RequestBody RestaurantDtoIn restaurantInfoDto) {
@@ -71,7 +72,6 @@ public class MerchantController {
                                       @RequestBody MenuItemDto menuItemDto) {
         return merchantService.updateMenuItem(restaurantId, menuItemId, menuItemDto);
     }
-
 
     @GetMapping("/merchant/restaurants/{restaurantId}/orders")
     @ResponseStatus(HttpStatus.OK)
