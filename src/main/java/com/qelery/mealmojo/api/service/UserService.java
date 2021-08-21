@@ -68,6 +68,7 @@ public class UserService {
     }
 
     public LoginResponse loginUser(LoginRequest loginRequest) {
+        System.out.println(loginRequest);
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String JWT = jwtUtils.generateToken(userDetails);

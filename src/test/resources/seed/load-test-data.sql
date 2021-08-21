@@ -9,17 +9,20 @@ VALUES (1, '1139 W Grand Ave', null, null, 'Chicago', 'IL', '60422', 'US', 41.89
 
 INSERT INTO customer_profile (id, first_name, last_name, address_id)
 VALUES (1, 'John', 'Smith', 1),
-       (2, 'Alice', 'Miller', 2);
+       (2, 'Alice', 'Miller', 2),
+       (3, 'Gregory', 'Miller', 2);
 
 INSERT INTO merchant_profile (id, first_name, last_name, address_id)
 VALUES (1, 'Sam', 'Wilson', null),
        (2, 'Rebecca', 'Black', null);
 
 INSERT INTO users (id, email, password, is_deactivated, role, customer_profile_id, merchant_profile_id)
-VALUES (1, 'john_customer@example.com', 'password', FALSE, 'CUSTOMER', 1, null),
-       (2, 'alice_customer@example.com', 'password', FALSE, 'CUSTOMER', 2, null),
-       (3, 'sam_merchant@example.com', 'password', FALSE, 'MERCHANT', null, 1),
-       (4, 'rebecca_merchant@example.com', 'password', FALSE, 'MERCHANT', null, 2);
+VALUES (1, 'john_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'CUSTOMER', 1, null),
+       (2, 'alice_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'CUSTOMER', 2, null),
+       (3, 'gregory_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'CUSTOMER', 3, null),
+       (4, 'sam_merchant@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'MERCHANT', null, 1),
+       (5, 'rebecca_merchant@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'MERCHANT', null, 2);
+
 
 INSERT INTO restaurant (id, name, description, pickup_available, pickup_eta_minutes, delivery_available,
                         delivery_eta_minutes, delivery_fee, logo_image_url, hero_image_url, is_active, address_id,
