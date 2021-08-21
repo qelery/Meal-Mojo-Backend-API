@@ -16,7 +16,7 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @PatchMapping("/users/{userId}")
+    @PatchMapping("/users/{userId}/activation")
     public UserDtoOut setUserActiveState(@PathVariable Long userId,
                                          @RequestParam Boolean active) {
         return adminService.changeUserActiveState(userId, active);

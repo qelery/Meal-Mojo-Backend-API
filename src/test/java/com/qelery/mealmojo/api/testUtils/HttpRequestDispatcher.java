@@ -139,6 +139,15 @@ public class HttpRequestDispatcher {
         return response.getContentAsString();
     }
 
+    public String performPATCH(String url) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(
+                        patch(url).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
+        return response.getContentAsString();
+    }
+
     public String performPATCH(String url, int expectedStatus) throws Exception {
         MockHttpServletResponse response = mockMvc.perform(
                         patch(url).accept(MediaType.APPLICATION_JSON))

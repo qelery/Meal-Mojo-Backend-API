@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
-import com.qelery.mealmojo.api.exception.global.ErrorResponseBody;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.CustomerProfile;
@@ -32,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.qelery.mealmojo.api.testUtils.CustomAssertions.assertContainsErrorMessage;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -259,10 +259,5 @@ class CustomerCenteredIntegrationTest {
             total += orderLine.getQuantity() * orderLine.getPriceEach();
         }
         return total;
-    }
-
-    private void assertContainsErrorMessage(String jsonResponse, String expectedErrorMessage) throws Exception {
-        ErrorResponseBody responseBody = objectMapper.readValue(jsonResponse, ErrorResponseBody.class);
-        assertEquals(expectedErrorMessage, responseBody.getMessage());
     }
 }

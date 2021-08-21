@@ -2,7 +2,6 @@ package com.qelery.mealmojo.api.integrationTests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qelery.mealmojo.api.exception.EmailExistsException;
-import com.qelery.mealmojo.api.exception.global.ErrorResponseBody;
 import com.qelery.mealmojo.api.model.dto.UserDtoIn;
 import com.qelery.mealmojo.api.model.dto.UserDtoOut;
 import com.qelery.mealmojo.api.model.entity.User;
@@ -26,6 +25,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Optional;
 
+import static com.qelery.mealmojo.api.testUtils.CustomAssertions.assertContainsErrorMessage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -151,10 +151,5 @@ public class LoginAndRegistrationIntegrationTest {
             String url = "/auth/users/login";
             httpRequestDispatcher.performPOST(url, loginRequest, 403);
         }
-    }
-
-    private void assertContainsErrorMessage(String jsonResponse, String expectedErrorMessage) throws Exception {
-        ErrorResponseBody responseBody = objectMapper.readValue(jsonResponse, ErrorResponseBody.class);
-        assertEquals(expectedErrorMessage, responseBody.getMessage());
     }
 }
