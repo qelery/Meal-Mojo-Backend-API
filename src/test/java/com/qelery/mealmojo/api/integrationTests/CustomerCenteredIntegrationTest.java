@@ -18,13 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,16 +35,14 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@ActiveProfiles("test")
 @SpringBootTest
+@AutoConfigureMockMvc
+@EnableAutoConfiguration(exclude = FlywayAutoConfiguration.class)
+@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
 @Sql(scripts = {"/seed/load-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"/seed/clear-test-data.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-@EnableAutoConfiguration(exclude = FlywayAutoConfiguration.class)
-@AutoConfigureMockMvc
 class CustomerCenteredIntegrationTest {
 
-    @Autowired
-    MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired

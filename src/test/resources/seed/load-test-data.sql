@@ -16,12 +16,13 @@ INSERT INTO merchant_profile (id, first_name, last_name, address_id)
 VALUES (1, 'Sam', 'Wilson', null),
        (2, 'Rebecca', 'Black', null);
 
-INSERT INTO users (id, email, password, is_deactivated, role, customer_profile_id, merchant_profile_id)
-VALUES (1, 'john_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'CUSTOMER', 1, null),
-       (2, 'alice_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'CUSTOMER', 2, null),
-       (3, 'gregory_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'CUSTOMER', 3, null),
-       (4, 'sam_merchant@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'MERCHANT', null, 1),
-       (5, 'rebecca_merchant@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'MERCHANT', null, 2);
+INSERT INTO users (id, email, password, is_active, role, customer_profile_id, merchant_profile_id)
+VALUES (1, 'admin@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'ADMIN', null, null),
+       (2, 'john_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'CUSTOMER', 1, null),
+       (3, 'alice_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'CUSTOMER', 2, null),
+       (4, 'gregory_customer@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', FALSE, 'CUSTOMER', 3, null),
+       (5, 'sam_merchant@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'MERCHANT', null, 1),
+       (6, 'rebecca_merchant@example.com', '$2a$10$O8n0pCmi8K1vv7IjCKrP5u4Gn021CHc.IFnZ1KpatrxSO8HkcOqw2', TRUE, 'MERCHANT', null, 2);
 
 
 INSERT INTO restaurant (id, name, description, pickup_available, pickup_eta_minutes, delivery_available,

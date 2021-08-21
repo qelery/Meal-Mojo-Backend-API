@@ -29,7 +29,7 @@ public class User implements UserDetails {
     @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    private Boolean isDeactivated = false;
+    private Boolean isActive = true;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -74,6 +74,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return !this.isDeactivated;
+        return this.isActive;
     }
 }

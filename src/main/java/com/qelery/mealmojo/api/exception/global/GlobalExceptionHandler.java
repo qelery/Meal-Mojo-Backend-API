@@ -62,6 +62,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Object> handleException(UserNotFoundException ex, WebRequest request) {
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleException(DataIntegrityViolationException ex) {
         if (Objects.requireNonNull(ex.getMessage()).contains("not-null property references a null")) {
