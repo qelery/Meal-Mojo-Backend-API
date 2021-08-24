@@ -1,6 +1,6 @@
 package com.qelery.mealmojo.api.unitTests.controller;
 
-import com.qelery.mealmojo.api.controller.OrderController;
+import com.qelery.mealmojo.api.controller.CustomerController;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
@@ -17,10 +17,10 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OrderControllerTest {
+class CustomerControllerTest {
 
     @InjectMocks
-    private OrderController orderController;
+    private CustomerController customerController;
 
     @Mock
     private OrderService orderService;
@@ -32,7 +32,7 @@ class OrderControllerTest {
         when(orderService.getAllRestaurants())
                 .thenReturn(expectedDtoList);
 
-        List<RestaurantThinDtoOut> actualDtoList = orderController.getAllRestaurants();
+        List<RestaurantThinDtoOut> actualDtoList = customerController.getAllRestaurants();
 
         assertEquals(expectedDtoList, actualDtoList);
     }
@@ -44,7 +44,7 @@ class OrderControllerTest {
         when(orderService.getRestaurantsWithinDistance(anyDouble(), anyDouble(), anyInt()))
                 .thenReturn(expectedDtoList);
 
-        List<RestaurantThinDtoOut> actualDtoList = orderController.getRestaurantsWithinDistance(1, 1, 1);
+        List<RestaurantThinDtoOut> actualDtoList = customerController.getRestaurantsWithinDistance(1, 1, 1);
 
         assertEquals(expectedDtoList, actualDtoList);
     }
@@ -56,7 +56,7 @@ class OrderControllerTest {
         when(orderService.getRestaurant(anyLong()))
                 .thenReturn(expectedDto);
 
-        RestaurantDtoOut actualDto = orderController.getRestaurant(1L);
+        RestaurantDtoOut actualDto = customerController.getRestaurant(1L);
 
         assertEquals(expectedDto, actualDto);
     }
@@ -68,7 +68,7 @@ class OrderControllerTest {
         when(orderService.getAllMenuItemsByRestaurant(anyLong()))
                 .thenReturn(expectedDtoList);
 
-        List<MenuItemDto> actualDtoList = orderController.getAllMenuItemsByRestaurant(1L);
+        List<MenuItemDto> actualDtoList = customerController.getAllMenuItemsByRestaurant(1L);
 
         assertEquals(expectedDtoList, actualDtoList);
     }
@@ -80,7 +80,7 @@ class OrderControllerTest {
         when(orderService.getMenuItemByRestaurant(anyLong(), anyLong()))
                 .thenReturn(expectedDto);
 
-        MenuItemDto actualDto = orderController.getMenuItemByRestaurant(1L, 1L);
+        MenuItemDto actualDto = customerController.getMenuItemByRestaurant(1L, 1L);
 
         assertEquals(expectedDto, actualDto);
     }
@@ -92,7 +92,7 @@ class OrderControllerTest {
         when(orderService.submitOrder(any(OrderDtoIn.class)))
                 .thenReturn(expectedDto);
 
-        OrderDtoOut actualDto = orderController.submitOrder(new OrderDtoIn());
+        OrderDtoOut actualDto = customerController.submitOrder(new OrderDtoIn());
 
         assertEquals(expectedDto, actualDto);
     }
@@ -104,7 +104,7 @@ class OrderControllerTest {
         when(orderService.getPlacedOrders(anyLong()))
                 .thenReturn(expectedDtoList);
 
-        List<OrderDtoOut> actualDtoList = orderController.getOrders(1L);
+        List<OrderDtoOut> actualDtoList = customerController.getOrders(1L);
 
         assertEquals(expectedDtoList, actualDtoList);
     }

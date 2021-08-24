@@ -1,6 +1,8 @@
 package com.qelery.mealmojo.api.service.utility;
 
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.AddressDto;
+import com.qelery.mealmojo.api.model.dto.CustomerDetailsDto;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.User;
 import org.modelmapper.Conditions;
@@ -48,13 +50,14 @@ public class MapperUtils {
     }
 
     private void setAdditionalConverters(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(User.class, UserDtoOut.class).setPreConverter(nameConverter);
+        modelMapper.createTypeMap(User.class, UserCreationDtoOut.class).setPreConverter(nameConverterUserCreationDtoOut);
+        modelMapper.createTypeMap(User.class, CustomerDetailsDto.class).setPreConverter(userToCustomerDetailsDtoConverter);
         modelMapper.createTypeMap(Address.class, Address.class).setPreConverter(streetsConverter);
     }
 
-    Converter<User, UserDtoOut> nameConverter = mappingContext -> {
+    Converter<User, UserCreationDtoOut> nameConverterUserCreationDtoOut = mappingContext -> {
         User source = mappingContext.getSource();
-        UserDtoOut destination = mappingContext.getDestination();
+        UserCreationDtoOut destination = mappingContext.getDestination();
         if (source.getCustomerProfile() != null) {
             destination.setFirstName(source.getCustomerProfile().getFirstName());
             destination.setLastName(source.getCustomerProfile().getLastName());
@@ -62,6 +65,16 @@ public class MapperUtils {
             destination.setFirstName(source.getMerchantProfile().getFirstName());
             destination.setLastName(source.getMerchantProfile().getLastName());
         }
+        return destination;
+    };
+
+    Converter<User, CustomerDetailsDto> userToCustomerDetailsDtoConverter = mappingContext -> {
+        User source = mappingContext.getSource();
+        CustomerDetailsDto destination = mappingContext.getDestination();
+        destination.setFirstName(source.getCustomerProfile().getFirstName());
+        destination.setLastName(source.getCustomerProfile().getLastName());
+        AddressDto addressDto = this.map(source.getCustomerProfile().getAddress(), AddressDto.class);
+        destination.setAddress(addressDto);
         return destination;
     };
 

@@ -1,7 +1,7 @@
 package com.qelery.mealmojo.api.unitTests.controller;
 
 import com.qelery.mealmojo.api.controller.AdminController;
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.service.AdminService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,11 +27,11 @@ public class AdminControllerTest {
     @Test
     @DisplayName("Should return from service user wiht new active state")
     void changeUserActiveState() {
-        UserDtoOut expectedUserDtoOut = new UserDtoOut();
+        UserCreationDtoOut expectedUserCreationDtoOut = new UserCreationDtoOut();
         when(adminService.changeUserActiveState(anyLong(), anyBoolean()))
-                .thenReturn(expectedUserDtoOut);
+                .thenReturn(expectedUserCreationDtoOut);
 
-        UserDtoOut actualUserDtoOUt = adminController.setUserActiveState(1L, false);
-        assertEquals(actualUserDtoOUt, expectedUserDtoOut);
+        UserCreationDtoOut actualUserCreationDtoOUt = adminController.setUserActiveState(1L, false);
+        assertEquals(actualUserCreationDtoOUt, expectedUserCreationDtoOut);
     }
 }

@@ -101,33 +101,46 @@ class MapperUtilsTest {
     }
 
     @Test
-    @DisplayName("Should map User entity to UserDtoOut")
-    void mapUserToUserOutDto() {
-        UserDtoOut userDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
+    @DisplayName("Should map User entity to UserCreationDtoOut")
+    void mapUserToUserCreationOutDto() {
+        UserCreationDtoOut userCreationDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserCreationDtoOut.class);
 
-        assertThat(userDtoOut.getEmail()).isEqualTo(userEntityWithCustomerProfile.getEmail());
-        assertThat(userDtoOut.getRole()).isEqualTo(userEntityWithCustomerProfile.getRole());
-        assertThat(userDtoOut.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
-        assertThat(userDtoOut.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
+        assertThat(userCreationDtoOut.getEmail()).isEqualTo(userEntityWithCustomerProfile.getEmail());
+        assertThat(userCreationDtoOut.getRole()).isEqualTo(userEntityWithCustomerProfile.getRole());
+        assertThat(userCreationDtoOut.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
+        assertThat(userCreationDtoOut.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
     }
 
     @Test
-    @DisplayName("Should pull first and last name from correct profile when mapping to UserDtoOut")
-    void mapNameForUserDtoOut() {
-        UserDtoOut userDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserDtoOut.class);
-        assertThat(userDtoOut.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
-        assertThat(userDtoOut.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
+    @DisplayName("Should pull first and last name from correct profile when mapping to UserCreationDtoOut")
+    void mapNameForUserCreationDtoOut() {
+        UserCreationDtoOut userCreationDtoOut = mapperUtils.map(userEntityWithCustomerProfile, UserCreationDtoOut.class);
+        assertThat(userCreationDtoOut.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
+        assertThat(userCreationDtoOut.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
 
 
-        userDtoOut = mapperUtils.map(userEntityWithMerchantProfile, UserDtoOut.class);
-        assertThat(userDtoOut.getFirstName()).isEqualTo(userEntityWithMerchantProfile.getMerchantProfile().getFirstName());
-        assertThat(userDtoOut.getLastName()).isEqualTo(userEntityWithMerchantProfile.getMerchantProfile().getLastName());
+        userCreationDtoOut = mapperUtils.map(userEntityWithMerchantProfile, UserCreationDtoOut.class);
+        assertThat(userCreationDtoOut.getFirstName()).isEqualTo(userEntityWithMerchantProfile.getMerchantProfile().getFirstName());
+        assertThat(userCreationDtoOut.getLastName()).isEqualTo(userEntityWithMerchantProfile.getMerchantProfile().getLastName());
 
 
         User userEntityNoProfile = new User();
-        userDtoOut = mapperUtils.map(userEntityNoProfile, UserDtoOut.class);
-        assertThat(userDtoOut.getFirstName()).isNull();
-        assertThat(userDtoOut.getLastName()).isNull();
+        userCreationDtoOut = mapperUtils.map(userEntityNoProfile, UserCreationDtoOut.class);
+        assertThat(userCreationDtoOut.getFirstName()).isNull();
+        assertThat(userCreationDtoOut.getLastName()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should map User entity to CustomerDetailsDto")
+    void mapUserToCustomerDetailsDto() {
+        CustomerDetailsDto customerDetailsDto = mapperUtils.map(userEntityWithCustomerProfile, CustomerDetailsDto.class);
+
+        assertThat(customerDetailsDto.getEmail()).isEqualTo(userEntityWithCustomerProfile.getEmail());
+        assertThat(customerDetailsDto.getFirstName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getFirstName());
+        assertThat(customerDetailsDto.getLastName()).isEqualTo(userEntityWithCustomerProfile.getCustomerProfile().getLastName());
+        Address addressEntity = userEntityWithCustomerProfile.getCustomerProfile().getAddress();
+        AddressDto addressDto = customerDetailsDto.getAddress();
+        assertThat(addressDto).usingRecursiveComparison().isEqualTo(addressEntity);
     }
 
     @Test

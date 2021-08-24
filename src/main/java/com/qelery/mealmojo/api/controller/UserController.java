@@ -1,7 +1,7 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.dto.UserDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
@@ -22,7 +22,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDtoOut createUser(@RequestBody UserDtoIn userDto) {
+    public UserCreationDtoOut createUser(@RequestBody UserCreationDtoIn userDto) {
         return userService.createUser(userDto);
     }
 

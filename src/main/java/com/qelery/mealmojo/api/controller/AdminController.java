@@ -1,12 +1,12 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final AdminService adminService;
@@ -17,8 +17,8 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{userId}/activation")
-    public UserDtoOut setUserActiveState(@PathVariable Long userId,
-                                         @RequestParam Boolean active) {
+    public UserCreationDtoOut setUserActiveState(@PathVariable Long userId,
+                                                 @RequestParam Boolean active) {
         return adminService.changeUserActiveState(userId, active);
     }
 }

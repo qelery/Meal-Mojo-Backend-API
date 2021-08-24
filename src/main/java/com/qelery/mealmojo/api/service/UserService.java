@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
-import com.qelery.mealmojo.api.model.dto.UserDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.entity.CustomerProfile;
 import com.qelery.mealmojo.api.model.entity.MerchantProfile;
 import com.qelery.mealmojo.api.model.entity.User;
@@ -45,30 +45,29 @@ public class UserService {
         this.mapperUtils = mapperUtils;
     }
 
-    public UserDtoOut createUser(UserDtoIn userDtoIn) {
-        User user = mapperUtils.map(userDtoIn, User.class);
+    public UserCreationDtoOut createUser(UserCreationDtoIn userCreationDtoIn) {
+        User user = mapperUtils.map(userCreationDtoIn, User.class);
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             if (user.getRole() == Role.CUSTOMER) {
                 CustomerProfile customerProfile = new CustomerProfile();
-                customerProfile.setFirstName(userDtoIn.getFirstName());
-                customerProfile.setLastName(userDtoIn.getLastName());
+                customerProfile.setFirstName(userCreationDtoIn.getFirstName());
+                customerProfile.setLastName(userCreationDtoIn.getLastName());
                 user.setCustomerProfile(customerProfile);
             } else {
                 MerchantProfile merchantProfile = new MerchantProfile();
-                merchantProfile.setFirstName(userDtoIn.getFirstName());
-                merchantProfile.setLastName(userDtoIn.getLastName());
+                merchantProfile.setFirstName(userCreationDtoIn.getFirstName());
+                merchantProfile.setLastName(userCreationDtoIn.getLastName());
                 user.setMerchantProfile(merchantProfile);
             }
             userRepository.save(user);
-            return mapperUtils.map(user, UserDtoOut.class);
+            return mapperUtils.map(user, UserCreationDtoOut.class);
         }
     }
 
     public LoginResponse loginUser(LoginRequest loginRequest) {
-        System.out.println(loginRequest);
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String JWT = jwtUtils.generateToken(userDetails);

@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
-import com.qelery.mealmojo.api.model.dto.UserDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
@@ -57,15 +57,15 @@ class UserServiceTest {
     @Captor
     ArgumentCaptor<UserDetails> userDetailsCaptor;
 
-    UserDtoIn userDtoIn;
+    UserCreationDtoIn userCreationDtoIn;
 
     @BeforeEach
     void setup() {
-        userDtoIn = new UserDtoIn();
-        userDtoIn.setFirstName("John");
-        userDtoIn.setLastName("Smith");
-        userDtoIn.setEmail("john@example.com");
-        userDtoIn.setPassword("password");
+        userCreationDtoIn = new UserCreationDtoIn();
+        userCreationDtoIn.setFirstName("John");
+        userCreationDtoIn.setLastName("Smith");
+        userCreationDtoIn.setEmail("john@example.com");
+        userCreationDtoIn.setPassword("password");
     }
 
     @Nested
@@ -74,47 +74,47 @@ class UserServiceTest {
         @Test
         @DisplayName("with a CustomerProfile")
         void createUserCustomer() {
-            userDtoIn.setRole(Role.CUSTOMER);
+            userCreationDtoIn.setRole(Role.CUSTOMER);
 
-            UserDtoOut userDtoOut = userService.createUser(userDtoIn);
+            UserCreationDtoOut userCreationDtoOut = userService.createUser(userCreationDtoIn);
 
-            verify(passwordEncoder).encode(userDtoIn.getPassword());
+            verify(passwordEncoder).encode(userCreationDtoIn.getPassword());
             verify(userRepository).save(userCaptor.capture());
             User userSavedToDatabase = userCaptor.getValue();
-            verify(mapperUtils).map(userSavedToDatabase, UserDtoOut.class);
+            verify(mapperUtils).map(userSavedToDatabase, UserCreationDtoOut.class);
 
-            assertEquals(userDtoIn.getEmail(), userSavedToDatabase.getEmail());
-            assertEquals(userDtoIn.getRole(), userSavedToDatabase.getRole());
-            assertEquals(userDtoIn.getFirstName(), userSavedToDatabase.getCustomerProfile().getFirstName());
-            assertEquals(userDtoIn.getLastName(), userSavedToDatabase.getCustomerProfile().getLastName());
+            assertEquals(userCreationDtoIn.getEmail(), userSavedToDatabase.getEmail());
+            assertEquals(userCreationDtoIn.getRole(), userSavedToDatabase.getRole());
+            assertEquals(userCreationDtoIn.getFirstName(), userSavedToDatabase.getCustomerProfile().getFirstName());
+            assertEquals(userCreationDtoIn.getLastName(), userSavedToDatabase.getCustomerProfile().getLastName());
 
-            assertEquals(userDtoIn.getFirstName(), userDtoOut.getFirstName());
-            assertEquals(userDtoIn.getLastName(), userDtoOut.getLastName());
-            assertEquals(userDtoIn.getEmail(), userDtoOut.getEmail());
-            assertEquals(userDtoIn.getRole(), userDtoOut.getRole());
+            assertEquals(userCreationDtoIn.getFirstName(), userCreationDtoOut.getFirstName());
+            assertEquals(userCreationDtoIn.getLastName(), userCreationDtoOut.getLastName());
+            assertEquals(userCreationDtoIn.getEmail(), userCreationDtoOut.getEmail());
+            assertEquals(userCreationDtoIn.getRole(), userCreationDtoOut.getRole());
         }
 
         @Test
         @DisplayName("with a MerchantProfile")
         void createUserMerchant() {
-            userDtoIn.setRole(Role.MERCHANT);
+            userCreationDtoIn.setRole(Role.MERCHANT);
 
-            UserDtoOut userDtoOut = userService.createUser(userDtoIn);
+            UserCreationDtoOut userCreationDtoOut = userService.createUser(userCreationDtoIn);
 
-            verify(passwordEncoder).encode(userDtoIn.getPassword());
+            verify(passwordEncoder).encode(userCreationDtoIn.getPassword());
             verify(userRepository).save(userCaptor.capture());
             User userSavedToDatabase = userCaptor.getValue();
-            verify(mapperUtils).map(userSavedToDatabase, UserDtoOut.class);
+            verify(mapperUtils).map(userSavedToDatabase, UserCreationDtoOut.class);
 
-            assertEquals(userDtoIn.getEmail(), userSavedToDatabase.getEmail());
-            assertEquals(userDtoIn.getRole(), userSavedToDatabase.getRole());
-            assertEquals(userDtoIn.getFirstName(), userSavedToDatabase.getMerchantProfile().getFirstName());
-            assertEquals(userDtoIn.getLastName(), userSavedToDatabase.getMerchantProfile().getLastName());
+            assertEquals(userCreationDtoIn.getEmail(), userSavedToDatabase.getEmail());
+            assertEquals(userCreationDtoIn.getRole(), userSavedToDatabase.getRole());
+            assertEquals(userCreationDtoIn.getFirstName(), userSavedToDatabase.getMerchantProfile().getFirstName());
+            assertEquals(userCreationDtoIn.getLastName(), userSavedToDatabase.getMerchantProfile().getLastName());
 
-            assertEquals(userDtoIn.getFirstName(), userDtoOut.getFirstName());
-            assertEquals(userDtoIn.getLastName(), userDtoOut.getLastName());
-            assertEquals(userDtoIn.getEmail(), userDtoOut.getEmail());
-            assertEquals(userDtoIn.getRole(), userDtoOut.getRole());
+            assertEquals(userCreationDtoIn.getFirstName(), userCreationDtoOut.getFirstName());
+            assertEquals(userCreationDtoIn.getLastName(), userCreationDtoOut.getLastName());
+            assertEquals(userCreationDtoIn.getEmail(), userCreationDtoOut.getEmail());
+            assertEquals(userCreationDtoIn.getRole(), userCreationDtoOut.getRole());
         }
 
         @Test
@@ -123,9 +123,9 @@ class UserServiceTest {
             when(userRepository.existsByEmail(anyString()))
                     .thenReturn(true);
             Exception exception = assertThrows(EmailExistsException.class, () -> {
-                userService.createUser(userDtoIn);
+                userService.createUser(userCreationDtoIn);
             });
-            assertEquals("User already exists with email " + userDtoIn.getEmail(), exception.getMessage());
+            assertEquals("User already exists with email " + userCreationDtoIn.getEmail(), exception.getMessage());
         }
     }
 

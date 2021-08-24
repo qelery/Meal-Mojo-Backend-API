@@ -4,7 +4,7 @@ import com.qelery.mealmojo.api.model.enums.Role;
 import lombok.Data;
 
 @Data
-public class UserDtoIn {
+public class UserCreationDtoIn {
 
     private String email;
     private String password;

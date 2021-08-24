@@ -9,23 +9,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
-public class OrderController {
+@RequestMapping("/api/customer")
+public class CustomerController {
 
     private final OrderService orderService;
 
     @Autowired
-    public OrderController(OrderService restaurantService) {
+    public CustomerController(OrderService restaurantService) {
         this.orderService = restaurantService;
     }
 
-    @GetMapping("/order/restaurants")
+    @GetMapping("/restaurants")
     @ResponseStatus(HttpStatus.OK)
     public List<RestaurantThinDtoOut> getAllRestaurants() {
         return orderService.getAllRestaurants();
     }
 
-    @GetMapping(value="/order/restaurants/nearby", params={"latitude", "longitude", "maxDistanceMiles"})
+    @GetMapping(value="/restaurants/nearby", params={"latitude", "longitude", "maxDistanceMiles"})
     @ResponseStatus(HttpStatus.OK)
     public List<RestaurantThinDtoOut> getRestaurantsWithinDistance(@RequestParam double latitude,
                                                                    @RequestParam double longitude,
@@ -33,19 +33,19 @@ public class OrderController {
         return orderService.getRestaurantsWithinDistance(latitude, longitude, maxDistanceMiles);
     }
 
-    @GetMapping("/order/restaurants/{restaurantId}")
+    @GetMapping("/restaurants/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
     public RestaurantDtoOut getRestaurant(@PathVariable Long restaurantId) {
         return orderService.getRestaurant(restaurantId);
     }
 
-    @GetMapping("/order/restaurants/{restaurantId}/menuitems")
+    @GetMapping("/restaurants/{restaurantId}/menuitems")
     @ResponseStatus(HttpStatus.OK)
     public List<MenuItemDto> getAllMenuItemsByRestaurant(@PathVariable Long restaurantId) {
         return orderService.getAllMenuItemsByRestaurant(restaurantId);
     }
 
-    @GetMapping("/order/restaurants/{restaurantId}/menuitems/{menuitemId}")
+    @GetMapping("/restaurants/{restaurantId}/menuitems/{menuitemId}")
     @ResponseStatus(HttpStatus.OK)
     public MenuItemDto getMenuItemByRestaurant(@PathVariable Long restaurantId,
                                             @PathVariable Long menuitemId) {

@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.unitTests.controller;
 
 import com.qelery.mealmojo.api.controller.UserController;
-import com.qelery.mealmojo.api.model.dto.UserDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
+import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
@@ -29,11 +29,11 @@ class UserControllerTest {
     @Test
     @DisplayName("Should return user dto from service after creating user")
     void createUser() {
-        UserDtoOut expectedDto = new UserDtoOut();
-        when(userService.createUser(any(UserDtoIn.class)))
+        UserCreationDtoOut expectedDto = new UserCreationDtoOut();
+        when(userService.createUser(any(UserCreationDtoIn.class)))
                 .thenReturn(expectedDto);
 
-        UserDtoOut actualDto = userController.createUser(new UserDtoIn());
+        UserCreationDtoOut actualDto = userController.createUser(new UserCreationDtoIn());
 
         assertEquals(expectedDto, actualDto);
     }
