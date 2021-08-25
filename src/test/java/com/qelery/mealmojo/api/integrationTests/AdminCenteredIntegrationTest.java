@@ -50,7 +50,7 @@ public class AdminCenteredIntegrationTest {
         void shouldDeactivateUser() throws Exception {
             long activeUsersId = 2L;
 
-            String url = "/admin/users/" + activeUsersId + "/activation?active=" + false;
+            String url = "/api/users/" + activeUsersId + "/activation?active=" + false;
             httpRequestDispatcher.performPATCH(url);
 
             Optional<User> user = userRepository.findById(activeUsersId);
@@ -64,7 +64,7 @@ public class AdminCenteredIntegrationTest {
         void shouldActivateUser() throws Exception {
             long deactivatedUsersId = 4L;
 
-            String url = "/admin/users/" + deactivatedUsersId + "/activation?active=" + true;
+            String url = "/api/users/" + deactivatedUsersId + "/activation?active=" + true;
             httpRequestDispatcher.performPATCH(url);
 
             Optional<User> user = userRepository.findById(deactivatedUsersId);
@@ -79,7 +79,7 @@ public class AdminCenteredIntegrationTest {
             long userIdThatDoesNotExist = 5003L;
             String errorMessage = new UserNotFoundException(userIdThatDoesNotExist).getMessage();
 
-            String url = "/admin/users/" + userIdThatDoesNotExist + "/activation?active=" + false;
+            String url = "/api/users/" + userIdThatDoesNotExist + "/activation?active=" + false;
             String jsonResponse = httpRequestDispatcher.performPATCH(url, 404);
 
             assertContainsErrorMessage(jsonResponse, errorMessage);

@@ -3,6 +3,7 @@ package com.qelery.mealmojo.api.integrationTests;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
+import com.qelery.mealmojo.api.exception.OrderNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.Address;
@@ -65,7 +66,7 @@ class CustomerCenteredIntegrationTest {
             List<String> expectedRestaurantNames = List.of("Joy Yee", "Portillo's Hot Dogs", "Pizano's Pizza & Pasta");
             String deactivatedRestaurantName = "Daley's Restaurant";
 
-            String url = "/api/order/restaurants";
+            String url = "/api/restaurants";
             String jsonResponse = httpRequestDispatcher.performGET(url);
             List<RestaurantThinDtoOut> actualRestaurants = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
@@ -89,7 +90,7 @@ class CustomerCenteredIntegrationTest {
             double longitude = address.getLongitude();
             int maxDistance = 5;
 
-            String url = String.format("/api/order/restaurants/nearby?latitude=%f&longitude=%f&maxDistanceMiles=%d",
+            String url = String.format("/api/restaurants/nearby?latitude=%f&longitude=%f&maxDistanceMiles=%d",
                     latitude, longitude, maxDistance);
             String jsonResponse = httpRequestDispatcher.performGET(url);
             List<RestaurantThinDtoOut> actualRestaurants = objectMapper.readValue(jsonResponse, new TypeReference<>() {
@@ -109,7 +110,7 @@ class CustomerCenteredIntegrationTest {
             long expectedRestaurantId = 1L;
             String expectedRestaurantName = "Portillo's Hot Dogs";
 
-            String url = "/api/order/restaurants/" + expectedRestaurantId;
+            String url = "/api/restaurants/" + expectedRestaurantId;
             String jsonResponse = httpRequestDispatcher.performGET(url);
             RestaurantDtoOut actualRestaurant = objectMapper.readValue(jsonResponse, RestaurantDtoOut.class);
 
@@ -124,7 +125,7 @@ class CustomerCenteredIntegrationTest {
             List<String> expectedMenuItemNames = List.of("Cheese Pizza", "Sausage Pizza");
             long restaurantId = 2L;
 
-            String url = "/api/order/restaurants/" + restaurantId + "/menuitems";
+            String url = "/api/restaurants/" + restaurantId + "/menuitems";
             String jsonResponse = httpRequestDispatcher.performGET(url);
             List<MenuItemDto> actualMenuItems = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
@@ -137,12 +138,12 @@ class CustomerCenteredIntegrationTest {
         @Test
         @DisplayName("Should get a specific menu item for a restaurant")
         @WithUserDetails("john_customer@example.com")
-        void getMenuItemByRestaurant() throws Exception {
+        void getMenuItemByRestaurant_customer() throws Exception {
             long restaurantId = 1L;
             long expectedMenuItemId = 1L;
             String expectedMenuItemName = "Chicago-Style Hot Dog";
 
-            String url = "/api/order/restaurants/" + restaurantId + "/menuitems/" + expectedMenuItemId;
+            String url = "/api/restaurants/" + restaurantId + "/menuitems/" + expectedMenuItemId;
             String jsonResponse = httpRequestDispatcher.performGET(url);
             MenuItemDto actualMenuItem = objectMapper.readValue(jsonResponse, MenuItemDto.class);
 
@@ -151,10 +152,10 @@ class CustomerCenteredIntegrationTest {
         }
 
         @Test
-        @DisplayName("Get all orders for logged in customer")
+        @DisplayName("Should get all orders for customer")
         @WithUserDetails("alice_customer@example.com")
-        void getOrders() throws Exception {
-            String url = "/api/order/past";
+        void getAllOrders_customer() throws Exception {
+            String url = "/api/orders";
             String jsonResponse = httpRequestDispatcher.performGET(url);
             List<OrderDtoOut> actualOrders = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
@@ -183,9 +184,38 @@ class CustomerCenteredIntegrationTest {
         }
 
         @Test
+        @DisplayName("Should get all orders for customer for a particular restaurant")
+        @WithUserDetails("alice_customer@example.com")
+        void getAllOrdersForARestaurant_customer() throws Exception {
+            long restaurantId = 1L;
+            String url = "/api/orders?restaurant-id=" + restaurantId;
+            String jsonResponse = httpRequestDispatcher.performGET(url);
+
+            List<OrderDtoOut> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>() {
+            });
+
+            assertEquals(1, actualOrderDtos.size());
+            OrderDtoOut actualOrder = actualOrderDtos.get(0);
+            assertEquals(actualOrder.getId(), 1L);
+        }
+
+        @Test
+        @DisplayName("Should get an order by id")
+        @WithUserDetails("alice_customer@example.com")
+        void getOrderById_customer() throws Exception {
+            long orderId = 1L;
+            String url = "/api/orders/" + orderId;
+            String jsonResponse = httpRequestDispatcher.performGET(url);
+
+            OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+
+            assertEquals(actualOrderDto.getId(), 1L);
+        }
+
+        @Test
         @DisplayName("Should submit an order for logged in customer")
         @WithUserDetails("alice_customer@example.com")
-        void submitOrder() throws Exception {
+        void submitOrder_customer() throws Exception {
             long hotdogMenuItemId = 1L;
             long italianBeefMenuItemId = 2L;
             Map<Long, Integer> menuItemsQuantitiesMap = new HashMap<>();
@@ -198,7 +228,7 @@ class CustomerCenteredIntegrationTest {
             orderDtoIn.setPaymentMethod(PaymentMethod.CARD);
             orderDtoIn.setMenuItemQuantitiesMap(menuItemsQuantitiesMap);
 
-            String url = "/api/order/submit";
+            String url = "/api/orders/submit";
             String jsonResponse = httpRequestDispatcher.performPOST(url, orderDtoIn);
             OrderDtoOut actualOrder = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
 
@@ -214,6 +244,7 @@ class CustomerCenteredIntegrationTest {
             assertEquals(loggedInCustomer.getAddress(), actualOrder.getCustomerProfileAddress());
         }
 
+
         @Nested
         @DisplayName("And customer has supplied non-existent entity id,")
         class throughAllLayers_customer_nonExistentEntity {
@@ -221,31 +252,43 @@ class CustomerCenteredIntegrationTest {
             @Test
             @WithUserDetails("alice_customer@example.com")
             @DisplayName("Should get 404 response when trying to get restaurant that doesn't exist")
-            void should404OnNonExistentRestaurant() throws Exception {
+            void should404OnNonExistentRestaurant_customer() throws Exception {
                 long restaurantIdThatDoesNotExist = 3001L;
                 String expectedErrorMessage = new RestaurantNotFoundException(3001L).getMessage();
 
                 String url;
                 String jsonResponse;
 
-                url = "/api/order/restaurants/" + restaurantIdThatDoesNotExist;
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist;
                 jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
-                url = "/api/order/restaurants/" + restaurantIdThatDoesNotExist + "/menuitems";
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist + "/menuitems";
                 jsonResponse = httpRequestDispatcher.performGET(url, 404);
+                assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
+            }
+
+            @Test
+            @WithUserDetails("alice_customer@example.com")
+            @DisplayName("Should get 404 response when trying to order that doesn't exist")
+            void should404OnNonExistentMenuItem_customer() throws Exception {
+                long orderIdThatDoesNotExist = 6023L;
+                String expectedErrorMessage = new OrderNotFoundException(6023L).getMessage();
+
+                String url = "/api/orders/" + orderIdThatDoesNotExist;
+                String jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
             }
 
             @Test
             @WithUserDetails("john_customer@example.com")
             @DisplayName("Should get 404 response when trying to get menu item that doesn't exist")
-            void should404OnNonExistentMenuItem() throws Exception {
+            void should404OnNonExistentOrder_customer() throws Exception {
                 long restaurantId = 2L;
                 long menuItemIdThatDoesNotExist = 99099L;
                 String expectedErrorMessage = new MenuItemNotFoundException(99099L).getMessage();
 
-                String url = "/api/order/restaurants/" + restaurantId + "/menuitems/" + menuItemIdThatDoesNotExist;
+                String url = "/api/restaurants/" + restaurantId + "/menuitems/" + menuItemIdThatDoesNotExist;
                 String jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
             }

@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
+import com.qelery.mealmojo.api.exception.UserNotFoundException;
 import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
 import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.entity.CustomerProfile;
@@ -19,6 +20,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -72,5 +75,13 @@ public class UserService {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
         final String JWT = jwtUtils.generateToken(userDetails);
         return new LoginResponse(JWT);
+    }
+
+    public UserCreationDtoOut changeUserActiveState(Long userId, Boolean active) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        User user = optionalUser.orElseThrow(() -> new UserNotFoundException(userId));
+        user.setIsActive(active);
+        userRepository.save(user);
+        return mapperUtils.map(user, UserCreationDtoOut.class);
     }
 }

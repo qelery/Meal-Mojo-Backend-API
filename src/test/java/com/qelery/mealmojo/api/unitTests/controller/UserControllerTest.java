@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,5 +48,16 @@ class UserControllerTest {
         LoginResponse actualResponse = userController.loginUser(new LoginRequest("john@example.com", "password"));
 
         assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    @DisplayName("Should return from service user with new active state")
+    void changeUserActiveState() {
+        UserCreationDtoOut expectedUserCreationDtoOut = new UserCreationDtoOut();
+        when(userService.changeUserActiveState(anyLong(), anyBoolean()))
+                .thenReturn(expectedUserCreationDtoOut);
+
+        UserCreationDtoOut actualUserCreationDtoOUt = userController.setUserActiveState(1L, false);
+        assertEquals(actualUserCreationDtoOUt, expectedUserCreationDtoOut);
     }
 }

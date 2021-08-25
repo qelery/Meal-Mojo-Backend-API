@@ -8,10 +8,12 @@ import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.OperatingHours;
+import com.qelery.mealmojo.api.model.entity.Order;
 import com.qelery.mealmojo.api.model.entity.Restaurant;
 import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.repository.AddressRepository;
+import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.testUtils.HttpRequestDispatcher;
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +56,8 @@ public class MerchantCenteredIntegrationTest {
     private RestaurantRepository restaurantRepository;
     @Autowired
     private AddressRepository addressRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     // Expected values are based on the test data loaded into the test H2
     // database using the sql scripts in the directory /test/resources/seed
@@ -67,16 +71,16 @@ public class MerchantCenteredIntegrationTest {
         void getAllRestaurantsOwned_merchant() throws Exception {
             List<String> expectedRestaurantNames = List.of("Portillo's Hot Dogs", "Joy Yee", "Daley's Restaurant");
 
-            String url = "/api/merchant/restaurants";
+            String url = "/api/restaurants/by-logged-in-merchant";
             String jsonResponse = httpRequestDispatcher.performGET(url);
 
-            List<RestaurantThinDtoOut> actualRestaurants = objectMapper.readValue(jsonResponse, new TypeReference<>() {
+            List<RestaurantThinDtoOut> actualRestaurantDtos = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
-            List<String> actualRestaurantNames = actualRestaurants.stream()
+            List<String> actualRestaurantNames = actualRestaurantDtos.stream()
                     .map(RestaurantThinDtoOut::getName)
                     .collect(Collectors.toList());
 
-            assertEquals(3, actualRestaurants.size());
+            assertEquals(3, actualRestaurantDtos.size());
             assertTrue(expectedRestaurantNames.containsAll(actualRestaurantNames));
         }
 
@@ -87,7 +91,7 @@ public class MerchantCenteredIntegrationTest {
             long expectedRestaurantId = 2;
             String expectedRestaurantName = "Pizano's Pizza & Pasta";
 
-            String url = "/api/merchant/restaurants/" + expectedRestaurantId;
+            String url = "/api/restaurants/" + expectedRestaurantId + "/by-logged-in-merchant";
             String jsonResponse = httpRequestDispatcher.performGET(url);
             ;
             RestaurantDtoOut actualRestaurant = objectMapper.readValue(jsonResponse, RestaurantDtoOut.class);
@@ -95,7 +99,6 @@ public class MerchantCenteredIntegrationTest {
             assertEquals(expectedRestaurantId, actualRestaurant.getId());
             assertEquals(expectedRestaurantName, actualRestaurant.getName());
         }
-
 
         @Test
         @DisplayName("Should create a restaurant under his/her profile")
@@ -118,7 +121,7 @@ public class MerchantCenteredIntegrationTest {
             restaurantDtoIn.setDeliveryFee(6.00);
             restaurantDtoIn.setAddress(addressDto);
 
-            String url = "/api/merchant/restaurants";
+            String url = "/api/restaurants";
             String jsonResponse = httpRequestDispatcher.performPOST(url, restaurantDtoIn);
             RestaurantDtoOut actualRestaurantDtoOut = objectMapper.readValue(jsonResponse, RestaurantDtoOut.class);
 
@@ -149,17 +152,16 @@ public class MerchantCenteredIntegrationTest {
             assertEquals(addressSavedToDatabase.get(), restaurantSavedToDatabase.getAddress());
         }
 
-
         @Test
         @DisplayName("Should update the basic info for a restaurant he/she owns")
         @WithUserDetails("rebecca_merchant@example.com")
-        void updateRestaurantBasicinfo_merchant() throws Exception {
+        void updateRestaurantBasicInfo_merchant() throws Exception {
             long restaurantId = 3L;
             RestaurantDtoIn restaurantDtoIn = new RestaurantDtoIn();
             restaurantDtoIn.setName("Joy Yee of Tinley Park");
             restaurantDtoIn.setLogoImageUrl("new_joy_yee_logo.jpg");
 
-            String url = "/api/merchant/restaurants/" + restaurantId;
+            String url = "/api/restaurants/" + restaurantId;
             String jsonResponse = httpRequestDispatcher.performPATCH(url, restaurantDtoIn);
 
             RestaurantThinDtoOut actualRestaurantDtoOut = objectMapper.readValue(jsonResponse, RestaurantThinDtoOut.class);
@@ -189,7 +191,7 @@ public class MerchantCenteredIntegrationTest {
             expectedNewTuesdayHoursDto.setCloseTime(LocalTime.of(22, 0));
             List<OperatingHoursDto> updatedHoursDto = List.of(expectedNewTuesdayHoursDto);
 
-            String url = "/api/merchant/restaurants/" + restaurantId + "/hours";
+            String url = "/api/restaurants/" + restaurantId + "/hours";
             String jsonResponse = httpRequestDispatcher.performPATCH(url, updatedHoursDto);
 
 
@@ -215,7 +217,7 @@ public class MerchantCenteredIntegrationTest {
         @Test
         @DisplayName("Should update address for a restaurant he/she owns")
         @WithUserDetails("rebecca_merchant@example.com")
-        void updateRestaurantAddress() throws Exception {
+        void updateRestaurantAddress_merchant() throws Exception {
             long restaurantId = 3L;
 
             Optional<Restaurant> restaurantOptional = restaurantRepository.findById(restaurantId);
@@ -230,7 +232,7 @@ public class MerchantCenteredIntegrationTest {
             updatedAddressDtoIn.setCountry(Country.US);
 
 
-            String url = "/api/merchant/restaurants/" + restaurantId + "/address";
+            String url = "/api/restaurants/" + restaurantId + "/address";
             String jsonResponse = httpRequestDispatcher.performPATCH(url, updatedAddressDtoIn);
             RestaurantThinDtoOut actualRestaurantDtoOut = objectMapper.readValue(jsonResponse, RestaurantThinDtoOut.class);
             AddressDto actualAddressDtoOut = actualRestaurantDtoOut.getAddress();
@@ -245,6 +247,67 @@ public class MerchantCenteredIntegrationTest {
             assertEquals(actualAddressDtoOut.getLongitude(), addressBeforeUpdate.getLongitude());
         }
 
+        @Test
+        @DisplayName("Should get all orders for all restaurants owned")
+        @WithUserDetails("rebecca_merchant@example.com")
+        void getAllOrdersAllOwnedRestaurants_merchant() throws Exception {
+            String url = "/api/orders";
+            String jsonResponse = httpRequestDispatcher.performGET(url);
+
+            List<OrderDtoOut> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>(){});
+
+            assertEquals(3, actualOrderDtos.size());
+            List<Long> actualOrderIds =  actualOrderDtos.stream()
+                    .map(OrderDtoOut::getId)
+                    .collect(Collectors.toList());
+            assertTrue(actualOrderIds.containsAll(List.of(1L, 3L, 4L)));
+        }
+
+        @Test
+        @DisplayName("Should get all orders for a particular restaurant owned by merchant")
+        @WithUserDetails("rebecca_merchant@example.com")
+        void getAllOrdersForAnOwnedRestaurant() throws Exception {
+            long restaurantId = 4L;
+            String url = "/api/orders?restaurant-id=" + restaurantId;
+            String jsonResponse = httpRequestDispatcher.performGET(url);
+
+            List<OrderDtoOut> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>(){});
+
+            assertEquals(1, actualOrderDtos.size());
+            OrderDtoOut actualOder = actualOrderDtos.get(0);
+            assertEquals(actualOder.getId(), 3L);
+        }
+
+        @Test
+        @DisplayName("Should get order by id if order belongs to restaurant merchant owns")
+        @WithUserDetails("sam_merchant@example.com")
+        void getSingleOrderForOwnedRestaurant_merchant() throws Exception {
+            long orderId = 2L;
+            String url = "/api/orders/" + orderId;
+            String jsonResponse = httpRequestDispatcher.performGET(url);
+
+            OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+
+            assertEquals(actualOrderDto.getId(), orderId);
+        }
+
+        @Test
+        @DisplayName("Should mark an order complete")
+        @WithUserDetails("sam_merchant@example.com")
+        void markOrderComplete_merchant() throws Exception {
+            long orderId = 2L;
+            String url = "/api/orders/" + orderId + "/complete";
+            String jsonResponse = httpRequestDispatcher.performPATCH(url, 200);
+
+            OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+
+            assertTrue(actualOrderDto.getIsCompleted());
+            Optional<Order> optionalOrder = orderRepository.findById(orderId);
+            assertTrue(optionalOrder.isPresent());
+            Order orderFromDatabase = optionalOrder.get();
+            assertTrue(orderFromDatabase.getIsCompleted());
+        }
+
 
         @Nested
         @DisplayName("And merchant has supplied non-existent entity id,")
@@ -253,28 +316,28 @@ public class MerchantCenteredIntegrationTest {
             @Test
             @WithUserDetails("sam_merchant@example.com")
             @DisplayName("Should get 404 response when trying to get or update restaurant that doesn't exist")
-            void should404OnNonExistentRestaurant() throws Exception {
+            void should404OnNonExistentRestaurant_merchant() throws Exception {
                 long restaurantIdThatDoesNotExist = 3001L;
                 String expectedErrorMessage = new RestaurantNotFoundException(3001L).getMessage();
 
                 String url;
                 String jsonResponse;
 
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist;
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist;
                 jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist;
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist;
                 jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist + "/orders";
+                url = "/api/orders?restaurant-id=" + restaurantIdThatDoesNotExist;
                 jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
                 RestaurantDtoIn updatedRestaurantInfoDto = new RestaurantDtoIn();
                 updatedRestaurantInfoDto.setName("New Restaurant Name");
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist;
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist;
                 jsonResponse = httpRequestDispatcher.performPATCH(url, updatedRestaurantInfoDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
@@ -283,20 +346,20 @@ public class MerchantCenteredIntegrationTest {
                 updatedTuesdayHours.setOpenTime(LocalTime.of(8, 0));
                 updatedTuesdayHours.setCloseTime(LocalTime.of(20, 0));
                 List<OperatingHoursDto> updatedHoursDto = List.of(updatedTuesdayHours);
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist + "/hours";
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist + "/hours";
                 jsonResponse = httpRequestDispatcher.performPATCH(url, updatedHoursDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
                 AddressDto updatedAddressDto = new AddressDto();
                 updatedAddressDto.setStreet1("123 New Street");
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist + "/address";
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist + "/address";
                 jsonResponse = httpRequestDispatcher.performPATCH(url, updatedAddressDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
                 MenuItemDto menuItemDto = new MenuItemDto();
                 menuItemDto.setName("Name");
                 menuItemDto.setPrice(10.00);
-                url = "/api/merchant/restaurants/" + restaurantIdThatDoesNotExist + "/menuitems";
+                url = "/api/restaurants/" + restaurantIdThatDoesNotExist + "/menuitems";
                 jsonResponse = httpRequestDispatcher.performPOST(url, menuItemDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
             }
@@ -304,7 +367,7 @@ public class MerchantCenteredIntegrationTest {
             @Test
             @WithUserDetails("rebecca_merchant@example.com")
             @DisplayName("Should get 404 response when trying to update menu item that doesn't exist")
-            void should404OnNonExistentMenuItem() throws Exception {
+            void should404OnNonExistentMenuItem_merchant() throws Exception {
                 long restaurantId = 1L;
                 long menuItemIdThatDoesNotExist = 5001L;
                 String expectedErrorMessage = new MenuItemNotFoundException(5001L).getMessage();
@@ -312,7 +375,7 @@ public class MerchantCenteredIntegrationTest {
                 MenuItemDto menuItemDto = new MenuItemDto();
                 menuItemDto.setName("Updated Name");
                 menuItemDto.setPrice(7.50);
-                String url = "/api/merchant/restaurants/" + restaurantId + "/menuitems/" + menuItemIdThatDoesNotExist;
+                String url = "/api/restaurants/" + restaurantId + "/menuitems/" + menuItemIdThatDoesNotExist;
                 String jsonResponse = httpRequestDispatcher.performPUT(url, menuItemDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
             }
@@ -321,18 +384,17 @@ public class MerchantCenteredIntegrationTest {
             @WithUserDetails("rebecca_merchant@example.com")
             @DisplayName("Should get 404 response when trying to get or update order that doesn't exist")
             void should404OnNonExistentOrder() throws Exception {
-                long restaurantId = 1L;
                 long orderIdThatDoesNotExist = 4815162342L;
                 String expectedErrorMessage = new OrderNotFoundException(4815162342L).getMessage();
 
                 String url;
                 String jsonResponse;
 
-                url = "/api/merchant/restaurants/" + restaurantId + "/orders/" + orderIdThatDoesNotExist;
+                url = "/api/orders/" + orderIdThatDoesNotExist;
                 jsonResponse = httpRequestDispatcher.performGET(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
-                url = "/api/merchant/restaurants/" + restaurantId + "/orders/" + orderIdThatDoesNotExist + "/complete";
+                url = "/api/orders/" + orderIdThatDoesNotExist + "/complete";
                 jsonResponse = httpRequestDispatcher.performPATCH(url, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
             }
@@ -348,24 +410,25 @@ public class MerchantCenteredIntegrationTest {
         @DisplayName("Should NOT be able to retrieve info about Merchant B's restaurants")
         void shouldNotRetrieveUnownedRestaurantInfo_wrongMerchant() throws Exception {
             long someoneElsesRestaurantId = 2L;
-            long orderIdFromRestaurantNotOwned = 2L;
             String expectedErrorMessage = new RestaurantNotFoundException(2L).getMessage();
 
             String url;
             String jsonResponse;
 
 
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId;
+            url = "/api/restaurants/" + someoneElsesRestaurantId + "/by-logged-in-merchant";
             jsonResponse = httpRequestDispatcher.performGET(url, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
 
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId + "/orders";
+            url = "/api/orders?restaurant-id=" + someoneElsesRestaurantId;
             jsonResponse = httpRequestDispatcher.performGET(url, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
 
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId + "/orders/" + orderIdFromRestaurantNotOwned;
+            long orderIdFromRestaurantNotOwned = 2L;
+            expectedErrorMessage = new OrderNotFoundException(2L).getMessage();
+            url = "/api/orders/" + orderIdFromRestaurantNotOwned;
             jsonResponse = httpRequestDispatcher.performGET(url, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
         }
@@ -380,7 +443,7 @@ public class MerchantCenteredIntegrationTest {
             menuItemDto.setPrice(10.00);
             String expectedErrorMessage = new RestaurantNotFoundException(2L).getMessage();
 
-            String url = "/api/merchant/restaurants/" + someoneElsesRestaurantId + "/menuitems";
+            String url = "/api/restaurants/" + someoneElsesRestaurantId + "/menuitems";
             String jsonResponse = httpRequestDispatcher.performPOST(url, menuItemDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
         }
@@ -388,10 +451,9 @@ public class MerchantCenteredIntegrationTest {
         @Test
         @WithUserDetails("rebecca_merchant@example.com")
         @DisplayName("Should NOT be able to update information for Merchant B's restaurants")
-        void shouldNotUpdateUnownedRestaurantInfo() throws Exception {
+        void shouldNotUpdateUnownedRestaurantInfo_wrongMerchant() throws Exception {
             long someoneElsesRestaurantId = 2L;
             long menuItemIdFromRestaurantNotOwned = 4L;
-            long orderIdFromRestaurantNotOwned = 2L;
             String expectedErrorMessage = new RestaurantNotFoundException(2L).getMessage();
 
             String url;
@@ -400,7 +462,7 @@ public class MerchantCenteredIntegrationTest {
 
             RestaurantDtoIn updatedBasicRestaurantInfoDto = new RestaurantDtoIn();
             updatedBasicRestaurantInfoDto.setName("New Name");
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId;
+            url = "/api/restaurants/" + someoneElsesRestaurantId;
             jsonResponse = httpRequestDispatcher.performPATCH(url, updatedBasicRestaurantInfoDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
@@ -410,14 +472,14 @@ public class MerchantCenteredIntegrationTest {
             newTuesdayHours.setOpenTime(LocalTime.of(8, 0));
             newTuesdayHours.setCloseTime(LocalTime.of(20, 0));
             List<OperatingHoursDto> updateHoursDto = List.of(newTuesdayHours);
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId + "/hours";
+            url = "/api/restaurants/" + someoneElsesRestaurantId + "/hours";
             jsonResponse = httpRequestDispatcher.performPATCH(url, updateHoursDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
 
             AddressDto addressDto = new AddressDto();
             addressDto.setStreet1("New Street 1");
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId + "/address";
+            url = "/api/restaurants/" + someoneElsesRestaurantId + "/address";
             jsonResponse = httpRequestDispatcher.performPATCH(url, addressDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
@@ -425,13 +487,14 @@ public class MerchantCenteredIntegrationTest {
             MenuItemDto menuItemDto = new MenuItemDto();
             menuItemDto.setName("name");
             menuItemDto.setPrice(10.00);
-            url = "/api/merchant/restaurants/" + someoneElsesRestaurantId + "/menuitems/" + menuItemIdFromRestaurantNotOwned;
+            url = "/api/restaurants/" + someoneElsesRestaurantId + "/menuitems/" + menuItemIdFromRestaurantNotOwned;
             jsonResponse = httpRequestDispatcher.performPUT(url, menuItemDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
 
 
-            url = String.format("/api/merchant/restaurants/%d/orders/%d/complete",
-                    someoneElsesRestaurantId, orderIdFromRestaurantNotOwned);
+            long orderIdFromRestaurantNotOwned = 2L;
+            expectedErrorMessage = new OrderNotFoundException(2L).getMessage();
+            url = "/api/orders/" + orderIdFromRestaurantNotOwned + "/complete";
             jsonResponse = httpRequestDispatcher.performPATCH(url, addressDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
         }

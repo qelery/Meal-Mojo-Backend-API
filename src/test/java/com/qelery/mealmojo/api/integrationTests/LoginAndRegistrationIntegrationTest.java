@@ -65,7 +65,7 @@ public class LoginAndRegistrationIntegrationTest {
             userSignUpInfoDto.setFirstName("Gordon");
             userSignUpInfoDto.setLastName("Ramsay");
 
-            String url = "/auth/users/register";
+            String url = "/api/users/register";
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto);
             UserCreationDtoOut actualUserCreationDtoOut = objectMapper.readValue(jsonResponse, UserCreationDtoOut.class);
 
@@ -85,7 +85,7 @@ public class LoginAndRegistrationIntegrationTest {
             userSignUpInfoDto.setFirstName("Julia");
             userSignUpInfoDto.setLastName("Child");
 
-            String url = "/auth/users/register";
+            String url = "/api/users/register";
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto);
             UserCreationDtoOut actualUserCreationDtoOut = objectMapper.readValue(jsonResponse, UserCreationDtoOut.class);
 
@@ -108,7 +108,7 @@ public class LoginAndRegistrationIntegrationTest {
             userSignUpInfoDto.setFirstName("John");
             userSignUpInfoDto.setLastName("Matthews");
 
-            String url = "/auth/users/register";
+            String url = "/api/users/register";
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto, status().isConflict());
 
             assertContainsErrorMessage(jsonResponse, errorMessage);
@@ -126,7 +126,7 @@ public class LoginAndRegistrationIntegrationTest {
             String password = "password";
             LoginRequest loginRequest = new LoginRequest(username, password);
 
-            String url = "/auth/users/login";
+            String url = "/api/users/login";
             httpRequestDispatcher.performPOST(url, loginRequest, 200);
         }
 
@@ -137,7 +137,7 @@ public class LoginAndRegistrationIntegrationTest {
             String password = "notThePassword";
             LoginRequest loginRequest = new LoginRequest(username, password);
 
-            String url = "/auth/users/login";
+            String url = "/api/users/login";
             httpRequestDispatcher.performPOST(url, loginRequest, 403);
         }
 
@@ -148,7 +148,7 @@ public class LoginAndRegistrationIntegrationTest {
             String password = "password";
             LoginRequest loginRequest = new LoginRequest(username, password);
 
-            String url = "/auth/users/login";
+            String url = "/api/users/login";
             httpRequestDispatcher.performPOST(url, loginRequest, 403);
         }
     }

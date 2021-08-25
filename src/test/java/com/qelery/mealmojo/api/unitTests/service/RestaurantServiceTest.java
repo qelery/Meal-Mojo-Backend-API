@@ -1,12 +1,13 @@
 package com.qelery.mealmojo.api.unitTests.service;
 
-import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
+import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.repository.*;
-import com.qelery.mealmojo.api.service.MerchantService;
+import com.qelery.mealmojo.api.service.RestaurantService;
+import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,86 +27,141 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MerchantServiceTest {
+public class RestaurantServiceTest {
 
     @InjectMocks
-    MerchantService merchantService;
+    RestaurantService restaurantService;
 
-    @Mock
-    RestaurantRepository restaurantRepository;
-    @Mock
-    MenuItemRepository menuItemRepository;
     @Mock
     OrderRepository orderRepository;
     @Mock
-    AddressRepository addressRepository;
+    RestaurantRepository restaurantRepository;
     @Mock
     OperatingHoursRepository operatingHoursRepository;
     @Mock
-    Authentication authentication;
+    AddressRepository addressRepository;
+    @Mock
+    MenuItemRepository menuItemRepository;
+    @Mock
+    DistanceUtils distanceUtils;
     @Spy
     MapperUtils mapperUtils;
 
-    User loggedInUser;
-    MerchantProfile merchantProfile;
     Restaurant restaurant1;
     Restaurant restaurant2;
+    MenuItem menuItem1;
+    MenuItem menuItem2;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         this.restaurant1 = new Restaurant();
         restaurant1.setId(1L);
         restaurant1.setName("Restaurant1");
-        restaurant1.setDescription("Description for restaurant1");
+        restaurant1.setDescription("Restaurant1 description.");
         restaurant1.setDeliveryFee(3.00);
         this.restaurant2 = new Restaurant();
         restaurant2.setId(2L);
         restaurant2.setName("Restaurant2");
+        restaurant2.setDescription("Restaurant2 description.");
+        restaurant2.setIsActive(false);
 
-        this.merchantProfile = new MerchantProfile();
-        merchantProfile.setId(1L);
-        this.loggedInUser = new User();
-        loggedInUser.setMerchantProfile(merchantProfile);
-        when(authentication.getPrincipal()).thenReturn(loggedInUser);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-   }
+        this.menuItem1 = new MenuItem();
+        menuItem1.setId(1L);
+        menuItem1.setName("Salad 1");
+        menuItem1.setPrice(7.99);
+        this.menuItem2 = new MenuItem();
+        menuItem2.setId(2L);
+        menuItem2.setName("Salad 2");
+        menuItem2.setPrice(8.60);
 
-    @Test
-    @DisplayName("Should throw exception if user trying to retrieve information does not have a merchant profile")
-    void shouldThrowProfileNotFoundException() {
-        loggedInUser.setMerchantProfile(null);
-
-        assertThrows(ProfileNotFoundException.class, () -> merchantService.getAllRestaurantsOwned());
+        restaurant1.setMenuItems(List.of(menuItem1, menuItem2));
     }
 
     @Test
-    @DisplayName("Should return all restaurants owned by the logged in merchant user")
-    void getAllRestaurantsOwned() {
-        merchantProfile.setRestaurantsOwned(List.of(restaurant1, restaurant2));
-        List<Restaurant> restaurants = List.of(restaurant1, restaurant2);
-        List<RestaurantThinDtoOut> expectedRestaurantsDto = mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
-        when(restaurantRepository.findAllByMerchantProfileId(anyLong())).thenReturn(restaurants);
+    @DisplayName("Should get all active restaurants")
+    void getAllRestaurants() {
+        Restaurant activeRestaurant = restaurant1;
+        when(restaurantRepository.findAllByIsActive(true)).thenReturn(List.of(activeRestaurant));
 
-        List<RestaurantThinDtoOut> actualRestaurantsDto = merchantService.getAllRestaurantsOwned();
+        List<RestaurantThinDtoOut> actualRestaurantDtos = restaurantService.getAllRestaurants();
 
-        assertEquals(expectedRestaurantsDto, actualRestaurantsDto);
+        assertEquals(1, actualRestaurantDtos.size());
+        assertEquals(activeRestaurant.getName(), actualRestaurantDtos.get(0).getName());
     }
 
     @Test
-    @DisplayName("Should return a restaurant by id that is owned by the logged in merchant user")
-    void getSingleRestaurantOwned() {
-        merchantProfile.setRestaurantsOwned(List.of(restaurant1));
+    @DisplayName("Should get all active restaurants within specified distance")
+    void getRestaurantsWithinDistance() {
+        when(distanceUtils.filterWithinDistance(anyList(), anyDouble(), anyDouble(), anyInt()))
+                .thenReturn(List.of(restaurant1));
+
+        List<RestaurantThinDtoOut> actualRestaurantDtoOut = restaurantService.getRestaurantsWithinDistance(41.9, -87.6, 10);
+
+        assertEquals(1, actualRestaurantDtoOut.size());
+        assertEquals(restaurant1.getName(), actualRestaurantDtoOut.get(0).getName());
+    }
+
+    @Test
+    @DisplayName("Should get a restaurant by its id")
+    void getRestaurant() {
+        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+
+        RestaurantDtoOut actualRestaurantDto = restaurantService.getRestaurant(restaurant1.getId());
+
+        assertEquals(restaurant1.getName(), actualRestaurantDto.getName());
+    }
+
+    @Test
+    @DisplayName("Should throw exception attempting to get restaurant by id that doesn't exist")
+    void getRestaurantByNonExistentId() {
+        Long nonExistentId = 90210L;
+        when(restaurantRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        assertThrows(RestaurantNotFoundException.class, () -> restaurantService.getRestaurant(nonExistentId));
+    }
+
+    @Test
+    @DisplayName("Should return restaurant by id owned by the logged in merchant user")
+    void getSingleRestaurantOwnedByLoggedInMerchant() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
         RestaurantDtoOut expectedRestaurantDto = mapperUtils.map(restaurant1, RestaurantDtoOut.class);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.of(restaurant1));
 
-        RestaurantDtoOut actualRestaurantDto = merchantService.getSingleRestaurantOwned(merchantProfile.getId());
+        RestaurantDtoOut actualRestaurantDto = restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(restaurant2.getId());
 
         assertEquals(expectedRestaurantDto, actualRestaurantDto);
+    }
+
+    @Test
+    @DisplayName("Should throw exception when logged in merchant attempting to get restaurant by id that isn't owned by them")
+    void getSingleRestaurantUnOwnedByLoggedInMerchant_throwError() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1));
+        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(RestaurantNotFoundException.class, () ->
+                restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(restaurant2.getId()));
+    }
+
+    @Test
+    @DisplayName("Should return all restaurants owned by the logged in merchant user")
+    void getAllRestaurantsOwnedByLoggedInMerchant() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        List<Restaurant> restaurants = List.of(restaurant1, restaurant2);
+        List<RestaurantThinDtoOut> expectedRestaurantsDto = mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
+        when(restaurantRepository.findAllByMerchantProfileId(anyLong())).thenReturn(restaurants);
+
+        List<RestaurantThinDtoOut> actualRestaurantsDto = restaurantService.getAllRestaurantsOwnedByLoggedInMerchant();
+
+        assertEquals(expectedRestaurantsDto, actualRestaurantsDto);
     }
 
     @Test
@@ -117,7 +173,7 @@ class MerchantServiceTest {
         restaurantDtoIn.setHeroImageUrl("my-restaurant-image.jpg");
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
-        merchantService.createRestaurant(restaurantDtoIn);
+        restaurantService.createRestaurant(restaurantDtoIn);
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
         Restaurant savedRestaurant = restaurantCaptor.getValue();
@@ -129,10 +185,12 @@ class MerchantServiceTest {
     @Test
     @DisplayName("Should save created restaurant with logged in merchant as its owner")
     void createRestaurantAndSaveToMerchantProfile() {
+        User loggedInUser = addMerchantToSecurityContext();
+        MerchantProfile merchantProfile = loggedInUser.getMerchantProfile();
         RestaurantDtoIn restaurantDtoIn = new RestaurantDtoIn();
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
-        merchantService.createRestaurant(restaurantDtoIn);
+        restaurantService.createRestaurant(restaurantDtoIn);
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
         assertEquals(merchantProfile, restaurantCaptor.getValue().getMerchantProfile());
@@ -141,6 +199,8 @@ class MerchantServiceTest {
     @Test
     @DisplayName("Should update restaurant info and save changes to database")
     void updateRestaurantBasicInformation() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
         RestaurantDtoIn updatedInfoDto = new RestaurantDtoIn();
         updatedInfoDto.setName("Updated Name");
         updatedInfoDto.setDescription("Updated Restaurant Description");
@@ -149,7 +209,7 @@ class MerchantServiceTest {
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
-        merchantService.updateRestaurantBasicInformation(restaurant1.getId(), updatedInfoDto);
+        restaurantService.updateRestaurantBasicInformation(restaurant1.getId(), updatedInfoDto);
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
         Restaurant savedRestaurant = restaurantCaptor.getValue();
@@ -161,6 +221,8 @@ class MerchantServiceTest {
     @Test
     @DisplayName("Should update restaurant with new hours and save to database")
     void updateRestaurantHoursAddNewHours() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
         OperatingHoursDto tuesdayHoursDto = new OperatingHoursDto();
         tuesdayHoursDto.setDayOfWeek(DayOfWeek.TUESDAY);
         tuesdayHoursDto.setOpenTime(LocalTime.of(8,0));
@@ -172,7 +234,7 @@ class MerchantServiceTest {
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
 
-        merchantService.updateRestaurantHours(restaurant1.getId(), List.of(tuesdayHoursDto));
+        restaurantService.updateRestaurantHours(restaurant1.getId(), List.of(tuesdayHoursDto));
 
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
@@ -189,13 +251,15 @@ class MerchantServiceTest {
     }
 
     @Test
-    @DisplayName("Should overwrite existing hours if updating restaurant hours and hours for that day already exists")
+    @DisplayName("Should overwrite restaurant's existing if hours for that day already exists")
     void updateRestaurantHoursOverwriteExisting() {
-        OperatingHours currentTuesdayHours = new OperatingHours();
-        currentTuesdayHours.setDayOfWeek(DayOfWeek.TUESDAY);
-        currentTuesdayHours.setOpenTime(LocalTime.of(5, 0));
-        currentTuesdayHours.setCloseTime(LocalTime.of(23, 0));
-        restaurant1.setOperatingHoursList(List.of(currentTuesdayHours));
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        OperatingHours existingTuesdayHours = new OperatingHours();
+        existingTuesdayHours.setDayOfWeek(DayOfWeek.TUESDAY);
+        existingTuesdayHours.setOpenTime(LocalTime.of(5, 0));
+        existingTuesdayHours.setCloseTime(LocalTime.of(23, 0));
+        restaurant1.setOperatingHoursList(List.of(existingTuesdayHours));
 
         OperatingHoursDto updatedTuesdayHoursDto = new OperatingHoursDto();
         updatedTuesdayHoursDto.setDayOfWeek(DayOfWeek.TUESDAY);
@@ -207,7 +271,7 @@ class MerchantServiceTest {
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
 
-        merchantService.updateRestaurantHours(restaurant1.getId(), List.of(updatedTuesdayHoursDto));
+        restaurantService.updateRestaurantHours(restaurant1.getId(), List.of(updatedTuesdayHoursDto));
 
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
@@ -244,7 +308,7 @@ class MerchantServiceTest {
                 .thenReturn(Optional.ofNullable(restaurant1));
 
 
-        RestaurantThinDtoOut restaurantDto = merchantService.updateRestaurantAddress(restaurant1.getId(), updatedAddressDto);
+        RestaurantThinDtoOut restaurantDto = restaurantService.updateRestaurantAddress(restaurant1.getId(), updatedAddressDto);
         AddressDto savedAddress = restaurantDto.getAddress();
 
 
@@ -260,8 +324,34 @@ class MerchantServiceTest {
     }
 
     @Test
+    @DisplayName("Should get all menu items for a restaurant")
+    void getAllMenuItemsByRestaurant() {
+        List<MenuItem> menuItems = List.of(menuItem1, menuItem2);
+        restaurant1.setMenuItems(menuItems);
+        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+
+        List<MenuItemDto> actualMenuItemDtos = restaurantService.getAllMenuItemsByRestaurant(restaurant1.getId());
+
+        for (MenuItem expectedMenuItem: menuItems) {
+            assertTrue(actualMenuItemDtos.stream().anyMatch(actualDto -> actualDto.getName().equals(expectedMenuItem.getName())));
+        }
+    }
+
+    @Test
+    @DisplayName("Should get a menu item by its id")
+    void getMenuItemByRestaurant() {
+        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+
+        MenuItemDto actualMenuItemDto = restaurantService.getMenuItemByRestaurant(restaurant1.getId(), menuItem1.getId());
+
+        assertEquals(menuItem1.getName(), actualMenuItemDto.getName());
+    }
+
+    @Test
     @DisplayName("Should add a new menu item to a restaurant and save to database")
     void createMenuItem() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
         MenuItemDto menuItemDto = new MenuItemDto();
         menuItemDto.setName("Pizza");
         menuItemDto.setPrice(18.0);
@@ -269,7 +359,7 @@ class MerchantServiceTest {
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
-        merchantService.createMenuItem(restaurant1.getId(), menuItemDto);
+        restaurantService.createMenuItem(restaurant1.getId(), menuItemDto);
 
         verify(menuItemRepository).save(menuItemCaptor.capture());
         MenuItem savedMenuItem = menuItemCaptor.getValue();
@@ -280,6 +370,8 @@ class MerchantServiceTest {
     @Test
     @DisplayName("Should update a restaurant's menu item and save changes to database")
     void updateMenuItem() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
         MenuItem currentMenuItem = new MenuItem();
         currentMenuItem.setId(5L);
         currentMenuItem.setName("Pepperoni Pizza");
@@ -295,7 +387,7 @@ class MerchantServiceTest {
                 .thenReturn(Optional.ofNullable(restaurant1));
 
 
-        merchantService.updateMenuItem(restaurant1.getId(), currentMenuItem.getId(), updatedMenuItemDto);
+        restaurantService.updateMenuItem(restaurant1.getId(), currentMenuItem.getId(), updatedMenuItemDto);
 
 
         verify(menuItemRepository).save(menuItemCaptor.capture());
@@ -304,58 +396,15 @@ class MerchantServiceTest {
         assertEquals(updatedMenuItemDto.getPrice(), savedMenuItem.getPrice());
     }
 
-    @Test
-    @DisplayName("Should get all orders for a restaurant if it is owned by the logged in merchant")
-    void getAllOrdersForOwnedRestaurant() {
-        Order order1 = new Order();
-        order1.setTip(1.0);
-        Order order2 = new Order();
-        order2.setTip(2.0);
-        restaurant1.setOrders(List.of(order1, order2));
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
-                .thenReturn(Optional.ofNullable(restaurant1));
-        when(orderRepository.findAllByRestaurantId(anyLong()))
-                .thenReturn(restaurant1.getOrders());
 
-        List<OrderDtoOut> actualOrdersDto = merchantService.getAllOrdersForOwnedRestaurant(restaurant1.getId());
-
-        assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
-        assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
-    }
-
-    @Test
-    @DisplayName("Should get an order if its restaurant is owned by the logged in merchant")
-    void getSingleOrderForOwnedRestaurant() {
-        Order order = new Order();
-        order.setId(5L);
-        order.setTip(1.0);
-        restaurant1.setOrders(List.of(order));
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
-                .thenReturn(Optional.ofNullable(restaurant1));
-        when(orderRepository.findByIdAndRestaurantId(anyLong(), anyLong()))
-                .thenReturn(Optional.ofNullable(restaurant1.getOrders().get(0)));
-
-        OrderDtoOut actualOrderDto = merchantService.getSingleOrderForOwnedRestaurant(restaurant1.getId(), order.getId()) ;
-
-        assertEquals(order.getTip(), actualOrderDto.getTip());
-    }
-
-    @Test
-    @DisplayName("Should mark an order complete if its restaurant is owned by the logged in merchant")
-    void markOrderComplete() {
-        Order order = new Order();
-        order.setId(5L);
-        order.setIsCompleted(false);
-        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
-                .thenReturn(Optional.ofNullable(restaurant1));
-        when(orderRepository.findByIdAndRestaurantId(anyLong(), anyLong()))
-                .thenReturn(Optional.of(order));
-
-        merchantService.markOrderComplete(restaurant1.getId(), order.getId());
-
-        verify(orderRepository).save(orderCaptor.capture());
-        Order savedOrder = orderCaptor.getValue();
-        assertTrue(savedOrder.getIsCompleted());
+    private User addMerchantToSecurityContext() {
+        MerchantProfile merchantProfile = new MerchantProfile();
+        merchantProfile.setId(1L);
+        User user = new User();
+        user.setMerchantProfile(merchantProfile);
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return user;
     }
 }

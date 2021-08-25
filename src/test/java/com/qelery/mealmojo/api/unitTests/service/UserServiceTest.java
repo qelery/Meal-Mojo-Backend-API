@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
+import com.qelery.mealmojo.api.exception.UserNotFoundException;
 import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
 import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
 import com.qelery.mealmojo.api.model.entity.User;
@@ -24,10 +25,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -148,5 +149,50 @@ class UserServiceTest {
         assertEquals(loginRequest.getEmail(), usernameCaptor.getValue());
         assertEquals(user, userDetailsCaptor.getValue());
         assertEquals("myJwtToken", actualLoginResponse.getJWT());
+    }
+
+    @Test
+    @DisplayName("Should deactivate a user")
+    void changeUserActiveState_deactivate() {
+        User activeUser = new User();
+        activeUser.setId(1L);
+        activeUser.setIsActive(true);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(activeUser));
+
+        userService.changeUserActiveState(activeUser.getId(), false);
+
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertFalse(savedUser.getIsActive());
+    }
+
+    @Test
+    @DisplayName("Should re-activate a user")
+    void changeUserActiveState_activate() {
+        User deactivatedUser = new User();
+        deactivatedUser.setId(1L);
+        deactivatedUser.setIsActive(false);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(deactivatedUser));
+
+        userService.changeUserActiveState(deactivatedUser.getId(), true);
+
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertTrue(savedUser.getIsActive());
+    }
+
+    @Test
+    @DisplayName("Should throw error when trying to change active status on user that does not exist")
+    void changeUserActiveState_userNotFound() {
+        Long userIdThatDoesNotExist = 4493L;
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class,
+                () -> userService.changeUserActiveState(userIdThatDoesNotExist, true));
     }
 }

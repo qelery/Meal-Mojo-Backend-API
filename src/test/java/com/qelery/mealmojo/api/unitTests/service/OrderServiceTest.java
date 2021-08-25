@@ -1,18 +1,21 @@
 package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmptyOrderException;
+import com.qelery.mealmojo.api.exception.OrderNotFoundException;
 import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
-import com.qelery.mealmojo.api.model.dto.*;
+import com.qelery.mealmojo.api.model.dto.OrderDtoIn;
+import com.qelery.mealmojo.api.model.dto.OrderDtoOut;
 import com.qelery.mealmojo.api.model.entity.*;
+import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.service.OrderService;
-import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,9 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -46,18 +48,16 @@ class OrderServiceTest {
     @Mock
     MenuItemRepository menuItemRepository;
     @Mock
-    DistanceUtils distanceUtils;
-    @Mock
     Authentication authentication;
     @Spy
     MapperUtils mapperUtils;
 
-    User loggedInUser;
-    CustomerProfile customerProfile;
     Restaurant restaurant1;
     Restaurant restaurant2;
     MenuItem menuItem1;
     MenuItem menuItem2;
+    Order order1;
+    Order order2;
 
     @BeforeEach
     void setup() {
@@ -78,177 +78,313 @@ class OrderServiceTest {
         menuItem2.setName("Salad 2");
         menuItem2.setPrice(8.60);
 
+        order1 = new Order();
+        order1.setId(1L);
+        order1.setTip(1.0);
+        order1.setRestaurant(restaurant1);
+        order2 = new Order();
+        order2.setId(2L);
+        order2.setTip(2.0);
+        order2.setRestaurant(restaurant2);
+
         restaurant1.setMenuItems(List.of(menuItem1, menuItem2));
-
-        this.customerProfile = new CustomerProfile();
-        customerProfile.setId(1L);
-        this.loggedInUser = new User();
-        loggedInUser.setCustomerProfile(customerProfile);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        restaurant1.setOrders(List.of(order1));
+        restaurant2.setOrders(List.of(order2));
     }
 
-    @Test
-    @DisplayName("Should get all active restaurants")
-    void getAllRestaurants() {
-        Restaurant activeRestaurant = restaurant1;
-        when(restaurantRepository.findAllByIsActive(true)).thenReturn(List.of(activeRestaurant));
+    @Nested
+    @DisplayName("With merchant logged in,")
+    class WithMerchantLoggedIn {
 
-        List<RestaurantThinDtoOut> actualRestaurantDtos = orderService.getAllRestaurants();
+        @Test
+        @DisplayName("Should get all orders for owned restaurant by id")
+        void getAllOrdersForSingleOwnedRestaurant() {
+            User loggedInUser = addMerchantToSecurityContext();
+            loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+            Long restaurantId = 1L;
 
-        assertEquals(1, actualRestaurantDtos.size());
-        assertEquals(activeRestaurant.getName(), actualRestaurantDtos.get(0).getName());
-    }
+            List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-    @Test
-    @DisplayName("Should get all active restaurants within specified distance")
-    void getRestaurantsWithinDistance() {
-        when(distanceUtils.filterWithinDistance(anyList(), anyDouble(), anyDouble(), anyInt()))
-                .thenReturn(List.of(restaurant1));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+        }
 
-        List<RestaurantThinDtoOut> actualRestaurantDtoOut = orderService.getRestaurantsWithinDistance(41.9, -87.6, 10);
+        @Test
+        @DisplayName("Should throw exception when attempting to get all orders for restaurant not owned by merchant")
+        void getAllOrdersForNonOwnedRestaurant_throwException() {
+            User loggedInUser = addMerchantToSecurityContext();
+            loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
 
-        assertEquals(1, actualRestaurantDtoOut.size());
-        assertEquals(restaurant1.getName(), actualRestaurantDtoOut.get(0).getName());
-    }
+            MerchantProfile someOtherMerchantsProfile = new MerchantProfile();
+            Restaurant restaurant3 = new Restaurant();
+            restaurant3.setId(3L);
+            someOtherMerchantsProfile.setRestaurantsOwned(List.of(restaurant3));
 
-    @Test
-    @DisplayName("Should get a restaurant by its id")
-    void getRestaurant() {
-        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurant3.getId()));
+        }
 
-        RestaurantDtoOut actualRestaurantDto = orderService.getRestaurant(restaurant1.getId());
+        @Test
+        @DisplayName("Should get all orders for all restaurants owned if restaurant id not supplied")
+        void getAllOrdersForAllOwnedRestaurants() {
+            User loggedInUser = addMerchantToSecurityContext();
+            loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+            Long restaurantId = null;
 
-        assertEquals(restaurant1.getName(), actualRestaurantDto.getName());
-    }
+            List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-    @Test
-    @DisplayName("Should throw exception if try to get restaurant by id that doesn't exist")
-    void getRestaurantByNonExistentId() {
-        Long nonExistentId = 90210L;
-        when(restaurantRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
+        }
 
-        assertThrows(RestaurantNotFoundException.class, () -> orderService.getRestaurant(nonExistentId));
-    }
+        @Test
+        @DisplayName("Should get a single order if it belongs to a restaurant the merchant owns")
+        void getSingleOrderForOwnedRestaurant() {
+            User loggedInUser = addMerchantToSecurityContext();
+            loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+            Long orderId = 1L;
 
-    @Test
-    @DisplayName("Should get all menu items for a restaurant")
-    void getAllMenuItemsByRestaurant() {
+            OrderDtoOut actualOrderDto = orderService.getSingleOrder(orderId);
 
-        List<MenuItem> menuItems = List.of(menuItem1, menuItem2);
-        restaurant1.setMenuItems(menuItems);
-        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+            assertEquals(order1.getTip(), actualOrderDto.getTip());
+        }
 
-        List<MenuItemDto> actualMenuItemDtos = orderService.getAllMenuItemsByRestaurant(restaurant1.getId());
+        @Test
+        @DisplayName("Should throw exception when attempting to get an order that belongs to another merchant's restaurant")
+        void getSingleOrderForNonOwnedRestaurant_throwException() {
+            User loggedInUser = addMerchantToSecurityContext();
+            loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
 
-        for (MenuItem expectedMenuItem: menuItems) {
-            assertTrue(actualMenuItemDtos.stream().anyMatch(actualDto -> actualDto.getName().equals(expectedMenuItem.getName())));
+            MerchantProfile someOtherMerchantsProfile = new MerchantProfile();
+            Restaurant restaurant3 = new Restaurant();
+            restaurant3.setId(3L);
+            Order order3 = new Order();
+            order3.setId(3L);
+            someOtherMerchantsProfile.setRestaurantsOwned(List.of(restaurant3));
+
+            assertThrows(OrderNotFoundException.class, () -> orderService.getSingleOrder(order3.getId()));
         }
     }
 
-    @Test
-    @DisplayName("Should get a menu item by its id")
-    void getMenuItemByRestaurant() {
-        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+    @Nested
+    @DisplayName("With customer logged in,")
+    class WithCustomerLoggedIn {
 
-        MenuItemDto actualMenuItemDto = orderService.getMenuItemByRestaurant(restaurant1.getId(), menuItem1.getId());
+        User loggedInUser;
 
-        assertEquals(menuItem1.getName(), actualMenuItemDto.getName());
-    }
+        @BeforeEach
+        void addCustomerToSecurityContext() {
+            CustomerProfile customerProfile = new CustomerProfile();
+            customerProfile.setId(1L);
+            loggedInUser = new User();
+            loggedInUser.setRole(Role.CUSTOMER);
+            loggedInUser.setCustomerProfile(customerProfile);
+            Authentication authentication = mock(Authentication.class);
+            when(authentication.getPrincipal()).thenReturn(loggedInUser);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
 
-    @Test
-    @DisplayName("Should get customer's orders for all restaurants if optional restaurant id not supplied")
-    void getPlacedOrdersAll() {
-        Order order1 = new Order();
-        order1.setTip(4.00);
-        order1.setRestaurant(restaurant1);
-        Order order2 = new Order();
-        order2.setTip(7.00);
-        order2.setRestaurant(restaurant2);
-        List<Order> orders = List.of(order1, order2);
-        loggedInUser.getCustomerProfile().setPlacedOrders(orders);
-        when(authentication.getPrincipal()).thenReturn(loggedInUser);
+        @Test
+        @DisplayName("Should get all orders placed by customer for specified restaurant id")
+        void getAllOrdersPlaceByCustomerByRestaurantId() {
+            loggedInUser.getCustomerProfile().setPlacedOrders(List.of(order1, order2));
+            when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+            Long restaurantId = 1L;
 
-        List<OrderDtoOut> orderDtoOutList = orderService.getPlacedOrders(null);
+            List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-        for (Order expectedOrder: orders) {
-            assertTrue(orderDtoOutList.stream().anyMatch(actualDto -> actualDto.getTip().equals(expectedOrder.getTip())));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when attempting to get all orders placed by customer for restaurant id that doesn't exist")
+        void getAllOrdersPlaceByCustomerForNonExistentRestaurant_throwException() {
+            loggedInUser.getCustomerProfile().setPlacedOrders(List.of(order1, order2));
+            Long restaurantIdThatDoesNotExist = 875L;
+
+            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurantIdThatDoesNotExist));
+        }
+
+        @Test
+        @DisplayName("Should get all orders placed by customer if optional restaurant id not supplied")
+        void getAllOrdersPlaceByCustomer() {
+            loggedInUser.getCustomerProfile().setPlacedOrders(List.of(order1, order2));
+            Long restaurantId = null;
+
+            List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
+
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
+        }
+
+        @Test
+        @DisplayName("Should get single order placed by customer by order id")
+        void getSinglePlacedOrder() {
+            loggedInUser.getCustomerProfile().setPlacedOrders(List.of(order1, order2));
+            Long orderId = 1L;
+
+            OrderDtoOut actualOrderDto = orderService.getSingleOrder(orderId);
+
+            assertEquals(order1.getTip(), actualOrderDto.getTip());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when attempting to order placed by customer by order id that doesn't exist")
+        void getSinglePlacedOrderNonExistentId_throwException() {
+            loggedInUser.getCustomerProfile().setPlacedOrders(List.of(order1, order2));
+            Long orderIdThatDoesNotExist = 2849L;
+
+            assertThrows(OrderNotFoundException.class, () -> orderService.getSingleOrder(orderIdThatDoesNotExist));
+        }
+
+
+        @Test
+        @DisplayName("Should save new order to the database")
+        void submitOrder() {
+            Map<Long, Integer> quantityMap = new HashMap<>();
+            quantityMap.put(menuItem1.getId(), 3);
+            quantityMap.put(menuItem2.getId(), 5);
+
+            OrderDtoIn orderDtoIn = new OrderDtoIn();
+            orderDtoIn.setTip(6.00);
+            orderDtoIn.setMenuItemQuantitiesMap(quantityMap);
+
+            when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
+            when(menuItemRepository.findById(menuItem2.getId())).thenReturn(Optional.ofNullable(menuItem2));
+            ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+
+            orderService.submitOrder(orderDtoIn);
+
+            verify(orderRepository).save(orderCaptor.capture());
+            Order savedOrder = orderCaptor.getValue();
+            // Assert save Order looks correct
+            assertEquals(orderDtoIn.getTip(), savedOrder.getTip());
+            assertEquals(orderDtoIn.getIsDelivery(), savedOrder.getIsDelivery());
+            assertEquals(orderDtoIn.getPaymentMethod(), savedOrder.getPaymentMethod());
+            assertSame(loggedInUser.getCustomerProfile(), savedOrder.getCustomerProfile());
+            // Assert saved OrderLines have correct menu item associated with correct quantity ordered
+            List<OrderLine> savedOrderLines = savedOrder.getOrderLines();
+            assertEquals(2, savedOrderLines.size());
+            assertTrue(savedOrderLines.stream().anyMatch(line -> line.getQuantity().equals(3) && line.getMenuItem().getName().equals(menuItem1.getName())));
+            assertTrue(savedOrderLines.stream().anyMatch(line -> line.getQuantity().equals(5) && line.getMenuItem().getName().equals(menuItem2.getName())));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when attempting to save order that has no menu items listed for purchase")
+        void shouldNotSubmitEmptyOrder() {
+            Map<Long, Integer> emptyMap = new HashMap<>();
+
+            OrderDtoIn orderDtoIn = new OrderDtoIn();
+            orderDtoIn.setMenuItemQuantitiesMap(emptyMap);
+
+            assertThrows(EmptyOrderException.class, () -> orderService.submitOrder(orderDtoIn));
         }
     }
 
-    @Test
-    @DisplayName("Should get customer's orders for specific restaurant if optional restaurant id is supplied")
-    void getPlacedOrdersSpecificRestaurant() {
-        Order order1 = new Order();
-        order1.setTip(4.00);
-        order1.setRestaurant(restaurant1);
-        Order order2 = new Order();
-        order2.setTip(7.00);
-        order2.setRestaurant(restaurant2);
-        List<Order> orders = List.of(order1, order2);
-        loggedInUser.getCustomerProfile().setPlacedOrders(orders);
-        when(authentication.getPrincipal()).thenReturn(loggedInUser);
+    @Nested
+    @DisplayName("With admin logged in,")
+    class WithAdminLoggedIn {
 
-        List<OrderDtoOut> actualOrderDtoOutList = orderService.getPlacedOrders(restaurant1.getId());
+        @Test
+        @DisplayName("Should get all orders by restaurant id")
+        void getAllOrdersByRestaurant() {
+            addAdminToSecurityContext();
+            Long restaurantId = 1L;
+            when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
 
-        assertEquals(1, actualOrderDtoOutList.size());
-        assertEquals(order1.getTip(), actualOrderDtoOutList.get(0).getTip());
-    }
+            List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-    @Test
-    @DisplayName("Should save the new order to the database")
-    void submitOrder() {
-        Map<Long, Integer> quantityMap = new HashMap<>();
-        quantityMap.put(menuItem1.getId(), 3);
-        quantityMap.put(menuItem2.getId(), 5);
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+        }
 
-        OrderDtoIn orderDtoIn = new OrderDtoIn();
-        orderDtoIn.setTip(6.00);
-        orderDtoIn.setMenuItemQuantitiesMap(quantityMap);
+        @Test
+        @DisplayName("Should throw exception when attempting to get orders by restaurant id that doesn't exist")
+        void getAllOrdersByNonExistentRestaurant() {
+            addAdminToSecurityContext();
+            Long restaurantIdThatDoesNotExit = 433L;
+            when(restaurantRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        when(authentication.getPrincipal()).thenReturn(loggedInUser);
-        when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
-        when(menuItemRepository.findById(menuItem2.getId())).thenReturn(Optional.ofNullable(menuItem2));
-        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurantIdThatDoesNotExit));
+        }
 
-        orderService.submitOrder(orderDtoIn);
+        @Test
+        @DisplayName("Should get all orders in database if restaurant id not supplied")
+        void getAllOrders() {
+            addAdminToSecurityContext();
+            Long restaurantId = null;
+            when(orderRepository.findAll()).thenReturn(List.of(order1, order2));
 
-        verify(orderRepository).save(orderCaptor.capture());
-        Order savedOrder = orderCaptor.getValue();
-        // Assert Order itself looks correct
-        assertEquals(orderDtoIn.getTip(), savedOrder.getTip());
-        assertEquals(orderDtoIn.getIsDelivery(), savedOrder.getIsDelivery());
-        assertEquals(orderDtoIn.getPaymentMethod(), savedOrder.getPaymentMethod());
-        assertSame(loggedInUser.getCustomerProfile(), savedOrder.getCustomerProfile());
-        // Assert OrderLines have correct menu item associated with correct quantity ordered
-        List<OrderLine> savedOrderLines = savedOrder.getOrderLines();
-        assertEquals(2, savedOrderLines.size());
-        assertTrue(savedOrderLines.stream().anyMatch(line -> line.getQuantity().equals(3) && line.getMenuItem().getName().equals(menuItem1.getName())));
-        assertTrue(savedOrderLines.stream().anyMatch(line -> line.getQuantity().equals(5) && line.getMenuItem().getName().equals(menuItem2.getName())));
-    }
+            List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-    @Test
-    @DisplayName("Should throw exception if try to save order that has no menu items listed for purchase")
-    void shouldNotSubmitEmptyOrder() {
-        Map<Long, Integer> emptyMap = new HashMap<>();
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
+        }
 
-        OrderDtoIn orderDtoIn = new OrderDtoIn();
-        orderDtoIn.setMenuItemQuantitiesMap(emptyMap);
+        @Test
+        @DisplayName("Should get single by order id")
+        void getSingleOrderById() {
+            addAdminToSecurityContext();
+            when(orderRepository.findById(anyLong())).thenReturn(Optional.ofNullable(order1));
+            Long orderId = 1L;
 
-        assertThrows(EmptyOrderException.class, () -> orderService.submitOrder(orderDtoIn));
+            OrderDtoOut actualOrderDto = orderService.getSingleOrder(orderId);
+
+            assertEquals(order1.getTip(), actualOrderDto.getTip());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when attempting to get by order id that doesn't exist")
+        void getSingleOrderByNonExistentId_throwException() {
+            addAdminToSecurityContext();
+            when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+            Long orderIdThatDoesNotExist = 3098L;
+
+            assertThrows(OrderNotFoundException.class, () -> orderService.getSingleOrder(orderIdThatDoesNotExist));
+        }
     }
 
     @Test
     @DisplayName("Should throw exception if try to save order without customer logged in")
     void shouldOnlySubmitOrderIfCustomerLoggedIn() {
-        loggedInUser.setCustomerProfile(null);
+        addMerchantToSecurityContext();
         Map<Long, Integer> quantityMap = new HashMap<>();
         quantityMap.put(menuItem1.getId(), 3);
         OrderDtoIn orderDtoIn = new OrderDtoIn();
         orderDtoIn.setMenuItemQuantitiesMap(quantityMap);
 
-        when(authentication.getPrincipal()).thenReturn(loggedInUser);
-        when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
-
         assertThrows(ProfileNotFoundException.class, () -> orderService.submitOrder(orderDtoIn));
+    }
+
+    @Test
+    @DisplayName("Should mark an order complete if it belong to one of merchant's restaurants")
+    void markOrderComplete() {
+        User loggedInUser = addMerchantToSecurityContext();
+        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        order1.setIsCompleted(false);
+        ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
+
+        orderService.markOrderComplete(order1.getId());
+
+        verify(orderRepository).save(orderCaptor.capture());
+        Order savedOrder = orderCaptor.getValue();
+        assertTrue(savedOrder.getIsCompleted());
+    }
+
+    private User addMerchantToSecurityContext() {
+        MerchantProfile merchantProfile = new MerchantProfile();
+        merchantProfile.setId(1L);
+        User user = new User();
+        user.setRole(Role.MERCHANT);
+        user.setMerchantProfile(merchantProfile);
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return user;
+    }
+
+    private void addAdminToSecurityContext() {
+        User user = new User();
+        user.setRole(Role.ADMIN);
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

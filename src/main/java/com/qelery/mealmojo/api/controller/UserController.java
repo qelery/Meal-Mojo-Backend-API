@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth/users")
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
@@ -20,15 +20,21 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserCreationDtoOut createUser(@RequestBody UserCreationDtoIn userDto) {
         return userService.createUser(userDto);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     @ResponseStatus(HttpStatus.OK)
     public LoginResponse loginUser(@RequestBody LoginRequest loginRequest) {
         return userService.loginUser(loginRequest);
+    }
+
+    @PatchMapping("/users/{userId}/activation")
+    public UserCreationDtoOut setUserActiveState(@PathVariable Long userId,
+                                                 @RequestParam Boolean active) {
+        return userService.changeUserActiveState(userId, active);
     }
 }
