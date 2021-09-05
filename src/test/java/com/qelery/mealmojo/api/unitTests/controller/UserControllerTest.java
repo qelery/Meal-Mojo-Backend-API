@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.unitTests.controller;
 
 import com.qelery.mealmojo.api.controller.UserController;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDto;
+import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
@@ -29,19 +29,19 @@ class UserControllerTest {
     @Test
     @DisplayName("Should return user dto from service after creating user")
     void createUser() {
-        UserCreationDtoOut expectedDto = new UserCreationDtoOut();
-        when(userService.createUser(any(UserCreationDtoIn.class)))
-                .thenReturn(expectedDto);
+        LoginResponse expectedResponse = new LoginResponse("myJwtToken", new UserInfoDto());
+        when(userService.createUser(any(UserCreationDto.class)))
+                .thenReturn(expectedResponse);
 
-        UserCreationDtoOut actualDto = userController.createUser(new UserCreationDtoIn());
+        LoginResponse actualResponse = userController.createUser(new UserCreationDto());
 
-        assertEquals(expectedDto, actualDto);
+        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
-    @DisplayName("Should return LoginResponse/JWT from service after logging in user")
+    @DisplayName("Should return LoginResponse from service after logging in user")
     void loginUser() {
-        LoginResponse expectedResponse = new LoginResponse("myJwtToken");
+        LoginResponse expectedResponse = new LoginResponse("myJwtToken", new UserInfoDto());
         when(userService.loginUser(any(LoginRequest.class)))
                 .thenReturn(expectedResponse);
 
@@ -53,11 +53,11 @@ class UserControllerTest {
     @Test
     @DisplayName("Should return from service user with new active state")
     void changeUserActiveState() {
-        UserCreationDtoOut expectedUserCreationDtoOut = new UserCreationDtoOut();
+        UserInfoDto expectedUserInfoDto = new UserInfoDto();
         when(userService.changeUserActiveState(anyLong(), anyBoolean()))
-                .thenReturn(expectedUserCreationDtoOut);
+                .thenReturn(expectedUserInfoDto);
 
-        UserCreationDtoOut actualUserCreationDtoOUt = userController.setUserActiveState(1L, false);
-        assertEquals(actualUserCreationDtoOUt, expectedUserCreationDtoOut);
+        UserInfoDto actualUserInfoDto = userController.setUserActiveState(1L, false);
+        assertEquals(actualUserInfoDto, expectedUserInfoDto);
     }
 }

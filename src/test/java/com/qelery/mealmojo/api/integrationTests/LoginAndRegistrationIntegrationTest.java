@@ -2,11 +2,11 @@ package com.qelery.mealmojo.api.integrationTests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qelery.mealmojo.api.exception.EmailExistsException;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDto;
 import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
+import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
 import com.qelery.mealmojo.api.testUtils.HttpRequestDispatcher;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,8 @@ public class LoginAndRegistrationIntegrationTest {
 
     @BeforeEach
     void clearSecurityContext() {
-        SecurityContextHolder.clearContext();;
+        SecurityContextHolder.clearContext();
+        ;
     }
 
     @Nested
@@ -58,7 +59,7 @@ public class LoginAndRegistrationIntegrationTest {
         @Test
         @DisplayName("Should be able to sign up for a Customer account")
         void shouldRegisterCustomer() throws Exception {
-            UserCreationDtoIn userSignUpInfoDto = new UserCreationDtoIn();
+            UserCreationDto userSignUpInfoDto = new UserCreationDto();
             userSignUpInfoDto.setEmail("gordon@example.com");
             userSignUpInfoDto.setPassword("password");
             userSignUpInfoDto.setRole(Role.CUSTOMER);
@@ -67,9 +68,12 @@ public class LoginAndRegistrationIntegrationTest {
 
             String url = "/api/users/register";
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto);
-            UserCreationDtoOut actualUserCreationDtoOut = objectMapper.readValue(jsonResponse, UserCreationDtoOut.class);
+            LoginResponse actualLoginResponse = objectMapper.readValue(jsonResponse, LoginResponse.class);
 
-            assertThat(actualUserCreationDtoOut).usingRecursiveComparison().isEqualTo(userSignUpInfoDto);
+            assertThat(actualLoginResponse.getUserInfo())
+                    .usingRecursiveComparison()
+                    .ignoringFields("address")
+                    .isEqualTo(userSignUpInfoDto);
             Optional<User> userFromDatabase = userRepository.findByEmail(userSignUpInfoDto.getEmail());
             assertTrue(userFromDatabase.isPresent());
             assertEquals(Role.CUSTOMER, userFromDatabase.get().getRole());
@@ -78,7 +82,7 @@ public class LoginAndRegistrationIntegrationTest {
         @Test
         @DisplayName("Should be able to sign up for a Merchant account")
         void shouldRegisterMerchant() throws Exception {
-            UserCreationDtoIn userSignUpInfoDto = new UserCreationDtoIn();
+            UserCreationDto userSignUpInfoDto = new UserCreationDto();
             userSignUpInfoDto.setEmail("julia@example.com");
             userSignUpInfoDto.setPassword("password");
             userSignUpInfoDto.setRole(Role.MERCHANT);
@@ -87,9 +91,12 @@ public class LoginAndRegistrationIntegrationTest {
 
             String url = "/api/users/register";
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto);
-            UserCreationDtoOut actualUserCreationDtoOut = objectMapper.readValue(jsonResponse, UserCreationDtoOut.class);
+            LoginResponse actualLoginResponse = objectMapper.readValue(jsonResponse, LoginResponse.class);
 
-            assertThat(actualUserCreationDtoOut).usingRecursiveComparison().isEqualTo(userSignUpInfoDto);
+            assertThat(actualLoginResponse.getUserInfo())
+                    .usingRecursiveComparison()
+                    .ignoringFields("address")
+                    .isEqualTo(userSignUpInfoDto);
             Optional<User> userFromDatabase = userRepository.findByEmail(userSignUpInfoDto.getEmail());
             assertTrue(userFromDatabase.isPresent());
             assertEquals(Role.MERCHANT, userFromDatabase.get().getRole());
@@ -101,7 +108,7 @@ public class LoginAndRegistrationIntegrationTest {
             String emailAlreadyInDatabase = "john_customer@example.com";
             String errorMessage = new EmailExistsException(emailAlreadyInDatabase).getMessage();
 
-            UserCreationDtoIn userSignUpInfoDto = new UserCreationDtoIn();
+            UserCreationDto userSignUpInfoDto = new UserCreationDto();
             userSignUpInfoDto.setEmail(emailAlreadyInDatabase);
             userSignUpInfoDto.setPassword("password");
             userSignUpInfoDto.setRole(Role.CUSTOMER);
@@ -149,7 +156,7 @@ public class LoginAndRegistrationIntegrationTest {
             LoginRequest loginRequest = new LoginRequest(username, password);
 
             String url = "/api/users/login";
-            httpRequestDispatcher.performPOST(url, loginRequest, 403);
+            httpRequestDispatcher.performPOST(url, loginRequest, 401);
         }
     }
 }

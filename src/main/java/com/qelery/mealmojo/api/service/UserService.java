@@ -2,8 +2,8 @@ package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.exception.UserNotFoundException;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDto;
+import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.entity.CustomerProfile;
 import com.qelery.mealmojo.api.model.entity.MerchantProfile;
 import com.qelery.mealmojo.api.model.entity.User;
@@ -48,40 +48,42 @@ public class UserService {
         this.mapperUtils = mapperUtils;
     }
 
-    public UserCreationDtoOut createUser(UserCreationDtoIn userCreationDtoIn) {
-        User user = mapperUtils.map(userCreationDtoIn, User.class);
+    public LoginResponse createUser(UserCreationDto userCreationDto) {
+        User user = mapperUtils.map(userCreationDto, User.class);
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             if (user.getRole() == Role.CUSTOMER) {
                 CustomerProfile customerProfile = new CustomerProfile();
-                customerProfile.setFirstName(userCreationDtoIn.getFirstName());
-                customerProfile.setLastName(userCreationDtoIn.getLastName());
+                customerProfile.setFirstName(userCreationDto.getFirstName());
+                customerProfile.setLastName(userCreationDto.getLastName());
                 user.setCustomerProfile(customerProfile);
             } else {
                 MerchantProfile merchantProfile = new MerchantProfile();
-                merchantProfile.setFirstName(userCreationDtoIn.getFirstName());
-                merchantProfile.setLastName(userCreationDtoIn.getLastName());
+                merchantProfile.setFirstName(userCreationDto.getFirstName());
+                merchantProfile.setLastName(userCreationDto.getLastName());
                 user.setMerchantProfile(merchantProfile);
             }
             userRepository.save(user);
-            return mapperUtils.map(user, UserCreationDtoOut.class);
         }
+        LoginRequest loginRequest = new LoginRequest(userCreationDto.getEmail(), userCreationDto.getPassword());
+        return loginUser(loginRequest);
     }
 
     public LoginResponse loginUser(LoginRequest loginRequest) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         final String JWT = jwtUtils.generateToken(userDetails);
-        return new LoginResponse(JWT);
+        UserInfoDto userInfoDto = mapperUtils.map((User) userDetails, UserInfoDto.class);
+        return new LoginResponse(JWT, userInfoDto);
     }
 
-    public UserCreationDtoOut changeUserActiveState(Long userId, Boolean active) {
+    public UserInfoDto changeUserActiveState(Long userId, Boolean active) {
         Optional<User> optionalUser = userRepository.findById(userId);
         User user = optionalUser.orElseThrow(() -> new UserNotFoundException(userId));
         user.setIsActive(active);
         userRepository.save(user);
-        return mapperUtils.map(user, UserCreationDtoOut.class);
+        return mapperUtils.map(user, UserInfoDto.class);
     }
 }

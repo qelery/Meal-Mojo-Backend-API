@@ -5,6 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -66,6 +67,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleException(UserNotFoundException ex, WebRequest request) {
         ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleException(AuthenticationException ex, WebRequest request) {
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.UNAUTHORIZED, request);
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

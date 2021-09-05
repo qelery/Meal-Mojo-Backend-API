@@ -1,7 +1,7 @@
 package com.qelery.mealmojo.api.controller;
 
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDto;
+import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.service.UserService;
@@ -22,7 +22,7 @@ public class UserController {
 
     @PostMapping("/users/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserCreationDtoOut createUser(@RequestBody UserCreationDtoIn userDto) {
+    public LoginResponse createUser(@RequestBody UserCreationDto userDto) {
         return userService.createUser(userDto);
     }
 
@@ -33,8 +33,8 @@ public class UserController {
     }
 
     @PatchMapping("/users/{userId}/activation")
-    public UserCreationDtoOut setUserActiveState(@PathVariable Long userId,
-                                                 @RequestParam Boolean active) {
+    public UserInfoDto setUserActiveState(@PathVariable Long userId,
+                                          @RequestParam Boolean active) {
         return userService.changeUserActiveState(userId, active);
     }
 }

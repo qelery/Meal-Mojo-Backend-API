@@ -2,8 +2,9 @@ package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.exception.UserNotFoundException;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoIn;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserCreationDto;
+import com.qelery.mealmojo.api.model.entity.CustomerProfile;
+import com.qelery.mealmojo.api.model.entity.MerchantProfile;
 import com.qelery.mealmojo.api.model.entity.User;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -58,15 +58,15 @@ class UserServiceTest {
     @Captor
     ArgumentCaptor<UserDetails> userDetailsCaptor;
 
-    UserCreationDtoIn userCreationDtoIn;
+    UserCreationDto userCreationDto;
 
     @BeforeEach
     void setup() {
-        userCreationDtoIn = new UserCreationDtoIn();
-        userCreationDtoIn.setFirstName("John");
-        userCreationDtoIn.setLastName("Smith");
-        userCreationDtoIn.setEmail("john@example.com");
-        userCreationDtoIn.setPassword("password");
+        userCreationDto = new UserCreationDto();
+        userCreationDto.setFirstName("John");
+        userCreationDto.setLastName("Smith");
+        userCreationDto.setEmail("john@example.com");
+        userCreationDto.setPassword("password");
     }
 
     @Nested
@@ -75,47 +75,71 @@ class UserServiceTest {
         @Test
         @DisplayName("with a CustomerProfile")
         void createUserCustomer() {
-            userCreationDtoIn.setRole(Role.CUSTOMER);
+            userCreationDto.setRole(Role.CUSTOMER);
 
-            UserCreationDtoOut userCreationDtoOut = userService.createUser(userCreationDtoIn);
+            CustomerProfile expectedCustomerProfile = new CustomerProfile();
+            expectedCustomerProfile.setFirstName(userCreationDto.getFirstName());
+            expectedCustomerProfile.setLastName(userCreationDto.getLastName());
+            User expectedUser = new User();
+            expectedUser.setCustomerProfile(expectedCustomerProfile);
+            expectedUser.setEmail(userCreationDto.getEmail());
+            expectedUser.setRole(userCreationDto.getRole());
 
-            verify(passwordEncoder).encode(userCreationDtoIn.getPassword());
+            when(userDetailsService.loadUserByUsername(anyString()))
+                    .thenReturn(expectedUser);
+            when(jwtUtils.generateToken(any(UserDetails.class)))
+                    .thenReturn("myJwtToken");
+
+            LoginResponse loginResponse = userService.createUser(userCreationDto);
+
+            verify(passwordEncoder).encode(userCreationDto.getPassword());
             verify(userRepository).save(userCaptor.capture());
             User userSavedToDatabase = userCaptor.getValue();
-            verify(mapperUtils).map(userSavedToDatabase, UserCreationDtoOut.class);
 
-            assertEquals(userCreationDtoIn.getEmail(), userSavedToDatabase.getEmail());
-            assertEquals(userCreationDtoIn.getRole(), userSavedToDatabase.getRole());
-            assertEquals(userCreationDtoIn.getFirstName(), userSavedToDatabase.getCustomerProfile().getFirstName());
-            assertEquals(userCreationDtoIn.getLastName(), userSavedToDatabase.getCustomerProfile().getLastName());
+            assertEquals(userCreationDto.getEmail(), userSavedToDatabase.getEmail());
+            assertEquals(userCreationDto.getRole(), userSavedToDatabase.getRole());
+            assertEquals(userCreationDto.getFirstName(), userSavedToDatabase.getCustomerProfile().getFirstName());
+            assertEquals(userCreationDto.getLastName(), userSavedToDatabase.getCustomerProfile().getLastName());
 
-            assertEquals(userCreationDtoIn.getFirstName(), userCreationDtoOut.getFirstName());
-            assertEquals(userCreationDtoIn.getLastName(), userCreationDtoOut.getLastName());
-            assertEquals(userCreationDtoIn.getEmail(), userCreationDtoOut.getEmail());
-            assertEquals(userCreationDtoIn.getRole(), userCreationDtoOut.getRole());
+            assertEquals(userCreationDto.getFirstName(), loginResponse.getUserInfo().getFirstName());
+            assertEquals(userCreationDto.getLastName(), loginResponse.getUserInfo().getLastName());
+            assertEquals(userCreationDto.getEmail(), loginResponse.getUserInfo().getEmail());
+            assertEquals("myJwtToken", loginResponse.getToken());
         }
 
         @Test
         @DisplayName("with a MerchantProfile")
         void createUserMerchant() {
-            userCreationDtoIn.setRole(Role.MERCHANT);
+            userCreationDto.setRole(Role.MERCHANT);
 
-            UserCreationDtoOut userCreationDtoOut = userService.createUser(userCreationDtoIn);
+            MerchantProfile expectedMerchantProfile = new MerchantProfile();
+            expectedMerchantProfile.setFirstName(userCreationDto.getFirstName());
+            expectedMerchantProfile.setLastName(userCreationDto.getLastName());
+            User expectedUser = new User();
+            expectedUser.setMerchantProfile(expectedMerchantProfile);
+            expectedUser.setEmail(userCreationDto.getEmail());
+            expectedUser.setRole(userCreationDto.getRole());
 
-            verify(passwordEncoder).encode(userCreationDtoIn.getPassword());
+            when(userDetailsService.loadUserByUsername(anyString()))
+                    .thenReturn(expectedUser);
+            when(jwtUtils.generateToken(any(UserDetails.class)))
+                    .thenReturn("myJwtToken");
+
+            LoginResponse loginResponse = userService.createUser(userCreationDto);
+
+            verify(passwordEncoder).encode(userCreationDto.getPassword());
             verify(userRepository).save(userCaptor.capture());
             User userSavedToDatabase = userCaptor.getValue();
-            verify(mapperUtils).map(userSavedToDatabase, UserCreationDtoOut.class);
 
-            assertEquals(userCreationDtoIn.getEmail(), userSavedToDatabase.getEmail());
-            assertEquals(userCreationDtoIn.getRole(), userSavedToDatabase.getRole());
-            assertEquals(userCreationDtoIn.getFirstName(), userSavedToDatabase.getMerchantProfile().getFirstName());
-            assertEquals(userCreationDtoIn.getLastName(), userSavedToDatabase.getMerchantProfile().getLastName());
+            assertEquals(userCreationDto.getEmail(), userSavedToDatabase.getEmail());
+            assertEquals(userCreationDto.getRole(), userSavedToDatabase.getRole());
+            assertEquals(userCreationDto.getFirstName(), userSavedToDatabase.getMerchantProfile().getFirstName());
+            assertEquals(userCreationDto.getLastName(), userSavedToDatabase.getMerchantProfile().getLastName());
 
-            assertEquals(userCreationDtoIn.getFirstName(), userCreationDtoOut.getFirstName());
-            assertEquals(userCreationDtoIn.getLastName(), userCreationDtoOut.getLastName());
-            assertEquals(userCreationDtoIn.getEmail(), userCreationDtoOut.getEmail());
-            assertEquals(userCreationDtoIn.getRole(), userCreationDtoOut.getRole());
+            assertEquals(userCreationDto.getFirstName(), loginResponse.getUserInfo().getFirstName());
+            assertEquals(userCreationDto.getLastName(), loginResponse.getUserInfo().getLastName());
+            assertEquals(userCreationDto.getEmail(), loginResponse.getUserInfo().getEmail());
+            assertEquals("myJwtToken", loginResponse.getToken());
         }
 
         @Test
@@ -124,9 +148,9 @@ class UserServiceTest {
             when(userRepository.existsByEmail(anyString()))
                     .thenReturn(true);
             Exception exception = assertThrows(EmailExistsException.class, () -> {
-                userService.createUser(userCreationDtoIn);
+                userService.createUser(userCreationDto);
             });
-            assertEquals("User already exists with email " + userCreationDtoIn.getEmail(), exception.getMessage());
+            assertEquals("User already exists with email " + userCreationDto.getEmail(), exception.getMessage());
         }
     }
 
@@ -142,13 +166,12 @@ class UserServiceTest {
 
         LoginResponse actualLoginResponse = userService.loginUser(loginRequest);
 
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(userDetailsService).loadUserByUsername(usernameCaptor.capture());
         verify(jwtUtils).generateToken(userDetailsCaptor.capture());
 
-        assertEquals(loginRequest.getEmail(), usernameCaptor.getValue());
+        assertEquals(loginRequest.getUsername(), usernameCaptor.getValue());
         assertEquals(user, userDetailsCaptor.getValue());
-        assertEquals("myJwtToken", actualLoginResponse.getJWT());
+        assertEquals("myJwtToken", actualLoginResponse.getToken());
     }
 
     @Test

@@ -1,10 +1,10 @@
 package com.qelery.mealmojo.api.service.utility;
 
 import com.qelery.mealmojo.api.model.dto.AddressDto;
-import com.qelery.mealmojo.api.model.dto.CustomerDetailsDto;
-import com.qelery.mealmojo.api.model.dto.UserCreationDtoOut;
+import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.User;
+import com.qelery.mealmojo.api.model.enums.Role;
 import org.modelmapper.Conditions;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -50,31 +50,27 @@ public class MapperUtils {
     }
 
     private void setAdditionalConverters(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(User.class, UserCreationDtoOut.class).setPreConverter(nameConverterUserCreationDtoOut);
-        modelMapper.createTypeMap(User.class, CustomerDetailsDto.class).setPreConverter(userToCustomerDetailsDtoConverter);
+        modelMapper.createTypeMap(User.class, UserInfoDto.class).setPreConverter(userToUserInfoDtoConverter);
         modelMapper.createTypeMap(Address.class, Address.class).setPreConverter(streetsConverter);
     }
 
-    Converter<User, UserCreationDtoOut> nameConverterUserCreationDtoOut = mappingContext -> {
+    Converter<User, UserInfoDto> userToUserInfoDtoConverter = mappingContext -> {
         User source = mappingContext.getSource();
-        UserCreationDtoOut destination = mappingContext.getDestination();
-        if (source.getCustomerProfile() != null) {
+        UserInfoDto destination = mappingContext.getDestination();
+        if (source.getRole() == Role.CUSTOMER) {
+            if (source.getCustomerProfile().getAddress() != null) {
+                AddressDto addressDto = this.map(source.getCustomerProfile().getAddress(), AddressDto.class);
+                destination.setAddress(addressDto);
+            } else {
+                destination.setAddress(null);
+            }
             destination.setFirstName(source.getCustomerProfile().getFirstName());
             destination.setLastName(source.getCustomerProfile().getLastName());
-        } else if (source.getMerchantProfile() != null) {
+        } else if (source.getRole() == Role.MERCHANT) {
             destination.setFirstName(source.getMerchantProfile().getFirstName());
             destination.setLastName(source.getMerchantProfile().getLastName());
+            destination.setAddress(null);
         }
-        return destination;
-    };
-
-    Converter<User, CustomerDetailsDto> userToCustomerDetailsDtoConverter = mappingContext -> {
-        User source = mappingContext.getSource();
-        CustomerDetailsDto destination = mappingContext.getDestination();
-        destination.setFirstName(source.getCustomerProfile().getFirstName());
-        destination.setLastName(source.getCustomerProfile().getLastName());
-        AddressDto addressDto = this.map(source.getCustomerProfile().getAddress(), AddressDto.class);
-        destination.setAddress(addressDto);
         return destination;
     };
 
