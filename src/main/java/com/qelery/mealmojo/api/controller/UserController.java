@@ -33,6 +33,7 @@ public class UserController {
     }
 
     @PatchMapping("/users/{userId}/activation")
+    @ResponseStatus(HttpStatus.OK)
     public UserInfoDto setUserActiveState(@PathVariable Long userId,
                                           @RequestParam Boolean active) {
         return userService.changeUserActiveState(userId, active);

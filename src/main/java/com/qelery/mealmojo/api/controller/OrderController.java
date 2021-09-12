@@ -26,6 +26,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
     public OrderDtoOut getSingleOrder(@PathVariable Long orderId) {
         return this.orderService.getSingleOrder(orderId);
     }
