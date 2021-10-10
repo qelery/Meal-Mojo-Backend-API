@@ -264,11 +264,7 @@ class UserServiceTest {
         updatedUserInfo.setEmail("michael@example.com");
         updatedUserInfo.setAddress(newAddress);
 
-        Authentication authentication = mock(Authentication.class);
-        SecurityContextHolder.clearContext();
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        when(authentication.getPrincipal())
-                .thenReturn(user);
+        addUserToSecurityContext(user);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
@@ -282,7 +278,7 @@ class UserServiceTest {
         assertEquals(updatedUserInfo.getLastName(), savedUser.getCustomerProfile().getLastName());
         Assertions.assertThat(savedUser.getCustomerProfile().getAddress())
                 .usingRecursiveComparison()
-                .ignoringActualNullFields()
+                .ignoringExpectedNullFields()
                 .isEqualTo(updatedUserInfo.getAddress());
     }
 
@@ -347,6 +343,54 @@ class UserServiceTest {
         addUserToSecurityContext(user);
 
         assertThrows(ProhibitedByRoleException.class, () -> userService.getLoggedInUserMerchantProfile());
+    }
+
+    @Test
+    @DisplayName("Should update user address")
+    void updateAddress() {
+        AddressDto updatedAddressDto = new AddressDto();
+        updatedAddressDto.setStreet1("02115");
+        updatedAddressDto.setCity("Boston");
+        updatedAddressDto.setState(State.MA);
+        updatedAddressDto.setZipcode("02115");
+        updatedAddressDto.setCountry(Country.US);
+        updatedAddressDto.setLatitude(42.3393849);
+        updatedAddressDto.setLongitude(-71.0962367);
+
+        Address oldAddress = new Address();
+        oldAddress.setStreet1("1400 S Lake Shore Dr");
+        oldAddress.setStreet2("Building 2");
+        oldAddress.setStreet3("#3A");
+        oldAddress.setCity("Chicago");
+        oldAddress.setState(State.IL);
+        oldAddress.setZipcode("60605");
+        oldAddress.setCountry(Country.US);
+        oldAddress.setLatitude(41.866265);
+        oldAddress.setLongitude(-87.6191692);
+
+        CustomerProfile customerProfile = new CustomerProfile();
+        customerProfile.setFirstName("John");
+        customerProfile.setLastName("Smith");
+        customerProfile.setAddress(oldAddress);
+        User user = new User();
+        user.setRole(Role.CUSTOMER);
+        user.setCustomerProfile(customerProfile);
+        addUserToSecurityContext(user);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+        userService.updateAddress(updatedAddressDto);
+
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertEquals(user.getEmail(), savedUser.getEmail());
+        assertEquals(customerProfile.getFirstName(), savedUser.getCustomerProfile().getFirstName());
+        assertEquals(customerProfile.getLastName(), savedUser.getCustomerProfile().getLastName());
+        Address savedAddress = savedUser.getCustomerProfile().getAddress();
+        Assertions.assertThat(savedAddress)
+                .usingRecursiveComparison()
+                .ignoringExpectedNullFields()
+                .isEqualTo(updatedAddressDto);
     }
 
     private void addUserToSecurityContext(User user) {

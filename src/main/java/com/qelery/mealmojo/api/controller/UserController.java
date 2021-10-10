@@ -1,5 +1,6 @@
 package com.qelery.mealmojo.api.controller;
 
+import com.qelery.mealmojo.api.model.dto.AddressDto;
 import com.qelery.mealmojo.api.model.dto.UserCreationDto;
 import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
@@ -38,10 +39,16 @@ public class UserController {
                                           @RequestParam Boolean active) {
         return userService.changeUserActiveState(userId, active);
     }
-    
+
     @PatchMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     public UserInfoDto updateUser(@RequestBody UserInfoDto updatedUserInfo) {
         return userService.updateUser(updatedUserInfo);
+    }
+
+    @PatchMapping("/users/address")
+    @ResponseStatus(HttpStatus.OK)
+    public UserInfoDto updateAddress(@RequestBody AddressDto addressDto) {
+        return userService.updateAddress(addressDto);
     }
 }

@@ -1,6 +1,7 @@
 package com.qelery.mealmojo.api.unitTests.controller;
 
 import com.qelery.mealmojo.api.controller.UserController;
+import com.qelery.mealmojo.api.model.dto.AddressDto;
 import com.qelery.mealmojo.api.model.dto.UserCreationDto;
 import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
@@ -69,6 +70,17 @@ class UserControllerTest {
                 .thenReturn(expectedUserInfoDto);
 
         UserInfoDto actualUserInfoDto = userController.updateUser(new UserInfoDto());
+        assertEquals(actualUserInfoDto, expectedUserInfoDto);
+    }
+
+    @Test
+    @DisplayName("Should return from service user dto with update address")
+    void updateAddress() {
+        UserInfoDto expectedUserInfoDto = new UserInfoDto();
+        when(userService.updateAddress(any(AddressDto.class)))
+                .thenReturn(expectedUserInfoDto);
+
+        UserInfoDto actualUserInfoDto = userController.updateAddress(new AddressDto());
         assertEquals(actualUserInfoDto, expectedUserInfoDto);
     }
 }

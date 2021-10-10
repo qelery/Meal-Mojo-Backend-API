@@ -3,6 +3,7 @@ package com.qelery.mealmojo.api.service;
 import com.qelery.mealmojo.api.exception.EmailExistsException;
 import com.qelery.mealmojo.api.exception.ProhibitedByRoleException;
 import com.qelery.mealmojo.api.exception.UserNotFoundException;
+import com.qelery.mealmojo.api.model.dto.AddressDto;
 import com.qelery.mealmojo.api.model.dto.UserCreationDto;
 import com.qelery.mealmojo.api.model.dto.UserInfoDto;
 import com.qelery.mealmojo.api.model.entity.*;
@@ -100,6 +101,17 @@ public class UserService {
         profile.setAddress(updatedAddress);
         userRepository.save(loggedInUser);
         return updatedUserInfo;
+    }
+
+    public UserInfoDto updateAddress(AddressDto updatedAddress) {
+        User loggedInUser = getLoggedInUser();
+        Profile profile = loggedInUser.getRole() == Role.CUSTOMER ?
+                loggedInUser.getCustomerProfile() :
+                loggedInUser.getMerchantProfile();
+        Address newAddress = mapperUtils.map(updatedAddress, Address.class);
+        profile.setAddress(newAddress);
+        userRepository.save(loggedInUser);
+        return mapperUtils.map(loggedInUser, UserInfoDto.class);
     }
 
     public Role getLoggedInUserRole() {

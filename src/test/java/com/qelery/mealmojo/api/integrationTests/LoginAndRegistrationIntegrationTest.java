@@ -235,4 +235,57 @@ public class LoginAndRegistrationIntegrationTest {
                     .isEqualTo(updatedUserInfoDto.getAddress());
         }
     }
+
+    @Nested
+    @DisplayName("[Integration Tests - Through All Layers] Should be able to update user address,")
+    class throughAllLayers_user_updateUserAddress {
+
+        AddressDto updatedAddressDto;
+
+        @BeforeEach()
+        void setup() {
+            updatedAddressDto = new AddressDto();
+            updatedAddressDto.setStreet1("60 E Broadway");
+            updatedAddressDto.setCity("Bloomington");
+            updatedAddressDto.setZipcode("55425");
+            updatedAddressDto.setState(State.MN);
+            updatedAddressDto.setCountry(Country.US);
+            updatedAddressDto.setLatitude(44.8548651);
+            updatedAddressDto.setLongitude(93.2422148);
+        }
+
+        @Test
+        @WithUserDetails("alice_customer@example.com")
+        @DisplayName("As a customer")
+        void shouldUpdateUserAddress_customer() throws Exception {
+            String url = "/api/users/address";
+            httpRequestDispatcher.performPATCH(url, updatedAddressDto, 200);
+
+            Optional<User> userFromDatabase = userRepository.findByEmailIgnoreCase("alice_customer@example.com");
+            assertTrue(userFromDatabase.isPresent());
+
+            Address updatedAddressFromDatabase = userFromDatabase.get().getCustomerProfile().getAddress();
+            assertThat(updatedAddressFromDatabase)
+                    .usingRecursiveComparison()
+                    .ignoringFields("id")
+                    .isEqualTo(updatedAddressDto);
+        }
+
+        @Test
+        @WithUserDetails("rebecca_merchant@example.com")
+        @DisplayName("As a merchant")
+        void shouldUpdateUserAddress_merchant() throws Exception {
+            String url = "/api/users/address";
+            httpRequestDispatcher.performPATCH(url, updatedAddressDto, 200);
+
+            Optional<User> userFromDatabase = userRepository.findByEmailIgnoreCase("rebecca_merchant@example.com");
+            assertTrue(userFromDatabase.isPresent());
+
+            Address updatedAddressFromDatabase = userFromDatabase.get().getMerchantProfile().getAddress();
+            assertThat(updatedAddressFromDatabase)
+                    .usingRecursiveComparison()
+                    .ignoringFields("id")
+                    .isEqualTo(updatedAddressDto);
+        }
+    }
 }
