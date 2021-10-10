@@ -59,12 +59,13 @@ public class RestaurantService {
     }
 
     public RestaurantDtoOut getRestaurant(Long restaurantId) {
-        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
-        if (restaurant.isPresent()) {
-            return mapperUtils.map(restaurant.get(), RestaurantDtoOut.class);
-        } else {
-            throw new RestaurantNotFoundException(restaurantId);
-        }
+        Restaurant restaurant = getRestaurantEntity(restaurantId);
+        return mapperUtils.map(restaurant, RestaurantDtoOut.class);
+    }
+
+    public Restaurant getRestaurantEntity(Long restaurantId) {
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
+        return optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
     }
 
     // TODO: Tests for locked down routes.

@@ -108,8 +108,18 @@ class RestaurantServiceTest {
         assertEquals(restaurant1.getName(), actualRestaurantDtoOut.get(0).getName());
     }
 
+
     @Test
-    @DisplayName("Should get a restaurant by its id")
+    @DisplayName("Should get a restaurant by its id, and return the entity")
+    void getRestaurantEntity() {
+        when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+
+        Restaurant actualRestaurant = restaurantService.getRestaurantEntity(restaurant1.getId());
+        assertEquals(restaurant1, actualRestaurant);
+    }
+
+    @Test
+    @DisplayName("Should get a restaurant by its id, and return a Dto")
     void getRestaurant() {
         when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
 

@@ -1,13 +1,15 @@
 package com.qelery.mealmojo.api.service;
 
-import com.qelery.mealmojo.api.exception.*;
+import com.qelery.mealmojo.api.exception.EmptyOrderException;
+import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
+import com.qelery.mealmojo.api.exception.OrderNotFoundException;
+import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.dto.OrderCreationDto;
 import com.qelery.mealmojo.api.model.dto.OrderDto;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
-import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,21 +23,21 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService {
 
-    private final RestaurantRepository restaurantRepository;
-    private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
+    private final MenuItemRepository menuItemRepository;
+    private final RestaurantService restaurantService;
     private final UserService userService;
     private final MapperUtils mapperUtils;
 
     @Autowired
-    public OrderService(RestaurantRepository restaurantRepository,
+    public OrderService(OrderRepository orderRepository,
                         MenuItemRepository menuItemRepository,
-                        OrderRepository orderRepository,
+                        RestaurantService restaurantService,
                         UserService userService,
                         MapperUtils mapperUtils) {
-        this.restaurantRepository = restaurantRepository;
-        this.menuItemRepository = menuItemRepository;
         this.orderRepository = orderRepository;
+        this.menuItemRepository = menuItemRepository;
+        this.restaurantService = restaurantService;
         this.userService = userService;
         this.mapperUtils = mapperUtils;
     }
@@ -152,8 +154,7 @@ public class OrderService {
     }
 
     private List<OrderDto> getCustomerOrdersByRestaurantId(Long restaurantId) {
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
-        Restaurant restaurant = optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        Restaurant restaurant = restaurantService.getRestaurantEntity(restaurantId);
         CustomerProfile customerProfile = userService.getLoggedInCustomerProfile();
         List<Order> orders = customerProfile.getPlacedOrders()
                 .stream().filter(order -> order.getRestaurant().getId().equals(restaurant.getId()))
@@ -162,8 +163,7 @@ public class OrderService {
     }
 
     private List<OrderDto> getAllOrdersByRestaurantId(Long restaurantId) {
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
-        Restaurant restaurant = optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        Restaurant restaurant = restaurantService.getRestaurantEntity(restaurantId);
         return mapperUtils.mapAll(restaurant.getOrders(), OrderDto.class);
     }
 

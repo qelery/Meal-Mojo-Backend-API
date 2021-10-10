@@ -9,8 +9,8 @@ import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
 import com.qelery.mealmojo.api.repository.OrderRepository;
-import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.service.OrderService;
+import com.qelery.mealmojo.api.service.RestaurantService;
 import com.qelery.mealmojo.api.service.UserService;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,9 +45,9 @@ class OrderServiceTest {
     @Mock
     OrderRepository orderRepository;
     @Mock
-    RestaurantRepository restaurantRepository;
-    @Mock
     MenuItemRepository menuItemRepository;
+    @Mock
+    RestaurantService restaurantService;
     @Mock
     UserService userService;
     @Mock
@@ -203,21 +203,12 @@ class OrderServiceTest {
             Long restaurantId = 1L;
             when(userService.getLoggedInUserRole()).thenReturn(Role.CUSTOMER);
             when(userService.getLoggedInCustomerProfile()).thenReturn(customerProfile);
-            when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+            when(restaurantService.getRestaurantEntity(anyLong())).thenReturn(restaurant1);
 
 
             List<OrderDto> actualOrdersDto = orderService.getOrders(restaurantId);
 
             assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getRestaurantId().equals(restaurantId)));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when attempting to get all orders placed by customer for restaurant id that doesn't exist")
-        void getAllOrdersPlaceByCustomerForNonExistentRestaurant_throwException() {
-            Long restaurantIdThatDoesNotExist = 875L;
-            when(userService.getLoggedInUserRole()).thenReturn(Role.CUSTOMER);
-
-            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurantIdThatDoesNotExist));
         }
 
         @Test
@@ -316,7 +307,7 @@ class OrderServiceTest {
         void getAllOrdersByRestaurant() {
             Long restaurantId = 1L;
             when(userService.getLoggedInUserRole()).thenReturn(Role.ADMIN);
-            when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
+            when(restaurantService.getRestaurantEntity(anyLong())).thenReturn(restaurant1);
 
             List<OrderDto> actualOrdersDto = orderService.getOrders(restaurantId);
 
@@ -324,16 +315,6 @@ class OrderServiceTest {
             List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getId).collect(Collectors.toList());
             assertEquals(expectedOrderIds.size(), actualOrderIds.size());
             assertTrue(expectedOrderIds.containsAll(actualOrderIds));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when attempting to get orders by restaurant id that doesn't exist")
-        void getAllOrdersByNonExistentRestaurant() {
-            Long restaurantIdThatDoesNotExit = 433L;
-            when(userService.getLoggedInUserRole()).thenReturn(Role.ADMIN);
-            when(restaurantRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurantIdThatDoesNotExit));
         }
 
         @Test
