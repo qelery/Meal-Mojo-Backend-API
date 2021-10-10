@@ -145,11 +145,9 @@ class UserServiceTest {
         @Test
         @DisplayName("only if one doesn't already exist with that email")
         void createUserEmailExistsException() {
-            when(userRepository.existsByEmail(anyString()))
+            when(userRepository.existsByEmailIgnoreCase(anyString()))
                     .thenReturn(true);
-            Exception exception = assertThrows(EmailExistsException.class, () -> {
-                userService.createUser(userCreationDto);
-            });
+            Exception exception = assertThrows(EmailExistsException.class, () -> userService.createUser(userCreationDto));
             assertEquals("User already exists with email " + userCreationDto.getEmail(), exception.getMessage());
         }
     }

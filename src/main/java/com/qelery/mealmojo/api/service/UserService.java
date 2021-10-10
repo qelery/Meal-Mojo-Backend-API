@@ -50,7 +50,8 @@ public class UserService {
 
     public LoginResponse createUser(UserCreationDto userCreationDto) {
         User user = mapperUtils.map(userCreationDto, User.class);
-        if (userRepository.existsByEmail(user.getEmail())) {
+
+        if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
             throw new EmailExistsException(user.getEmail());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));

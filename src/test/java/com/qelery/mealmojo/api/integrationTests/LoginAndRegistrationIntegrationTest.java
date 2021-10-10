@@ -49,7 +49,6 @@ public class LoginAndRegistrationIntegrationTest {
     @BeforeEach
     void clearSecurityContext() {
         SecurityContextHolder.clearContext();
-        ;
     }
 
     @Nested
@@ -74,7 +73,7 @@ public class LoginAndRegistrationIntegrationTest {
                     .usingRecursiveComparison()
                     .ignoringFields("address")
                     .isEqualTo(userSignUpInfoDto);
-            Optional<User> userFromDatabase = userRepository.findByEmail(userSignUpInfoDto.getEmail());
+            Optional<User> userFromDatabase = userRepository.findByEmailIgnoreCase(userSignUpInfoDto.getEmail());
             assertTrue(userFromDatabase.isPresent());
             assertEquals(Role.CUSTOMER, userFromDatabase.get().getRole());
         }
@@ -97,7 +96,7 @@ public class LoginAndRegistrationIntegrationTest {
                     .usingRecursiveComparison()
                     .ignoringFields("address")
                     .isEqualTo(userSignUpInfoDto);
-            Optional<User> userFromDatabase = userRepository.findByEmail(userSignUpInfoDto.getEmail());
+            Optional<User> userFromDatabase = userRepository.findByEmailIgnoreCase(userSignUpInfoDto.getEmail());
             assertTrue(userFromDatabase.isPresent());
             assertEquals(Role.MERCHANT, userFromDatabase.get().getRole());
         }

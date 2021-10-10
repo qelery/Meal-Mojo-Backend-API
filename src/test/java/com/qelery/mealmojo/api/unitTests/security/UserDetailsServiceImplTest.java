@@ -32,7 +32,7 @@ class UserDetailsServiceImplTest {
     @DisplayName("Should return user for given email")
     void loadUserByUsername() {
         User expectedUser = new User();
-        when(userRepository.findByEmail(anyString())).thenReturn(java.util.Optional.of(expectedUser));
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(java.util.Optional.of(expectedUser));
 
         UserDetails actualUserDetails = userDetailsService.loadUserByUsername("example@google.com");
 
@@ -42,7 +42,7 @@ class UserDetailsServiceImplTest {
     @Test
     @DisplayName("Should throw exception when trying to retrieve UserDetails for an email that isn't assigned to a user")
     void loadUserByUsernameThrowsException() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsService.loadUserByUsername("example@google.com"));
