@@ -13,7 +13,7 @@ public class OrderLine {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private Integer quantity;
-    private Double priceEach;
+    private Long priceEach; // cents
 
     @ManyToOne
     @JoinColumn(name="menu_item_id", referencedColumnName="id")

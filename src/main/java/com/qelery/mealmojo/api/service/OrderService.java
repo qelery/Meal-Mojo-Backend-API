@@ -95,9 +95,11 @@ public class OrderService {
         }
 
         Order order = mapperUtils.map(orderDtoIn, Order.class);
+        Restaurant restaurant = orderLines.get(0).getMenuItem().getRestaurant();
         order.setOrderLines(orderLines);
         order.setCustomerProfile(customerProfile);
-        order.setRestaurant(orderLines.get(0).getMenuItem().getRestaurant());
+        order.setRestaurant(restaurant);
+        order.setDeliveryFee(restaurant.getDeliveryFee());
 
         orderRepository.save(order);
         return mapperUtils.map(order, OrderDtoOut.class);

@@ -174,13 +174,13 @@ class CustomerCenteredIntegrationTest {
 
             assertEquals(1, actualOrderId1.getRestaurantId());
             assertEquals(2, actualOrderId1.getOrderLines().size());
-            assertEquals(14.50, calculateTotalPrice(actualOrderId1));
+            assertEquals(2259L, calculateTotalInCents(actualOrderId1));
             assertEquals(4, actualOrderId3.getRestaurantId());
             assertEquals(1, actualOrderId3.getOrderLines().size());
-            assertEquals(18.50, calculateTotalPrice(actualOrderId3));
+            assertEquals(1850L, calculateTotalInCents(actualOrderId3));
             assertEquals(3, actualOrderId4.getRestaurantId());
             assertEquals(1, actualOrderId4.getOrderLines().size());
-            assertEquals(33.40, calculateTotalPrice(actualOrderId4));
+            assertEquals(3340L, calculateTotalInCents(actualOrderId4));
         }
 
         @Test
@@ -223,7 +223,7 @@ class CustomerCenteredIntegrationTest {
             menuItemsQuantitiesMap.put(italianBeefMenuItemId, 3);
 
             OrderDtoIn orderDtoIn = new OrderDtoIn();
-            orderDtoIn.setTip(5.00);
+            orderDtoIn.setTip(500L);
             orderDtoIn.setIsDelivery(true);
             orderDtoIn.setPaymentMethod(PaymentMethod.CARD);
             orderDtoIn.setMenuItemQuantitiesMap(menuItemsQuantitiesMap);
@@ -236,6 +236,7 @@ class CustomerCenteredIntegrationTest {
             assertFalse(actualOrder.getIsCompleted());
             assertTrue(actualOrder.getIsDelivery());
             assertEquals(orderDtoIn.getPaymentMethod(), actualOrder.getPaymentMethod());
+            assertEquals(500L, actualOrder.getDeliveryFee());
             assertEquals(2, actualOrder.getOrderLines().size());
             assertEquals("Portillo's Hot Dogs", actualOrder.getRestaurantName());
             assertEquals(1, actualOrder.getRestaurantId());
@@ -296,9 +297,10 @@ class CustomerCenteredIntegrationTest {
         }
     }
 
-    private double calculateTotalPrice(OrderDtoOut order) {
-        double total = 0;
-        total += order.getTip();
+    private long calculateTotalInCents(OrderDtoOut order) {
+        long tip = order.getTip() == null ? 0 : order.getTip();
+        long deliveryFee = order.getDeliveryFee() == null ? 0 : order.getDeliveryFee();
+        long total = tip + deliveryFee;
         for (OrderLine orderLine : order.getOrderLines()) {
             total += orderLine.getQuantity() * orderLine.getPriceEach();
         }

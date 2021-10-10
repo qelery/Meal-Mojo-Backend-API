@@ -62,7 +62,7 @@ class RestaurantServiceTest {
         restaurant1.setId(1L);
         restaurant1.setName("Restaurant1");
         restaurant1.setDescription("Restaurant1 description.");
-        restaurant1.setDeliveryFee(3.00);
+        restaurant1.setDeliveryFee(300L);
         this.restaurant2 = new Restaurant();
         restaurant2.setId(2L);
         restaurant2.setName("Restaurant2");
@@ -72,11 +72,11 @@ class RestaurantServiceTest {
         this.menuItem1 = new MenuItem();
         menuItem1.setId(1L);
         menuItem1.setName("Salad 1");
-        menuItem1.setPrice(7.99);
+        menuItem1.setPrice(799L);
         this.menuItem2 = new MenuItem();
         menuItem2.setId(2L);
         menuItem2.setName("Salad 2");
-        menuItem2.setPrice(8.60);
+        menuItem2.setPrice(860L);
 
         restaurant1.setMenuItems(List.of(menuItem1, menuItem2));
     }
@@ -206,7 +206,7 @@ class RestaurantServiceTest {
         RestaurantDtoIn updatedInfoDto = new RestaurantDtoIn();
         updatedInfoDto.setName("Updated Name");
         updatedInfoDto.setDescription("Updated Restaurant Description");
-        updatedInfoDto.setDeliveryFee(5.50);
+        updatedInfoDto.setDeliveryFee(550L);
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
@@ -356,7 +356,7 @@ class RestaurantServiceTest {
         loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
         MenuItemDto menuItemDto = new MenuItemDto();
         menuItemDto.setName("Pizza");
-        menuItemDto.setPrice(18.0);
+        menuItemDto.setPrice(1800L);
         ArgumentCaptor<MenuItem> menuItemCaptor = ArgumentCaptor.forClass(MenuItem.class);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
@@ -377,12 +377,12 @@ class RestaurantServiceTest {
         MenuItem currentMenuItem = new MenuItem();
         currentMenuItem.setId(5L);
         currentMenuItem.setName("Pepperoni Pizza");
-        currentMenuItem.setPrice(18.0);
+        currentMenuItem.setPrice(1800L);
         restaurant1.setMenuItems(List.of(currentMenuItem));
 
         MenuItemDto updatedMenuItemDto = new MenuItemDto();
         updatedMenuItemDto.setName("Sausage Pizza");
-        updatedMenuItemDto.setPrice(20.0);
+        updatedMenuItemDto.setPrice(2000L);
 
         ArgumentCaptor<MenuItem> menuItemCaptor = ArgumentCaptor.forClass(MenuItem.class);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))

@@ -23,9 +23,10 @@ public class Order {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     private OffsetDateTime dateTime = OffsetDateTime.now();
-    private Double tip = 0.00;
+    private Long tip; // cents
     private Boolean isCompleted = false;
     private Boolean isDelivery;
+    private Long deliveryFee; // cents
 
     @Enumerated(EnumType.STRING)
     @JsonFormat(with=JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)

@@ -191,6 +191,7 @@ class MapperUtilsTest {
         assertThat(orderDtoOut.getIsCompleted()).isEqualTo(orderEntity.getIsCompleted());
         assertThat(orderDtoOut.getDateTime()).isEqualTo(orderEntity.getDateTime());
         assertThat(orderDtoOut.getIsDelivery()).isEqualTo(orderEntity.getIsDelivery());
+        assertThat(orderDtoOut.getDeliveryFee()).isEqualTo(orderEntity.getDeliveryFee());
         assertThat(orderDtoOut.getPaymentMethod()).isEqualTo(orderEntity.getPaymentMethod());
         assertThat(orderDtoOut.getRestaurantId()).isEqualTo(orderEntity.getRestaurant().getId());
         assertThat(orderDtoOut.getRestaurantName()).isEqualTo(orderEntity.getRestaurant().getName());
@@ -285,34 +286,37 @@ class MapperUtilsTest {
         menuItemEntity = new MenuItem();
         menuItemEntity.setId(1L);
         menuItemEntity.setName("Burger");
-        menuItemEntity.setPrice(5.99);
+        menuItemEntity.setPrice(599L);
 
         restaurantEntity = new Restaurant();
         restaurantEntity.setName("Burger Hut");
         restaurantEntity.setDescription("Description for Burger Hut");
+        restaurantEntity.setDeliveryFee(400L);
+        restaurantEntity.setDeliveryEtaMinutes(40);
+        restaurantEntity.setDeliveryAvailable(true);
         restaurantEntity.setPickupAvailable(true);
         restaurantEntity.setPickupEtaMinutes(20);
-        restaurantEntity.setDeliveryAvailable(true);
-        restaurantEntity.setDeliveryEtaMinutes(40);
         restaurantEntity.setLogoImageUrl("logo.jpg");
         restaurantEntity.setHeroImageUrl("hero.jpg");
         restaurantEntity.setAddress(addressEntity);
+        restaurantEntity.setMenuItems(List.of(menuItemEntity));
         restaurantEntity.setMerchantProfile(merchantProfileEntity);
         restaurantEntity.setOperatingHoursList(List.of(operatingHoursMondayEntity));
-        restaurantEntity.setMenuItems(List.of(menuItemEntity));
 
         orderLineEntity = new OrderLine();
         orderLineEntity.setMenuItem(menuItemEntity);
         orderLineEntity.setQuantity(3);
-        orderLineEntity.setPriceEach(7.99);
+        orderLineEntity.setPriceEach(799L);
 
         orderEntity = new Order();
-        orderEntity.setTip(4.00);
+        orderEntity.setTip(400L);
         orderEntity.setIsDelivery(true);
+
+        orderEntity.setRestaurant(restaurantEntity);
         orderEntity.setPaymentMethod(PaymentMethod.CARD);
         orderEntity.setOrderLines(List.of(orderLineEntity));
-        orderEntity.setRestaurant(restaurantEntity);
         orderEntity.setCustomerProfile(customerProfileEntity);
+        orderEntity.setDeliveryFee(restaurantEntity.getDeliveryFee());
 
         restaurantEntity.setOrders(List.of(orderEntity));
     }

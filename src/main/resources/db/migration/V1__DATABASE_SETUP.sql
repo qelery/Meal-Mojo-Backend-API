@@ -71,7 +71,7 @@ CREATE TABLE ${schema}.restaurant
     pickup_eta_minutes   INT,
     delivery_available   BOOLEAN      NOT NULL,
     delivery_eta_minutes INT,
-    delivery_fee         NUMERIC(6, 2),
+    delivery_fee         BIGINT, -- cents
     logo_image_url       VARCHAR(255),
     hero_image_url       VARCHAR(255),
     is_active            BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -108,12 +108,12 @@ CREATE TABLE ${schema}.operating_hours
 CREATE TABLE ${schema}.menu_item
 (
     id            BIGINT GENERATED ALWAYS AS IDENTITY,
-    name          VARCHAR(50)   NOT NULL,
+    name          VARCHAR(50) NOT NULL,
     description   VARCHAR(255),
-    price         NUMERIC(7, 2) NOT NULL,
+    price         BIGINT      NOT NULL, --cents
     image_url     VARCHAR(255),
-    is_available  BOOLEAN       NOT NULL DEFAULT TRUE,
-    restaurant_id BIGINT        NOT NULL,
+    is_available  BOOLEAN     NOT NULL DEFAULT TRUE,
+    restaurant_id BIGINT      NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -121,10 +121,11 @@ CREATE TABLE ${schema}.orders
 (
     id                  BIGINT GENERATED ALWAYS AS IDENTITY,
     date_time           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
-    tip                 NUMERIC(7, 2)            NOT NULL DEFAULT 0.00,
+    tip                 BIGINT, -- cents
     is_completed        BOOLEAN                  NOT NULL DEFAULT FALSE,
     payment_method      PAYMENT_METHOD           NOT NULL,
     is_delivery         BOOLEAN                  NOT NULL,
+    delivery_fee        BIGINT, -- cents
     restaurant_id       BIGINT                   NOT NULL,
     customer_profile_id BIGINT                   NOT NULL,
     PRIMARY KEY (id)
@@ -133,10 +134,10 @@ CREATE TABLE ${schema}.orders
 CREATE TABLE ${schema}.order_line
 (
     id           BIGINT GENERATED ALWAYS AS IDENTITY,
-    quantity     INT           NOT NULL,
-    price_each   NUMERIC(7, 2) NOT NULL,
-    menu_item_id BIGINT        NOT NULL,
-    order_id     BIGINT        NOT NULL,
+    quantity     INT    NOT NULL,
+    price_each   BIGINT NOT NULL, --cents
+    menu_item_id BIGINT NOT NULL,
+    order_id     BIGINT NOT NULL,
     PRIMARY KEY (id)
 );
 

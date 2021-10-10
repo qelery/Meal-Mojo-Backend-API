@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -61,35 +62,38 @@ class OrderServiceTest {
 
     @BeforeEach
     void setup() {
-        this.restaurant1 = new Restaurant();
+        restaurant1 = new Restaurant();
         restaurant1.setId(1L);
         restaurant1.setName("Restaurant1");
-        this.restaurant2 = new Restaurant();
+        restaurant2 = new Restaurant();
         restaurant2.setId(2L);
         restaurant2.setName("Restaurant2");
         restaurant2.setIsActive(false);
 
-        this.menuItem1 = new MenuItem();
+        menuItem1 = new MenuItem();
         menuItem1.setId(1L);
         menuItem1.setName("Salad 1");
-        menuItem1.setPrice(7.99);
-        this.menuItem2 = new MenuItem();
+        menuItem1.setPrice(799L);
+        menuItem2 = new MenuItem();
         menuItem2.setId(2L);
         menuItem2.setName("Salad 2");
-        menuItem2.setPrice(8.60);
+        menuItem2.setPrice(860L);
 
         order1 = new Order();
         order1.setId(1L);
-        order1.setTip(1.0);
+        order1.setTip(100L);
         order1.setRestaurant(restaurant1);
         order2 = new Order();
         order2.setId(2L);
-        order2.setTip(2.0);
+        order2.setTip(200L);
         order2.setRestaurant(restaurant2);
 
         restaurant1.setMenuItems(List.of(menuItem1, menuItem2));
         restaurant1.setOrders(List.of(order1));
         restaurant2.setOrders(List.of(order2));
+
+        menuItem1.setRestaurant(restaurant1);
+        menuItem2.setRestaurant(restaurant1);
     }
 
     @Nested
@@ -105,7 +109,7 @@ class OrderServiceTest {
 
             List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 100L));
         }
 
         @Test
@@ -132,8 +136,8 @@ class OrderServiceTest {
 
             List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
+            assertTrue(actualOrdersDto.stream().allMatch(order -> order.getRestaurantId().equals(restaurant1.getId()) ||
+                    order.getRestaurantId().equals(restaurant2.getId())));
         }
 
         @Test
@@ -193,7 +197,7 @@ class OrderServiceTest {
 
             List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getRestaurantId().equals(restaurantId)));
         }
 
         @Test
@@ -213,8 +217,10 @@ class OrderServiceTest {
 
             List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
+            List<Long> expectedOrderIds = List.of(order1.getId(), order2.getId());
+            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDtoOut::getId).collect(Collectors.toList());
+            assertEquals(expectedOrderIds.size(), actualOrderIds.size());
+            assertTrue(expectedOrderIds.containsAll(actualOrderIds));
         }
 
         @Test
@@ -246,7 +252,7 @@ class OrderServiceTest {
             quantityMap.put(menuItem2.getId(), 5);
 
             OrderDtoIn orderDtoIn = new OrderDtoIn();
-            orderDtoIn.setTip(6.00);
+            orderDtoIn.setTip(600L);
             orderDtoIn.setMenuItemQuantitiesMap(quantityMap);
 
             when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
@@ -257,10 +263,11 @@ class OrderServiceTest {
 
             verify(orderRepository).save(orderCaptor.capture());
             Order savedOrder = orderCaptor.getValue();
-            // Assert save Order looks correct
+            // Assert saved Order looks correct
             assertEquals(orderDtoIn.getTip(), savedOrder.getTip());
             assertEquals(orderDtoIn.getIsDelivery(), savedOrder.getIsDelivery());
             assertEquals(orderDtoIn.getPaymentMethod(), savedOrder.getPaymentMethod());
+            assertEquals(menuItem1.getRestaurant().getDeliveryFee(), savedOrder.getDeliveryFee());
             assertSame(loggedInUser.getCustomerProfile(), savedOrder.getCustomerProfile());
             // Assert saved OrderLines have correct menu item associated with correct quantity ordered
             List<OrderLine> savedOrderLines = savedOrder.getOrderLines();
@@ -294,7 +301,10 @@ class OrderServiceTest {
 
             List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
+            List<Long> expectedOrderIds = restaurant1.getOrders().stream().map(Order::getId).collect(Collectors.toList());
+            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDtoOut::getId).collect(Collectors.toList());
+            assertEquals(expectedOrderIds.size(), actualOrderIds.size());
+            assertTrue(expectedOrderIds.containsAll(actualOrderIds));
         }
 
         @Test
@@ -316,8 +326,11 @@ class OrderServiceTest {
 
             List<OrderDtoOut> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 1.0));
-            assertTrue(actualOrdersDto.stream().anyMatch(order -> order.getTip() == 2.0));
+
+            List<Long> expectedOrderIds = List.of(order1.getId(), order2.getId());
+            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDtoOut::getId).collect(Collectors.toList());
+            assertEquals(expectedOrderIds.size(), actualOrdersDto.size());
+            assertTrue(expectedOrderIds.containsAll(actualOrderIds));
         }
 
         @Test

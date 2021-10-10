@@ -14,7 +14,7 @@ public class RestaurantThinDtoOut {
     private Integer pickupEtaMinutes;
     private Boolean deliveryAvailable;
     private Integer deliveryEtaMinutes;
-    private Double deliveryFee;
+    private Long deliveryFee; // cents
     private String logoImageUrl;
     private String heroImageUrl;
     private AddressDto address;

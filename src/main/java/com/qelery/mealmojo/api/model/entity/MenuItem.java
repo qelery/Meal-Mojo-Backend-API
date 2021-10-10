@@ -17,7 +17,7 @@ public class MenuItem {
     private Long id;
     private String name;
     private String description;
-    private Double price;
+    private Long price; // cents
     private String imageUrl;
     private Boolean isAvailable = true;
 

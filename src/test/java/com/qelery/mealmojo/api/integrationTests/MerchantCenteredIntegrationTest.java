@@ -117,7 +117,7 @@ public class MerchantCenteredIntegrationTest {
             restaurantDtoIn.setPickupEtaMinutes(30);
             restaurantDtoIn.setDeliveryAvailable(true);
             restaurantDtoIn.setDeliveryEtaMinutes(40);
-            restaurantDtoIn.setDeliveryFee(6.00);
+            restaurantDtoIn.setDeliveryFee(600L);
             restaurantDtoIn.setAddress(addressDto);
 
             String url = "/api/restaurants";
@@ -357,7 +357,7 @@ public class MerchantCenteredIntegrationTest {
 
                 MenuItemDto menuItemDto = new MenuItemDto();
                 menuItemDto.setName("Name");
-                menuItemDto.setPrice(10.00);
+                menuItemDto.setPrice(1000L);
                 url = "/api/restaurants/" + restaurantIdThatDoesNotExist + "/menuitems";
                 jsonResponse = httpRequestDispatcher.performPOST(url, menuItemDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
@@ -373,7 +373,7 @@ public class MerchantCenteredIntegrationTest {
 
                 MenuItemDto menuItemDto = new MenuItemDto();
                 menuItemDto.setName("Updated Name");
-                menuItemDto.setPrice(7.50);
+                menuItemDto.setPrice(750L);
                 String url = "/api/restaurants/" + restaurantId + "/menuitems/" + menuItemIdThatDoesNotExist;
                 String jsonResponse = httpRequestDispatcher.performPUT(url, menuItemDto, 404);
                 assertContainsErrorMessage(jsonResponse, expectedErrorMessage);
@@ -439,7 +439,7 @@ public class MerchantCenteredIntegrationTest {
             long someoneElsesRestaurantId = 2L;
             MenuItemDto menuItemDto = new MenuItemDto();
             menuItemDto.setName("name");
-            menuItemDto.setPrice(10.00);
+            menuItemDto.setPrice(1000L);
             String expectedErrorMessage = new RestaurantNotFoundException(2L).getMessage();
 
             String url = "/api/restaurants/" + someoneElsesRestaurantId + "/menuitems";
@@ -485,7 +485,7 @@ public class MerchantCenteredIntegrationTest {
 
             MenuItemDto menuItemDto = new MenuItemDto();
             menuItemDto.setName("name");
-            menuItemDto.setPrice(10.00);
+            menuItemDto.setPrice(1000L);
             url = "/api/restaurants/" + someoneElsesRestaurantId + "/menuitems/" + menuItemIdFromRestaurantNotOwned;
             jsonResponse = httpRequestDispatcher.performPUT(url, menuItemDto, 404);
             assertContainsErrorMessage(jsonResponse, expectedErrorMessage);

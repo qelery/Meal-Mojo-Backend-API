@@ -12,10 +12,11 @@ import java.util.List;
 public class OrderDtoOut {
 
     private Long id;
-    private Double tip;
+    private Long tip; //cents
     private OffsetDateTime dateTime;
     private Boolean isCompleted;
     private Boolean isDelivery;
+    private Long deliveryFee; // cents
     private PaymentMethod paymentMethod;
     private List<OrderLine> orderLines;
     private Long restaurantId;

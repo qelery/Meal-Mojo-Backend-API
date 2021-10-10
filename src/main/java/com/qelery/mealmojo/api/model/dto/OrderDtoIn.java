@@ -8,7 +8,7 @@ import java.util.Map;
 @Data
 public class OrderDtoIn {
 
-    private Double tip;
+    private Long tip; // cents
     private Boolean isDelivery;
     private PaymentMethod paymentMethod;
     private Map<Long, Integer> menuItemQuantitiesMap;
