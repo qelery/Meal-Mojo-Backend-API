@@ -38,4 +38,10 @@ public class UserController {
                                           @RequestParam Boolean active) {
         return userService.changeUserActiveState(userId, active);
     }
+    
+    @PatchMapping("/users")
+    @ResponseStatus(HttpStatus.OK)
+    public UserInfoDto updateUser(@RequestBody UserInfoDto updatedUserInfo) {
+        return userService.updateUser(updatedUserInfo);
+    }
 }

@@ -34,7 +34,7 @@ class UserDetailsServiceImplTest {
         User expectedUser = new User();
         when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(java.util.Optional.of(expectedUser));
 
-        UserDetails actualUserDetails = userDetailsService.loadUserByUsername("example@google.com");
+        UserDetails actualUserDetails = userDetailsService.loadUserByUsername("john@example.com");
 
         assertEquals(actualUserDetails, expectedUser);
     }
@@ -45,6 +45,6 @@ class UserDetailsServiceImplTest {
         when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
-                () -> userDetailsService.loadUserByUsername("example@google.com"));
+                () -> userDetailsService.loadUserByUsername("john@example.com"));
     }
 }

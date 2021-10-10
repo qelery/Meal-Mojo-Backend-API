@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class OrderDtoIn {
+public class OrderCreationDto {
 
     private Long tip; // cents
     private Boolean isDelivery;

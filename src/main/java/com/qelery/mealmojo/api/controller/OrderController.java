@@ -21,25 +21,25 @@ public class OrderController {
 
     @GetMapping("/orders")
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderDtoOut> getOrders(@RequestParam(name = "restaurant-id", required=false) Long restaurantId) {
+    public List<OrderDto> getOrders(@RequestParam(name = "restaurant-id", required=false) Long restaurantId) {
         return this.orderService.getOrders(restaurantId);
     }
 
     @GetMapping("/orders/{orderId}")
     @ResponseStatus(HttpStatus.OK)
-    public OrderDtoOut getSingleOrder(@PathVariable Long orderId) {
+    public OrderDto getSingleOrder(@PathVariable Long orderId) {
         return this.orderService.getSingleOrder(orderId);
     }
 
     @PostMapping("/orders/submit")
     @ResponseStatus(HttpStatus.CREATED)
-    public OrderDtoOut submitOrder(@RequestBody OrderDtoIn orderDtoIn) {
-        return this.orderService.submitOrder(orderDtoIn);
+    public OrderDto submitOrder(@RequestBody OrderCreationDto orderCreationDto) {
+        return this.orderService.submitOrder(orderCreationDto);
     }
 
     @PatchMapping("/orders/{orderId}/complete")
     @ResponseStatus(HttpStatus.OK)
-    public OrderDtoOut markOrderComplete(@PathVariable Long orderId) {
+    public OrderDto markOrderComplete(@PathVariable Long orderId) {
         return orderService.markOrderComplete(orderId);
     }
 }

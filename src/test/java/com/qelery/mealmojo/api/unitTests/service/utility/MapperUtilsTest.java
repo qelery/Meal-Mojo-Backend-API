@@ -185,19 +185,19 @@ class MapperUtilsTest {
     @Test
     @DisplayName("Should map Order entity to OrderDtoOut")
     void mapOrderToOrderDtoOut() {
-        OrderDtoOut orderDtoOut = mapperUtils.map(orderEntity, OrderDtoOut.class);
+        OrderDto orderDto = mapperUtils.map(orderEntity, OrderDto.class);
 
-        assertThat(orderDtoOut.getTip()).isEqualTo(orderEntity.getTip());
-        assertThat(orderDtoOut.getIsCompleted()).isEqualTo(orderEntity.getIsCompleted());
-        assertThat(orderDtoOut.getDateTime()).isEqualTo(orderEntity.getDateTime());
-        assertThat(orderDtoOut.getIsDelivery()).isEqualTo(orderEntity.getIsDelivery());
-        assertThat(orderDtoOut.getDeliveryFee()).isEqualTo(orderEntity.getDeliveryFee());
-        assertThat(orderDtoOut.getPaymentMethod()).isEqualTo(orderEntity.getPaymentMethod());
-        assertThat(orderDtoOut.getRestaurantId()).isEqualTo(orderEntity.getRestaurant().getId());
-        assertThat(orderDtoOut.getRestaurantName()).isEqualTo(orderEntity.getRestaurant().getName());
-        assertThat(orderDtoOut.getRestaurantLogoImageUrl()).isEqualTo(orderEntity.getRestaurant().getLogoImageUrl());
-        assertThat(orderDtoOut.getCustomerProfileFirstName()).isEqualTo(orderEntity.getCustomerProfile().getFirstName());
-        assertThat(orderDtoOut.getCustomerProfileLastName()).isEqualTo(orderEntity.getCustomerProfile().getLastName());
+        assertThat(orderDto.getTip()).isEqualTo(orderEntity.getTip());
+        assertThat(orderDto.getIsCompleted()).isEqualTo(orderEntity.getIsCompleted());
+        assertThat(orderDto.getDateTime()).isEqualTo(orderEntity.getDateTime());
+        assertThat(orderDto.getIsDelivery()).isEqualTo(orderEntity.getIsDelivery());
+        assertThat(orderDto.getDeliveryFee()).isEqualTo(orderEntity.getDeliveryFee());
+        assertThat(orderDto.getPaymentMethod()).isEqualTo(orderEntity.getPaymentMethod());
+        assertThat(orderDto.getRestaurantId()).isEqualTo(orderEntity.getRestaurant().getId());
+        assertThat(orderDto.getRestaurantName()).isEqualTo(orderEntity.getRestaurant().getName());
+        assertThat(orderDto.getRestaurantLogoImageUrl()).isEqualTo(orderEntity.getRestaurant().getLogoImageUrl());
+        assertThat(orderDto.getCustomerProfileFirstName()).isEqualTo(orderEntity.getCustomerProfile().getFirstName());
+        assertThat(orderDto.getCustomerProfileLastName()).isEqualTo(orderEntity.getCustomerProfile().getLastName());
     }
 
     @Test

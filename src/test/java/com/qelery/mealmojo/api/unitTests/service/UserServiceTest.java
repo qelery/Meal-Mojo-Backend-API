@@ -1,12 +1,18 @@
 package com.qelery.mealmojo.api.unitTests.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
+import com.qelery.mealmojo.api.exception.ProhibitedByRoleException;
 import com.qelery.mealmojo.api.exception.UserNotFoundException;
+import com.qelery.mealmojo.api.model.dto.AddressDto;
 import com.qelery.mealmojo.api.model.dto.UserCreationDto;
+import com.qelery.mealmojo.api.model.dto.UserInfoDto;
+import com.qelery.mealmojo.api.model.entity.Address;
 import com.qelery.mealmojo.api.model.entity.CustomerProfile;
 import com.qelery.mealmojo.api.model.entity.MerchantProfile;
 import com.qelery.mealmojo.api.model.entity.User;
+import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.Role;
+import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
@@ -14,6 +20,7 @@ import com.qelery.mealmojo.api.security.JwtUtils;
 import com.qelery.mealmojo.api.security.UserDetailsServiceImpl;
 import com.qelery.mealmojo.api.service.UserService;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,6 +29,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,8 +38,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -215,5 +223,135 @@ class UserServiceTest {
 
         assertThrows(UserNotFoundException.class,
                 () -> userService.changeUserActiveState(userIdThatDoesNotExist, true));
+    }
+
+    @Test
+    @DisplayName("Should update user info for user")
+    void updateUser() {
+        Address address = new Address();
+        address.setStreet1("1400 S Lake Shore Dr");
+        address.setStreet2("Building 2");
+        address.setStreet3("#3A");
+        address.setCity("Chicago");
+        address.setState(State.IL);
+        address.setZipcode("60605");
+        address.setCountry(Country.US);
+        address.setLatitude(41.866265);
+        address.setLongitude(-87.6191692);
+
+        CustomerProfile customerProfile = new CustomerProfile();
+        customerProfile.setFirstName("John");
+        customerProfile.setLastName("Smith");
+        customerProfile.setAddress(address);
+
+        User user = new User();
+        user.setRole(Role.CUSTOMER);
+        user.setEmail("john@example.com");
+        user.setCustomerProfile(customerProfile);
+
+        AddressDto newAddress = new AddressDto();
+        newAddress.setStreet1("02115");
+        newAddress.setCity("Boston");
+        newAddress.setState(State.MA);
+        newAddress.setZipcode("02115");
+        newAddress.setCountry(Country.US);
+        newAddress.setLatitude(42.3393849);
+        newAddress.setLongitude(-71.0962367);
+
+        UserInfoDto updatedUserInfo = new UserInfoDto();
+        updatedUserInfo.setFirstName("Michael");
+        updatedUserInfo.setLastName("Johnson");
+        updatedUserInfo.setEmail("michael@example.com");
+        updatedUserInfo.setAddress(newAddress);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContextHolder.clearContext();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        when(authentication.getPrincipal())
+                .thenReturn(user);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+        UserInfoDto actualUserDto = userService.updateUser(updatedUserInfo);
+
+        assertEquals(updatedUserInfo, actualUserDto);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+        assertEquals(updatedUserInfo.getEmail(), savedUser.getEmail());
+        assertEquals(updatedUserInfo.getFirstName(), savedUser.getCustomerProfile().getFirstName());
+        assertEquals(updatedUserInfo.getLastName(), savedUser.getCustomerProfile().getLastName());
+        Assertions.assertThat(savedUser.getCustomerProfile().getAddress())
+                .usingRecursiveComparison()
+                .ignoringActualNullFields()
+                .isEqualTo(updatedUserInfo.getAddress());
+    }
+
+    @Test
+    @DisplayName("Should get role for logged in user")
+    void getLoggedInUserRole() {
+        Role expectedRole = Role.CUSTOMER;
+        User user = new User();
+        user.setRole(expectedRole);
+        addUserToSecurityContext(user);
+
+        assertEquals(expectedRole, userService.getLoggedInUserRole());
+    }
+
+    @Test
+    @DisplayName("Should get customer profile for logged in user")
+    void getLoggedInCustomerProfile() {
+        CustomerProfile expectedCustomerProfile = new CustomerProfile();
+        User user = new User();
+        user.setRole(Role.CUSTOMER);
+        user.setCustomerProfile(expectedCustomerProfile);
+        addUserToSecurityContext(user);
+
+        CustomerProfile actualCustomerProfile = userService.getLoggedInCustomerProfile();
+
+        assertEquals(expectedCustomerProfile, actualCustomerProfile);
+    }
+
+    @Test
+    @DisplayName("Should get merchant profile for logged in user")
+    void getLoggedInMerchantProfile() {
+        MerchantProfile expectedMerchantProfile = new MerchantProfile();
+        User user = new User();
+        user.setRole(Role.MERCHANT);
+        user.setMerchantProfile(expectedMerchantProfile);
+        addUserToSecurityContext(user);
+
+        MerchantProfile actualMerchantProfile = userService.getLoggedInUserMerchantProfile();
+
+        assertEquals(expectedMerchantProfile, actualMerchantProfile);
+    }
+
+    @Test
+    @DisplayName("Should throw exception if retrieving customer profile for user without customer role")
+    void getLoggedInCustomerProfile_throwException() {
+        MerchantProfile merchantProfile = new MerchantProfile();
+        User user = new User();
+        user.setRole(Role.MERCHANT);
+        user.setMerchantProfile(merchantProfile);
+        addUserToSecurityContext(user);
+
+        assertThrows(ProhibitedByRoleException.class, () -> userService.getLoggedInCustomerProfile());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if retrieving merchant profile for user without merchant role")
+    void getLoggedInMerchantProfile_throwException() {
+        CustomerProfile customerProfile = new CustomerProfile();
+        User user = new User();
+        user.setRole(Role.CUSTOMER);
+        user.setCustomerProfile(customerProfile);
+        addUserToSecurityContext(user);
+
+        assertThrows(ProhibitedByRoleException.class, () -> userService.getLoggedInUserMerchantProfile());
+    }
+
+    private void addUserToSecurityContext(User user) {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

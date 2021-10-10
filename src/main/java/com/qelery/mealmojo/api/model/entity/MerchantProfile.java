@@ -1,29 +1,30 @@
 package com.qelery.mealmojo.api.model.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Entity
-@Table(name="merchant_profile")
-public class MerchantProfile {
+@EqualsAndHashCode(callSuper = true)
+@Table(name = "merchant_profile")
+public class MerchantProfile extends Profile {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Long id;
-    private String firstName;
-    private String lastName;
 
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="address_id", referencedColumnName="id")
-    private Address address;
-
-    @OneToMany(mappedBy="merchantProfile")
+    @OneToMany(mappedBy = "merchantProfile")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<Restaurant> restaurantsOwned = new ArrayList<>();
+
+    public List<Restaurant> getRestaurantsOwned() {
+        return this.restaurantsOwned;
+    }
+
 }
+

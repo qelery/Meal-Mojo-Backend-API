@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.unitTests.controller;
 
 import com.qelery.mealmojo.api.controller.OrderController;
-import com.qelery.mealmojo.api.model.dto.OrderDtoIn;
-import com.qelery.mealmojo.api.model.dto.OrderDtoOut;
+import com.qelery.mealmojo.api.model.dto.OrderCreationDto;
+import com.qelery.mealmojo.api.model.dto.OrderDto;
 import com.qelery.mealmojo.api.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,11 +30,11 @@ class OrderControllerTest {
     @Test
     @DisplayName("Should return orders from service")
     void getOrders() {
-        List<OrderDtoOut> expectedDtoList = List.of(new OrderDtoOut());
+        List<OrderDto> expectedDtoList = List.of(new OrderDto());
         when(orderService.getOrders(anyLong()))
                 .thenReturn(expectedDtoList);
 
-        List<OrderDtoOut> actualDtoList = orderController.getOrders(1L);
+        List<OrderDto> actualDtoList = orderController.getOrders(1L);
 
         assertEquals(expectedDtoList, actualDtoList);
     }
@@ -42,11 +42,11 @@ class OrderControllerTest {
     @Test
     @DisplayName("Should return order by id from restaurant")
     void getSingleOrder() {
-        OrderDtoOut expectedDto = new OrderDtoOut();
+        OrderDto expectedDto = new OrderDto();
         when(orderService.getSingleOrder(anyLong()))
                 .thenReturn(expectedDto);
 
-        OrderDtoOut actualDto = orderController.getSingleOrder(1L);
+        OrderDto actualDto = orderController.getSingleOrder(1L);
 
         assertEquals(expectedDto, actualDto);
     }
@@ -54,11 +54,11 @@ class OrderControllerTest {
     @Test
     @DisplayName("Should return the submitted order from service")
     void submitOrder() {
-        OrderDtoOut expectedDto = new OrderDtoOut();
-        when(orderService.submitOrder(any(OrderDtoIn.class)))
+        OrderDto expectedDto = new OrderDto();
+        when(orderService.submitOrder(any(OrderCreationDto.class)))
                 .thenReturn(expectedDto);
 
-        OrderDtoOut actualDto = orderController.submitOrder(new OrderDtoIn());
+        OrderDto actualDto = orderController.submitOrder(new OrderCreationDto());
 
         assertEquals(expectedDto, actualDto);
     }
@@ -66,11 +66,11 @@ class OrderControllerTest {
     @Test
     @DisplayName("Should return order that has been marked as complete from service")
     void markOrderComplete() {
-        OrderDtoOut expectedDto = new OrderDtoOut();
+        OrderDto expectedDto = new OrderDto();
         when(orderService.markOrderComplete(anyLong()))
                 .thenReturn(expectedDto);
 
-        OrderDtoOut actualDto = orderController.markOrderComplete(1L);
+        OrderDto actualDto = orderController.markOrderComplete(1L);
 
         assertEquals(expectedDto, actualDto);
     }

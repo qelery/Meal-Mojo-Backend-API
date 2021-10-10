@@ -60,4 +60,15 @@ class UserControllerTest {
         UserInfoDto actualUserInfoDto = userController.setUserActiveState(1L, false);
         assertEquals(actualUserInfoDto, expectedUserInfoDto);
     }
+
+    @Test
+    @DisplayName("Should return from service user dto with update info")
+    void updateUser() {
+        UserInfoDto expectedUserInfoDto = new UserInfoDto();
+        when(userService.updateUser(any(UserInfoDto.class)))
+                .thenReturn(expectedUserInfoDto);
+
+        UserInfoDto actualUserInfoDto = userController.updateUser(new UserInfoDto());
+        assertEquals(actualUserInfoDto, expectedUserInfoDto);
+    }
 }

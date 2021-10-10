@@ -20,5 +20,5 @@ public class RestaurantDtoOut {
     private AddressDto address;
     private List<OperatingHoursDto> operatingHoursList;
     private List<MenuItemDto> menuItems;
-    private List<OrderDtoOut> orders;
+    private List<OrderDto> orders;
 }

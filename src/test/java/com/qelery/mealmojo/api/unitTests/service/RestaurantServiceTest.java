@@ -5,8 +5,12 @@ import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.State;
-import com.qelery.mealmojo.api.repository.*;
+import com.qelery.mealmojo.api.repository.AddressRepository;
+import com.qelery.mealmojo.api.repository.MenuItemRepository;
+import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
+import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.service.RestaurantService;
+import com.qelery.mealmojo.api.service.UserService;
 import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -28,7 +30,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RestaurantServiceTest {
@@ -37,8 +40,6 @@ class RestaurantServiceTest {
     RestaurantService restaurantService;
 
     @Mock
-    OrderRepository orderRepository;
-    @Mock
     RestaurantRepository restaurantRepository;
     @Mock
     OperatingHoursRepository operatingHoursRepository;
@@ -46,6 +47,8 @@ class RestaurantServiceTest {
     AddressRepository addressRepository;
     @Mock
     MenuItemRepository menuItemRepository;
+    @Mock
+    UserService userService;
     @Mock
     DistanceUtils distanceUtils;
     @Spy
@@ -127,9 +130,10 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should return restaurant by id owned by the logged in merchant user")
     void getSingleRestaurantOwnedByLoggedInMerchant() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         RestaurantDtoOut expectedRestaurantDto = mapperUtils.map(restaurant1, RestaurantDtoOut.class);
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.of(restaurant1));
 
@@ -141,12 +145,12 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should throw exception when logged in merchant attempting to get restaurant by id that isn't owned by them")
     void getSingleRestaurantUnOwnedByLoggedInMerchant_throwError() {
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         Long unownedRestaurantId = restaurant2.getId();
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1));
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.empty());
-
 
         assertThrows(RestaurantNotFoundException.class, () ->
                 restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(unownedRestaurantId));
@@ -155,11 +159,13 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should return all restaurants owned by the logged in merchant user")
     void getAllRestaurantsOwnedByLoggedInMerchant() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         List<Restaurant> restaurants = List.of(restaurant1, restaurant2);
         List<RestaurantThinDtoOut> expectedRestaurantsDto = mapperUtils.mapAll(restaurants, RestaurantThinDtoOut.class);
-        when(restaurantRepository.findAllByMerchantProfileId(anyLong())).thenReturn(restaurants);
+        when(userService.getLoggedInUserMerchantProfile()).
+                thenReturn(merchantProfile);
+        when(restaurantRepository.findAllByMerchantProfileId(anyLong()))
+                .thenReturn(restaurants);
 
         List<RestaurantThinDtoOut> actualRestaurantsDto = restaurantService.getAllRestaurantsOwnedByLoggedInMerchant();
 
@@ -187,10 +193,11 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should save created restaurant with logged in merchant as its owner")
     void createRestaurantAndSaveToMerchantProfile() {
-        User loggedInUser = addMerchantToSecurityContext();
-        MerchantProfile merchantProfile = loggedInUser.getMerchantProfile();
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         RestaurantDtoIn restaurantDtoIn = new RestaurantDtoIn();
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
 
         restaurantService.createRestaurant(restaurantDtoIn);
 
@@ -201,13 +208,14 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should update restaurant info and save changes to database")
     void updateRestaurantBasicInformation() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         RestaurantDtoIn updatedInfoDto = new RestaurantDtoIn();
         updatedInfoDto.setName("Updated Name");
         updatedInfoDto.setDescription("Updated Restaurant Description");
         updatedInfoDto.setDeliveryFee(550L);
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
@@ -223,12 +231,13 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should update restaurant with new hours and save to database")
     void updateRestaurantHoursAddNewHours() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         OperatingHoursDto tuesdayHoursDto = new OperatingHoursDto();
         tuesdayHoursDto.setDayOfWeek(DayOfWeek.TUESDAY);
-        tuesdayHoursDto.setOpenTime(LocalTime.of(8,0));
+        tuesdayHoursDto.setOpenTime(LocalTime.of(8, 0));
         tuesdayHoursDto.setCloseTime(LocalTime.of(20, 0));
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
         when(operatingHoursRepository.save(any(OperatingHours.class)))
@@ -255,8 +264,8 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should overwrite restaurant's existing if hours for that day already exists")
     void updateRestaurantHoursOverwriteExisting() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
+
         OperatingHours existingTuesdayHours = new OperatingHours();
         existingTuesdayHours.setDayOfWeek(DayOfWeek.TUESDAY);
         existingTuesdayHours.setOpenTime(LocalTime.of(5, 0));
@@ -265,9 +274,11 @@ class RestaurantServiceTest {
 
         OperatingHoursDto updatedTuesdayHoursDto = new OperatingHoursDto();
         updatedTuesdayHoursDto.setDayOfWeek(DayOfWeek.TUESDAY);
-        updatedTuesdayHoursDto.setOpenTime(LocalTime.of(8,0));
+        updatedTuesdayHoursDto.setOpenTime(LocalTime.of(8, 0));
         updatedTuesdayHoursDto.setCloseTime(LocalTime.of(20, 0));
 
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
@@ -306,6 +317,10 @@ class RestaurantServiceTest {
         updatedAddressDto.setStreet1("5700 S Lake Shore Dr");
         updatedAddressDto.setZipcode("60637");
 
+        MerchantProfile merchantProfile = addMockMerchantProfile();
+
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
@@ -334,7 +349,7 @@ class RestaurantServiceTest {
 
         List<MenuItemDto> actualMenuItemDtos = restaurantService.getAllMenuItemsByRestaurant(restaurant1.getId());
 
-        for (MenuItem expectedMenuItem: menuItems) {
+        for (MenuItem expectedMenuItem : menuItems) {
             assertTrue(actualMenuItemDtos.stream().anyMatch(actualDto -> actualDto.getName().equals(expectedMenuItem.getName())));
         }
     }
@@ -352,12 +367,13 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should add a new menu item to a restaurant and save to database")
     void createMenuItem() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         MenuItemDto menuItemDto = new MenuItemDto();
         menuItemDto.setName("Pizza");
         menuItemDto.setPrice(1800L);
         ArgumentCaptor<MenuItem> menuItemCaptor = ArgumentCaptor.forClass(MenuItem.class);
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
@@ -372,8 +388,7 @@ class RestaurantServiceTest {
     @Test
     @DisplayName("Should update a restaurant's menu item and save changes to database")
     void updateMenuItem() {
-        User loggedInUser = addMerchantToSecurityContext();
-        loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        MerchantProfile merchantProfile = addMockMerchantProfile();
         MenuItem currentMenuItem = new MenuItem();
         currentMenuItem.setId(5L);
         currentMenuItem.setName("Pepperoni Pizza");
@@ -385,6 +400,9 @@ class RestaurantServiceTest {
         updatedMenuItemDto.setPrice(2000L);
 
         ArgumentCaptor<MenuItem> menuItemCaptor = ArgumentCaptor.forClass(MenuItem.class);
+
+        when(userService.getLoggedInUserMerchantProfile())
+                .thenReturn(merchantProfile);
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
@@ -399,14 +417,10 @@ class RestaurantServiceTest {
     }
 
 
-    private User addMerchantToSecurityContext() {
+    private MerchantProfile addMockMerchantProfile() {
         MerchantProfile merchantProfile = new MerchantProfile();
         merchantProfile.setId(1L);
-        User user = new User();
-        user.setMerchantProfile(merchantProfile);
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getPrincipal()).thenReturn(user);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return user;
+        merchantProfile.setRestaurantsOwned(List.of(restaurant1, restaurant2));
+        return merchantProfile;
     }
 }

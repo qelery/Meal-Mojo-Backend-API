@@ -1,12 +1,11 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.EmailExistsException;
+import com.qelery.mealmojo.api.exception.ProhibitedByRoleException;
 import com.qelery.mealmojo.api.exception.UserNotFoundException;
 import com.qelery.mealmojo.api.model.dto.UserCreationDto;
 import com.qelery.mealmojo.api.model.dto.UserInfoDto;
-import com.qelery.mealmojo.api.model.entity.CustomerProfile;
-import com.qelery.mealmojo.api.model.entity.MerchantProfile;
-import com.qelery.mealmojo.api.model.entity.User;
+import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
@@ -17,6 +16,7 @@ import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -86,5 +86,43 @@ public class UserService {
         user.setIsActive(active);
         userRepository.save(user);
         return mapperUtils.map(user, UserInfoDto.class);
+    }
+
+    public UserInfoDto updateUser(UserInfoDto updatedUserInfo) {
+        User loggedInUser = getLoggedInUser();
+        loggedInUser.setEmail(updatedUserInfo.getEmail());
+        Profile profile = loggedInUser.getRole() == Role.CUSTOMER ?
+                loggedInUser.getCustomerProfile() :
+                loggedInUser.getMerchantProfile();
+        profile.setFirstName(updatedUserInfo.getFirstName());
+        profile.setLastName(updatedUserInfo.getLastName());
+        Address updatedAddress = mapperUtils.map(updatedUserInfo.getAddress(), Address.class);
+        profile.setAddress(updatedAddress);
+        userRepository.save(loggedInUser);
+        return updatedUserInfo;
+    }
+
+    public Role getLoggedInUserRole() {
+        return getLoggedInUser().getRole();
+    }
+
+    public CustomerProfile getLoggedInCustomerProfile() {
+        if (getLoggedInUserRole() != Role.CUSTOMER) {
+            throw new ProhibitedByRoleException();
+        }
+        return getLoggedInUser().getCustomerProfile();
+    }
+
+    public MerchantProfile getLoggedInUserMerchantProfile() {
+        if (getLoggedInUserRole() != Role.MERCHANT) {
+            throw new ProhibitedByRoleException();
+        }
+        return getLoggedInUser().getMerchantProfile();
+    }
+
+    private User getLoggedInUser() {
+        return (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
     }
 }

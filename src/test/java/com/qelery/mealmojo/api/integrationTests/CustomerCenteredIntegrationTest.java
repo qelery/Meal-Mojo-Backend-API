@@ -157,20 +157,20 @@ class CustomerCenteredIntegrationTest {
         void getAllOrders_customer() throws Exception {
             String url = "/api/orders";
             String jsonResponse = httpRequestDispatcher.performGET(url);
-            List<OrderDtoOut> actualOrders = objectMapper.readValue(jsonResponse, new TypeReference<>() {
+            List<OrderDto> actualOrders = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
 
             assertEquals(3, actualOrders.size());
 
-            Optional<OrderDtoOut> optionalOrderId1 = actualOrders.stream().filter(order -> order.getId() == 1L).findFirst();
-            Optional<OrderDtoOut> optionalOrderId3 = actualOrders.stream().filter(order -> order.getId() == 3L).findFirst();
-            Optional<OrderDtoOut> optionalOrderId4 = actualOrders.stream().filter(order -> order.getId() == 4L).findFirst();
+            Optional<OrderDto> optionalOrderId1 = actualOrders.stream().filter(order -> order.getId() == 1L).findFirst();
+            Optional<OrderDto> optionalOrderId3 = actualOrders.stream().filter(order -> order.getId() == 3L).findFirst();
+            Optional<OrderDto> optionalOrderId4 = actualOrders.stream().filter(order -> order.getId() == 4L).findFirst();
             assertTrue(optionalOrderId1.isPresent());
             assertTrue(optionalOrderId3.isPresent());
             assertTrue(optionalOrderId4.isPresent());
-            OrderDtoOut actualOrderId1 = optionalOrderId1.get();
-            OrderDtoOut actualOrderId3 = optionalOrderId3.get();
-            OrderDtoOut actualOrderId4 = optionalOrderId4.get();
+            OrderDto actualOrderId1 = optionalOrderId1.get();
+            OrderDto actualOrderId3 = optionalOrderId3.get();
+            OrderDto actualOrderId4 = optionalOrderId4.get();
 
             assertEquals(1, actualOrderId1.getRestaurantId());
             assertEquals(2, actualOrderId1.getOrderLines().size());
@@ -191,11 +191,11 @@ class CustomerCenteredIntegrationTest {
             String url = "/api/orders?restaurant-id=" + restaurantId;
             String jsonResponse = httpRequestDispatcher.performGET(url);
 
-            List<OrderDtoOut> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>() {
+            List<OrderDto> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
 
             assertEquals(1, actualOrderDtos.size());
-            OrderDtoOut actualOrder = actualOrderDtos.get(0);
+            OrderDto actualOrder = actualOrderDtos.get(0);
             assertEquals(1L, actualOrder.getId());
         }
 
@@ -207,7 +207,7 @@ class CustomerCenteredIntegrationTest {
             String url = "/api/orders/" + orderId;
             String jsonResponse = httpRequestDispatcher.performGET(url);
 
-            OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+            OrderDto actualOrderDto = objectMapper.readValue(jsonResponse, OrderDto.class);
 
             assertEquals(1L, actualOrderDto.getId());
         }
@@ -222,20 +222,20 @@ class CustomerCenteredIntegrationTest {
             menuItemsQuantitiesMap.put(hotdogMenuItemId, 5);
             menuItemsQuantitiesMap.put(italianBeefMenuItemId, 3);
 
-            OrderDtoIn orderDtoIn = new OrderDtoIn();
-            orderDtoIn.setTip(500L);
-            orderDtoIn.setIsDelivery(true);
-            orderDtoIn.setPaymentMethod(PaymentMethod.CARD);
-            orderDtoIn.setMenuItemQuantitiesMap(menuItemsQuantitiesMap);
+            OrderCreationDto orderCreationDto = new OrderCreationDto();
+            orderCreationDto.setTip(500L);
+            orderCreationDto.setIsDelivery(true);
+            orderCreationDto.setPaymentMethod(PaymentMethod.CARD);
+            orderCreationDto.setMenuItemQuantitiesMap(menuItemsQuantitiesMap);
 
             String url = "/api/orders/submit";
-            String jsonResponse = httpRequestDispatcher.performPOST(url, orderDtoIn);
-            OrderDtoOut actualOrder = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+            String jsonResponse = httpRequestDispatcher.performPOST(url, orderCreationDto);
+            OrderDto actualOrder = objectMapper.readValue(jsonResponse, OrderDto.class);
 
-            assertEquals(orderDtoIn.getTip(), actualOrder.getTip());
+            assertEquals(orderCreationDto.getTip(), actualOrder.getTip());
             assertFalse(actualOrder.getIsCompleted());
             assertTrue(actualOrder.getIsDelivery());
-            assertEquals(orderDtoIn.getPaymentMethod(), actualOrder.getPaymentMethod());
+            assertEquals(orderCreationDto.getPaymentMethod(), actualOrder.getPaymentMethod());
             assertEquals(500L, actualOrder.getDeliveryFee());
             assertEquals(2, actualOrder.getOrderLines().size());
             assertEquals("Portillo's Hot Dogs", actualOrder.getRestaurantName());
@@ -297,7 +297,7 @@ class CustomerCenteredIntegrationTest {
         }
     }
 
-    private long calculateTotalInCents(OrderDtoOut order) {
+    private long calculateTotalInCents(OrderDto order) {
         long tip = order.getTip() == null ? 0 : order.getTip();
         long deliveryFee = order.getDeliveryFee() == null ? 0 : order.getDeliveryFee();
         long total = tip + deliveryFee;

@@ -57,16 +57,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(ProfileNotFoundException.class)
-    public ResponseEntity<Object> handleException(ProfileNotFoundException ex, WebRequest request) {
-        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Object> handleException(UserNotFoundException ex, WebRequest request) {
         ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.NOT_FOUND, request);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ProhibitedByRoleException.class)
+    public ResponseEntity<Object> handleException(ProhibitedByRoleException ex, WebRequest request) {
+        ErrorResponseBody body = new ErrorResponseBody(ex, HttpStatus.FORBIDDEN, request);
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AuthenticationException.class)

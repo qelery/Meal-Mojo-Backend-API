@@ -1,15 +1,16 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.MenuItemNotFoundException;
-import com.qelery.mealmojo.api.exception.ProfileNotFoundException;
 import com.qelery.mealmojo.api.exception.RestaurantNotFoundException;
 import com.qelery.mealmojo.api.model.dto.*;
 import com.qelery.mealmojo.api.model.entity.*;
-import com.qelery.mealmojo.api.repository.*;
+import com.qelery.mealmojo.api.repository.AddressRepository;
+import com.qelery.mealmojo.api.repository.MenuItemRepository;
+import com.qelery.mealmojo.api.repository.OperatingHoursRepository;
+import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.service.utility.DistanceUtils;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,20 +24,23 @@ public class RestaurantService {
     private final MenuItemRepository menuItemRepository;
     private final AddressRepository addressRepository;
     private final OperatingHoursRepository operatingHoursRepository;
+    private final UserService userService;
     private final DistanceUtils distanceUtils;
     private final MapperUtils mapperUtils;
 
     @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository,
-                        MenuItemRepository menuItemRepository,
-                        AddressRepository addressRepository,
-                        OperatingHoursRepository operatingHoursRepository,
-                        DistanceUtils distanceUtils,
-                        MapperUtils mapperUtils) {
+                             MenuItemRepository menuItemRepository,
+                             AddressRepository addressRepository,
+                             OperatingHoursRepository operatingHoursRepository,
+                             UserService userService,
+                             DistanceUtils distanceUtils,
+                             MapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
         this.addressRepository = addressRepository;
         this.operatingHoursRepository = operatingHoursRepository;
+        this.userService = userService;
         this.distanceUtils = distanceUtils;
         this.mapperUtils = mapperUtils;
     }
@@ -63,12 +67,15 @@ public class RestaurantService {
         }
     }
 
+    // TODO: Tests for locked down routes.
+    // If I have locked down routes, is that enough. For example, in the below test
+    // should I also be checking the user's role and throwing an error if it's incorrect?
     public List<RestaurantThinDtoOut> getAllRestaurantsOwnedByLoggedInMerchant() {
-    MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
-    List<Restaurant> restaurantsOwned = restaurantRepository.findAllByMerchantProfileId(merchantProfile.getId());
-    return restaurantsOwned.stream()
-            .map(restaurant -> mapperUtils.map(restaurant, RestaurantThinDtoOut.class))
-            .collect(Collectors.toList());
+        MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
+        List<Restaurant> restaurantsOwned = restaurantRepository.findAllByMerchantProfileId(merchantProfile.getId());
+        return restaurantsOwned.stream()
+                .map(restaurant -> mapperUtils.map(restaurant, RestaurantThinDtoOut.class))
+                .collect(Collectors.toList());
     }
 
     public RestaurantDtoOut getSingleRestaurantOwnedByLoggedInMerchant(Long restaurantId) {
@@ -77,8 +84,9 @@ public class RestaurantService {
     }
 
     public RestaurantDtoOut createRestaurant(RestaurantDtoIn restaurantDtoIn) {
+        MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
         Restaurant restaurant = mapperUtils.map(restaurantDtoIn, Restaurant.class);
-        restaurant.setMerchantProfile(getLoggedInUserMerchantProfile());
+        restaurant.setMerchantProfile(merchantProfile);
         restaurantRepository.save(restaurant);
         return mapperUtils.map(restaurant, RestaurantDtoOut.class);
     }
@@ -95,7 +103,7 @@ public class RestaurantService {
     public RestaurantThinDtoOut updateRestaurantHours(Long restaurantId, List<OperatingHoursDto> newHoursListDto) {
         Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
 
-        for (OperatingHoursDto newHoursDto: newHoursListDto) {
+        for (OperatingHoursDto newHoursDto : newHoursListDto) {
             OperatingHours newHours = mapperUtils.map(newHoursDto, OperatingHours.class);
             Optional<OperatingHours> oldHoursForThatDay = restaurant.getOperatingHoursList()
                     .stream()
@@ -159,19 +167,8 @@ public class RestaurantService {
     }
 
     private Restaurant getRestaurantByMerchantProfile(Long restaurantId) {
-        MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
+        MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndMerchantProfileId(restaurantId, merchantProfile.getId());
         return optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
-    }
-
-    private MerchantProfile getLoggedInUserMerchantProfile() {
-        User user = (User) SecurityContextHolder.getContext().
-                getAuthentication()
-                .getPrincipal();
-        MerchantProfile merchantProfile = user.getMerchantProfile();
-        if (merchantProfile == null) {
-            throw new ProfileNotFoundException();
-        }
-        return merchantProfile;
     }
 }

@@ -1,8 +1,8 @@
 package com.qelery.mealmojo.api.service;
 
 import com.qelery.mealmojo.api.exception.*;
-import com.qelery.mealmojo.api.model.dto.OrderDtoIn;
-import com.qelery.mealmojo.api.model.dto.OrderDtoOut;
+import com.qelery.mealmojo.api.model.dto.OrderCreationDto;
+import com.qelery.mealmojo.api.model.dto.OrderDto;
 import com.qelery.mealmojo.api.model.entity.*;
 import com.qelery.mealmojo.api.model.enums.Role;
 import com.qelery.mealmojo.api.repository.MenuItemRepository;
@@ -10,7 +10,6 @@ import com.qelery.mealmojo.api.repository.OrderRepository;
 import com.qelery.mealmojo.api.repository.RestaurantRepository;
 import com.qelery.mealmojo.api.service.utility.MapperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,21 +24,24 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
     private final OrderRepository orderRepository;
+    private final UserService userService;
     private final MapperUtils mapperUtils;
 
     @Autowired
     public OrderService(RestaurantRepository restaurantRepository,
                         MenuItemRepository menuItemRepository,
                         OrderRepository orderRepository,
+                        UserService userService,
                         MapperUtils mapperUtils) {
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
         this.orderRepository = orderRepository;
+        this.userService = userService;
         this.mapperUtils = mapperUtils;
     }
 
-    public List<OrderDtoOut> getOrders(Long restaurantId) {
-        Role role = getLoggedInUserRole();
+    public List<OrderDto> getOrders(Long restaurantId) {
+        Role role = userService.getLoggedInUserRole();
         switch (role) {
             case MERCHANT:
                 if (restaurantId == null) {
@@ -64,8 +66,8 @@ public class OrderService {
         }
     }
 
-    public OrderDtoOut getSingleOrder(Long orderId) {
-        Role role = getLoggedInUserRole();
+    public OrderDto getSingleOrder(Long orderId) {
+        Role role = userService.getLoggedInUserRole();
         switch (role) {
             case MERCHANT:
                 return getOrderByIdForLoggedInMerchant(orderId);
@@ -78,10 +80,10 @@ public class OrderService {
         }
     }
 
-    public OrderDtoOut submitOrder(OrderDtoIn orderDtoIn) {
-        CustomerProfile customerProfile = getLoggedInCustomerProfile();
+    public OrderDto submitOrder(OrderCreationDto orderCreationDto) {
+        CustomerProfile customerProfile = userService.getLoggedInCustomerProfile();
         List<OrderLine> orderLines = new ArrayList<>();
-        orderDtoIn.getMenuItemQuantitiesMap().forEach((menuItemId, quantity) -> {
+        orderCreationDto.getMenuItemQuantitiesMap().forEach((menuItemId, quantity) -> {
             Optional<MenuItem> optionalMenuItem = menuItemRepository.findById(menuItemId);
             MenuItem menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
             OrderLine orderLine = new OrderLine();
@@ -94,7 +96,7 @@ public class OrderService {
             throw new EmptyOrderException();
         }
 
-        Order order = mapperUtils.map(orderDtoIn, Order.class);
+        Order order = mapperUtils.map(orderCreationDto, Order.class);
         Restaurant restaurant = orderLines.get(0).getMenuItem().getRestaurant();
         order.setOrderLines(orderLines);
         order.setCustomerProfile(customerProfile);
@@ -102,11 +104,11 @@ public class OrderService {
         order.setDeliveryFee(restaurant.getDeliveryFee());
 
         orderRepository.save(order);
-        return mapperUtils.map(order, OrderDtoOut.class);
+        return mapperUtils.map(order, OrderDto.class);
     }
 
-    public OrderDtoOut markOrderComplete(Long orderId) {
-        Optional<Order> optionalOrder = getLoggedInUserMerchantProfile()
+    public OrderDto markOrderComplete(Long orderId) {
+        Optional<Order> optionalOrder = userService.getLoggedInUserMerchantProfile()
                 .getRestaurantsOwned()
                 .stream()
                 .map(Restaurant::getOrders)
@@ -116,11 +118,11 @@ public class OrderService {
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
         order.setIsCompleted(true);
         orderRepository.save(order);
-        return mapperUtils.map(order, OrderDtoOut.class);
+        return mapperUtils.map(order, OrderDto.class);
     }
 
     private Restaurant getRestaurantByMerchantProfile(Long restaurantId) {
-        MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
+        MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
         Optional<Restaurant> optionalRestaurant = merchantProfile.getRestaurantsOwned()
                 .stream()
                 .filter(restaurant -> restaurant.getId().equals(restaurantId))
@@ -128,50 +130,50 @@ public class OrderService {
         return optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
     }
 
-    private List<OrderDtoOut> getAllMerchantOrders() {
-        MerchantProfile merchantProfile = getLoggedInUserMerchantProfile();
+    private List<OrderDto> getAllMerchantOrders() {
+        MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
         List<Restaurant> ownedRestaurants = merchantProfile.getRestaurantsOwned();
-        List<Order> orders =  ownedRestaurants.stream()
+        List<Order> orders = ownedRestaurants.stream()
                 .map(Restaurant::getOrders)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        return mapperUtils.mapAll(orders, OrderDtoOut.class);
+        return mapperUtils.mapAll(orders, OrderDto.class);
     }
 
-    private List<OrderDtoOut> getMerchantOrdersByRestaurantId(Long restaurantId) {
+    private List<OrderDto> getMerchantOrdersByRestaurantId(Long restaurantId) {
         Restaurant restaurant = getRestaurantByMerchantProfile(restaurantId);
-        return mapperUtils.mapAll(restaurant.getOrders(), OrderDtoOut.class);
+        return mapperUtils.mapAll(restaurant.getOrders(), OrderDto.class);
     }
 
-    private List<OrderDtoOut> getAllCustomerOrders() {
-        CustomerProfile customerProfile = getLoggedInCustomerProfile();
+    private List<OrderDto> getAllCustomerOrders() {
+        CustomerProfile customerProfile = userService.getLoggedInCustomerProfile();
         List<Order> orders = customerProfile.getPlacedOrders();
-        return mapperUtils.mapAll(orders, OrderDtoOut.class);
+        return mapperUtils.mapAll(orders, OrderDto.class);
     }
 
-    private List<OrderDtoOut> getCustomerOrdersByRestaurantId(Long restaurantId) {
+    private List<OrderDto> getCustomerOrdersByRestaurantId(Long restaurantId) {
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
         Restaurant restaurant = optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
-        CustomerProfile customerProfile = getLoggedInCustomerProfile();
+        CustomerProfile customerProfile = userService.getLoggedInCustomerProfile();
         List<Order> orders = customerProfile.getPlacedOrders()
                 .stream().filter(order -> order.getRestaurant().getId().equals(restaurant.getId()))
                 .collect(Collectors.toList());
-        return mapperUtils.mapAll(orders, OrderDtoOut.class);
+        return mapperUtils.mapAll(orders, OrderDto.class);
     }
 
-    private List<OrderDtoOut> getAllOrdersByRestaurantId(Long restaurantId) {
+    private List<OrderDto> getAllOrdersByRestaurantId(Long restaurantId) {
         Optional<Restaurant> optionalRestaurant = restaurantRepository.findById(restaurantId);
         Restaurant restaurant = optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
-        return mapperUtils.mapAll(restaurant.getOrders(), OrderDtoOut.class);
+        return mapperUtils.mapAll(restaurant.getOrders(), OrderDto.class);
     }
 
-    private List<OrderDtoOut> getAllOrders() {
+    private List<OrderDto> getAllOrders() {
         List<Order> allOrders = orderRepository.findAll();
-        return mapperUtils.mapAll(allOrders, OrderDtoOut.class);
+        return mapperUtils.mapAll(allOrders, OrderDto.class);
     }
 
-    private OrderDtoOut getOrderByIdForLoggedInMerchant(Long orderId) {
-        Optional<Order> optionalOrder = getLoggedInUserMerchantProfile()
+    private OrderDto getOrderByIdForLoggedInMerchant(Long orderId) {
+        Optional<Order> optionalOrder = userService.getLoggedInUserMerchantProfile()
                 .getRestaurantsOwned()
                 .stream()
                 .map(Restaurant::getOrders)
@@ -179,52 +181,23 @@ public class OrderService {
                 .filter(o -> o.getId().equals(orderId))
                 .findFirst();
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
-        return mapperUtils.map(order, OrderDtoOut.class);
+        return mapperUtils.map(order, OrderDto.class);
     }
 
-    private OrderDtoOut getOrderForLoggedInCustomer(Long orderId) {
-        Optional<Order> optionalOrder = getLoggedInCustomerProfile()
+    private OrderDto getOrderForLoggedInCustomer(Long orderId) {
+        CustomerProfile customerProfile = userService.getLoggedInCustomerProfile();
+        Optional<Order> optionalOrder = customerProfile
                 .getPlacedOrders()
                 .stream()
                 .filter(o -> o.getId().equals(orderId))
                 .findFirst();
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
-        return  mapperUtils.map(order, OrderDtoOut.class);
+        return mapperUtils.map(order, OrderDto.class);
     }
 
-    private OrderDtoOut getOrderById(Long orderId) {
+    private OrderDto getOrderById(Long orderId) {
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
-        return  mapperUtils.map(order, OrderDtoOut.class);
-    }
-
-    private MerchantProfile getLoggedInUserMerchantProfile() {
-        User user = (User) SecurityContextHolder.getContext().
-                getAuthentication()
-                .getPrincipal();
-        MerchantProfile merchantProfile = user.getMerchantProfile();
-        if (merchantProfile == null) {
-            throw new ProfileNotFoundException();
-        }
-        return merchantProfile;
-    }
-
-    private CustomerProfile getLoggedInCustomerProfile() {
-        User user = (User) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        CustomerProfile customerProfile = user.getCustomerProfile();
-        if (customerProfile == null) {
-            throw new ProfileNotFoundException();
-        } else {
-            return customerProfile;
-        }
-    }
-
-    private Role getLoggedInUserRole() {
-        User user = (User) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        return user.getRole();
+        return mapperUtils.map(order, OrderDto.class);
     }
 }

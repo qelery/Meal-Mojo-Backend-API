@@ -189,6 +189,7 @@ public class HttpRequestDispatcher {
     }
 
     public String performPATCH(String url, Object requestBody, int expectedStatus) throws Exception {
+        asJson(requestBody);
         MockHttpServletResponse response = mockMvc.perform(
                         patch(url).accept(MediaType.APPLICATION_JSON)
                                 .content(asJson(requestBody))

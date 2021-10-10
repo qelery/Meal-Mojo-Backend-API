@@ -253,11 +253,11 @@ public class MerchantCenteredIntegrationTest {
             String url = "/api/orders";
             String jsonResponse = httpRequestDispatcher.performGET(url);
 
-            List<OrderDtoOut> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>(){});
+            List<OrderDto> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>(){});
 
             assertEquals(3, actualOrderDtos.size());
             List<Long> actualOrderIds =  actualOrderDtos.stream()
-                    .map(OrderDtoOut::getId)
+                    .map(OrderDto::getId)
                     .collect(Collectors.toList());
             assertTrue(actualOrderIds.containsAll(List.of(1L, 3L, 4L)));
         }
@@ -270,10 +270,10 @@ public class MerchantCenteredIntegrationTest {
             String url = "/api/orders?restaurant-id=" + restaurantId;
             String jsonResponse = httpRequestDispatcher.performGET(url);
 
-            List<OrderDtoOut> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>(){});
+            List<OrderDto> actualOrderDtos = objectMapper.readValue(jsonResponse, new TypeReference<>(){});
 
             assertEquals(1, actualOrderDtos.size());
-            OrderDtoOut actualOder = actualOrderDtos.get(0);
+            OrderDto actualOder = actualOrderDtos.get(0);
             assertEquals(3L, actualOder.getId());
         }
 
@@ -285,7 +285,7 @@ public class MerchantCenteredIntegrationTest {
             String url = "/api/orders/" + orderId;
             String jsonResponse = httpRequestDispatcher.performGET(url);
 
-            OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+            OrderDto actualOrderDto = objectMapper.readValue(jsonResponse, OrderDto.class);
 
             assertEquals(orderId, actualOrderDto.getId());
         }
@@ -298,7 +298,7 @@ public class MerchantCenteredIntegrationTest {
             String url = "/api/orders/" + orderId + "/complete";
             String jsonResponse = httpRequestDispatcher.performPATCH(url, 200);
 
-            OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
+            OrderDto actualOrderDto = objectMapper.readValue(jsonResponse, OrderDto.class);
 
             assertTrue(actualOrderDto.getIsCompleted());
             Optional<Order> optionalOrder = orderRepository.findById(orderId);

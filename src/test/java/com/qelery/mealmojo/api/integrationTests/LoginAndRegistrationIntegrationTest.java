@@ -2,9 +2,13 @@ package com.qelery.mealmojo.api.integrationTests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qelery.mealmojo.api.exception.EmailExistsException;
+import com.qelery.mealmojo.api.model.dto.AddressDto;
 import com.qelery.mealmojo.api.model.dto.UserCreationDto;
-import com.qelery.mealmojo.api.model.entity.User;
+import com.qelery.mealmojo.api.model.dto.UserInfoDto;
+import com.qelery.mealmojo.api.model.entity.*;
+import com.qelery.mealmojo.api.model.enums.Country;
 import com.qelery.mealmojo.api.model.enums.Role;
+import com.qelery.mealmojo.api.model.enums.State;
 import com.qelery.mealmojo.api.model.request.LoginRequest;
 import com.qelery.mealmojo.api.model.response.LoginResponse;
 import com.qelery.mealmojo.api.repository.UserRepository;
@@ -21,14 +25,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Optional;
 
 import static com.qelery.mealmojo.api.testUtils.CustomAssertions.assertContainsErrorMessage;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -53,7 +57,7 @@ public class LoginAndRegistrationIntegrationTest {
 
     @Nested
     @DisplayName("[Integration Tests - Through All Layers] When user registers,")
-    class throughAllLayers_user_register {
+    class throughAllLayers_user_registration {
 
         @Test
         @DisplayName("Should be able to sign up for a Customer account")
@@ -156,6 +160,79 @@ public class LoginAndRegistrationIntegrationTest {
 
             String url = "/api/users/login";
             httpRequestDispatcher.performPOST(url, loginRequest, 401);
+        }
+    }
+
+    @Nested
+    @DisplayName("[Integration Tests - Through All Layers] Should be able to update user info,")
+    class throughAllLayers_user_updateUserInfo {
+
+        UserInfoDto updatedUserInfoDto;
+
+        @BeforeEach()
+        void setup() {
+            AddressDto updatedAddress = new AddressDto();
+            updatedAddress.setStreet1("60 E Broadway");
+            updatedAddress.setCity("Bloomington");
+            updatedAddress.setZipcode("55425");
+            updatedAddress.setState(State.MN);
+            updatedAddress.setCountry(Country.US);
+            updatedAddress.setLatitude(44.8548651);
+            updatedAddress.setLongitude(93.2422148);
+
+            updatedUserInfoDto = new UserInfoDto();
+            updatedUserInfoDto.setFirstName("Sharon");
+            updatedUserInfoDto.setLastName("Miller");
+            updatedUserInfoDto.setEmail("sharon@example.com");
+            updatedUserInfoDto.setAddress(updatedAddress);
+        }
+
+        @Test
+        @WithUserDetails("alice_customer@example.com")
+        @DisplayName("As a customer")
+        void shouldUpdateUserInfo_customer() throws Exception {
+            String url = "/api/users";
+            httpRequestDispatcher.performPATCH(url, updatedUserInfoDto, 200);
+
+            Optional<User> userFoundByOldEmail = userRepository.findByEmailIgnoreCase("alice_customer@example.com");
+            assertFalse(userFoundByOldEmail.isPresent());
+
+            Optional<User> userFoundByNewEmail = userRepository.findByEmailIgnoreCase(updatedUserInfoDto.getEmail());
+            assertTrue(userFoundByNewEmail.isPresent());
+
+            CustomerProfile updatedProfileFromDatabase = userFoundByNewEmail.get().getCustomerProfile();
+            assertEquals(updatedUserInfoDto.getFirstName(), updatedProfileFromDatabase.getFirstName());
+            assertEquals(updatedUserInfoDto.getLastName(), updatedProfileFromDatabase.getLastName());
+
+            Address updatedAddressFromDatabase = updatedProfileFromDatabase.getAddress();
+            assertThat(updatedAddressFromDatabase)
+                    .usingRecursiveComparison()
+                    .ignoringFields("id")
+                    .isEqualTo(updatedUserInfoDto.getAddress());
+        }
+
+        @Test
+        @WithUserDetails("rebecca_merchant@example.com")
+        @DisplayName("As a merchant")
+        void shouldUpdateUserInfo_merchant() throws Exception {
+            String url = "/api/users";
+            httpRequestDispatcher.performPATCH(url, updatedUserInfoDto, 200);
+
+            Optional<User> userFoundByOldEmail = userRepository.findByEmailIgnoreCase("rebecca_customer@example.com");
+            assertFalse(userFoundByOldEmail.isPresent());
+
+            Optional<User> userFoundByNewEmail = userRepository.findByEmailIgnoreCase(updatedUserInfoDto.getEmail());
+            assertTrue(userFoundByNewEmail.isPresent());
+
+            MerchantProfile updatedProfileFromDatabase = userFoundByNewEmail.get().getMerchantProfile();
+            assertEquals(updatedUserInfoDto.getFirstName(), updatedProfileFromDatabase.getFirstName());
+            assertEquals(updatedUserInfoDto.getLastName(), updatedProfileFromDatabase.getLastName());
+
+            Address updatedAddressFromDatabase = updatedProfileFromDatabase.getAddress();
+            assertThat(updatedAddressFromDatabase)
+                    .usingRecursiveComparison()
+                    .ignoringFields("id")
+                    .isEqualTo(updatedUserInfoDto.getAddress());
         }
     }
 }
