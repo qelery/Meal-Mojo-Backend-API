@@ -189,8 +189,10 @@ class MapperUtilsTest {
 
         assertThat(orderDtoOut.getTip()).isEqualTo(orderEntity.getTip());
         assertThat(orderDtoOut.getIsCompleted()).isEqualTo(orderEntity.getIsCompleted());
+        assertThat(orderDtoOut.getDateTime()).isEqualTo(orderEntity.getDateTime());
         assertThat(orderDtoOut.getIsDelivery()).isEqualTo(orderEntity.getIsDelivery());
         assertThat(orderDtoOut.getPaymentMethod()).isEqualTo(orderEntity.getPaymentMethod());
+        assertThat(orderDtoOut.getRestaurantId()).isEqualTo(orderEntity.getRestaurant().getId());
         assertThat(orderDtoOut.getRestaurantName()).isEqualTo(orderEntity.getRestaurant().getName());
         assertThat(orderDtoOut.getRestaurantLogoImageUrl()).isEqualTo(orderEntity.getRestaurant().getLogoImageUrl());
         assertThat(orderDtoOut.getCustomerProfileFirstName()).isEqualTo(orderEntity.getCustomerProfile().getFirstName());

@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RestaurantServiceTest {
+class RestaurantServiceTest {
 
     @InjectMocks
     RestaurantService restaurantService;
@@ -141,13 +141,15 @@ public class RestaurantServiceTest {
     @Test
     @DisplayName("Should throw exception when logged in merchant attempting to get restaurant by id that isn't owned by them")
     void getSingleRestaurantUnOwnedByLoggedInMerchant_throwError() {
+        Long unownedRestaurantId = restaurant2.getId();
         User loggedInUser = addMerchantToSecurityContext();
         loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1));
         when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.empty());
 
+
         assertThrows(RestaurantNotFoundException.class, () ->
-                restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(restaurant2.getId()));
+                restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(unownedRestaurantId));
     }
 
     @Test

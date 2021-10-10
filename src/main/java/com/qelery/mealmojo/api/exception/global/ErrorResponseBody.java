@@ -7,14 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
 public class ErrorResponseBody {
 
-    private final LocalDateTime timestamp = java.time.LocalDateTime.now();
     private int status;
     private String error;
     private String message;

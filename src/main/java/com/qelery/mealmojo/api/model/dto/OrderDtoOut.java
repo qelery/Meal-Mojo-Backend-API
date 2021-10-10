@@ -5,6 +5,7 @@ import com.qelery.mealmojo.api.model.entity.OrderLine;
 import com.qelery.mealmojo.api.model.enums.PaymentMethod;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -12,10 +13,12 @@ public class OrderDtoOut {
 
     private Long id;
     private Double tip;
+    private OffsetDateTime dateTime;
     private Boolean isCompleted;
     private Boolean isDelivery;
     private PaymentMethod paymentMethod;
     private List<OrderLine> orderLines;
+    private Long restaurantId;
     private String restaurantName;
     private String restaurantLogoImageUrl;
     private String customerProfileFirstName;

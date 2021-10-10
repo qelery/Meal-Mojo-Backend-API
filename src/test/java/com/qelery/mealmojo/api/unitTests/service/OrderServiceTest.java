@@ -115,11 +115,12 @@ class OrderServiceTest {
             loggedInUser.getMerchantProfile().setRestaurantsOwned(List.of(restaurant1, restaurant2));
 
             MerchantProfile someOtherMerchantsProfile = new MerchantProfile();
+            Long restaurantId = 3L;
             Restaurant restaurant3 = new Restaurant();
-            restaurant3.setId(3L);
+            restaurant3.setId(restaurantId);
             someOtherMerchantsProfile.setRestaurantsOwned(List.of(restaurant3));
 
-            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurant3.getId()));
+            assertThrows(RestaurantNotFoundException.class, () -> orderService.getOrders(restaurantId));
         }
 
         @Test
@@ -156,11 +157,12 @@ class OrderServiceTest {
             MerchantProfile someOtherMerchantsProfile = new MerchantProfile();
             Restaurant restaurant3 = new Restaurant();
             restaurant3.setId(3L);
+            Long orderId = 3L;
             Order order3 = new Order();
-            order3.setId(3L);
+            order3.setId(orderId);
             someOtherMerchantsProfile.setRestaurantsOwned(List.of(restaurant3));
 
-            assertThrows(OrderNotFoundException.class, () -> orderService.getSingleOrder(order3.getId()));
+            assertThrows(OrderNotFoundException.class, () -> orderService.getSingleOrder(orderId));
         }
     }
 

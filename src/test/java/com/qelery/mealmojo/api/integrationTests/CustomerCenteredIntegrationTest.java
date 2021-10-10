@@ -172,13 +172,13 @@ class CustomerCenteredIntegrationTest {
             OrderDtoOut actualOrderId3 = optionalOrderId3.get();
             OrderDtoOut actualOrderId4 = optionalOrderId4.get();
 
-            assertEquals("Portillo's Hot Dogs", actualOrderId1.getRestaurantName());
+            assertEquals(1, actualOrderId1.getRestaurantId());
             assertEquals(2, actualOrderId1.getOrderLines().size());
             assertEquals(14.50, calculateTotalPrice(actualOrderId1));
-            assertEquals("Daley's Restaurant", actualOrderId3.getRestaurantName());
+            assertEquals(4, actualOrderId3.getRestaurantId());
             assertEquals(1, actualOrderId3.getOrderLines().size());
             assertEquals(18.50, calculateTotalPrice(actualOrderId3));
-            assertEquals("Joy Yee", actualOrderId4.getRestaurantName());
+            assertEquals(3, actualOrderId4.getRestaurantId());
             assertEquals(1, actualOrderId4.getOrderLines().size());
             assertEquals(33.40, calculateTotalPrice(actualOrderId4));
         }
@@ -196,7 +196,7 @@ class CustomerCenteredIntegrationTest {
 
             assertEquals(1, actualOrderDtos.size());
             OrderDtoOut actualOrder = actualOrderDtos.get(0);
-            assertEquals(actualOrder.getId(), 1L);
+            assertEquals(1L, actualOrder.getId());
         }
 
         @Test
@@ -209,7 +209,7 @@ class CustomerCenteredIntegrationTest {
 
             OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
 
-            assertEquals(actualOrderDto.getId(), 1L);
+            assertEquals(1L, actualOrderDto.getId());
         }
 
         @Test
@@ -238,6 +238,7 @@ class CustomerCenteredIntegrationTest {
             assertEquals(orderDtoIn.getPaymentMethod(), actualOrder.getPaymentMethod());
             assertEquals(2, actualOrder.getOrderLines().size());
             assertEquals("Portillo's Hot Dogs", actualOrder.getRestaurantName());
+            assertEquals(1, actualOrder.getRestaurantId());
             CustomerProfile loggedInCustomer = ((User) userDetailsService.loadUserByUsername("alice_customer@example.com")).getCustomerProfile();
             assertEquals(loggedInCustomer.getFirstName(), actualOrder.getCustomerProfileFirstName());
             assertEquals(loggedInCustomer.getLastName(), actualOrder.getCustomerProfileLastName());

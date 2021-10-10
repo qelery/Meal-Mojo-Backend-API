@@ -9,7 +9,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
-    private LocalDateTime dateTime = LocalDateTime.now();
+    private OffsetDateTime dateTime = OffsetDateTime.now();
     private Double tip = 0.00;
     private Boolean isCompleted = false;
     private Boolean isDelivery;

@@ -2,7 +2,6 @@ package com.qelery.mealmojo.api.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.DayOfWeek;
@@ -10,7 +9,6 @@ import java.time.LocalTime;
 
 @Data
 @Entity
-@ToString(exclude={"restaurant"})
 @Table(name="operating_hours")
 public class OperatingHours {
 

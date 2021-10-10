@@ -93,7 +93,6 @@ public class MerchantCenteredIntegrationTest {
 
             String url = "/api/restaurants/" + expectedRestaurantId + "/by-logged-in-merchant";
             String jsonResponse = httpRequestDispatcher.performGET(url);
-            ;
             RestaurantDtoOut actualRestaurant = objectMapper.readValue(jsonResponse, RestaurantDtoOut.class);
 
             assertEquals(expectedRestaurantId, actualRestaurant.getId());
@@ -275,7 +274,7 @@ public class MerchantCenteredIntegrationTest {
 
             assertEquals(1, actualOrderDtos.size());
             OrderDtoOut actualOder = actualOrderDtos.get(0);
-            assertEquals(actualOder.getId(), 3L);
+            assertEquals(3L, actualOder.getId());
         }
 
         @Test
@@ -288,7 +287,7 @@ public class MerchantCenteredIntegrationTest {
 
             OrderDtoOut actualOrderDto = objectMapper.readValue(jsonResponse, OrderDtoOut.class);
 
-            assertEquals(actualOrderDto.getId(), orderId);
+            assertEquals(orderId, actualOrderDto.getId());
         }
 
         @Test
