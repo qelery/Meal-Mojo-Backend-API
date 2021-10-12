@@ -6,10 +6,6 @@ CREATE TYPE PAYMENT_METHOD AS ENUM (
     'CARD', 'APPLE_PAY' , 'PAYPAL'
     );
 
-CREATE TYPE PURCHASE_STATUS AS ENUM (
-    'CART', 'PURCHASED'
-    );
-
 CREATE TYPE ROLE AS ENUM (
     'ADMIN', 'CUSTOMER', 'MERCHANT'
     );
@@ -25,7 +21,7 @@ CREATE TYPE STATE AS ENUM (
     'OK', 'OR', 'PA', 'RI', 'SC',
     'SD', 'TN', 'TX', 'UT', 'VA',
     'VT', 'WA', 'WI', 'WV', 'WY',
-    'DC'
+    'DC', 'ON', 'QC', 'BC', 'AB'
     );
 
 CREATE TYPE COUNTRY AS ENUM (
@@ -44,42 +40,6 @@ CREATE TABLE ${schema}.users
     PRIMARY KEY (id)
 );
 
-CREATE TABLE ${schema}.customer_profile
-(
-    id         BIGINT GENERATED ALWAYS AS IDENTITY,
-    first_name VARCHAR(255) NOT NULL,
-    last_name  VARCHAR(255) NOT NULL,
-    address_id BIGINT,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE ${schema}.merchant_profile
-(
-    id         BIGINT GENERATED ALWAYS AS IDENTITY,
-    first_name VARCHAR(255) NOT NULL,
-    last_name  VARCHAR(255) NOT NULL,
-    address_id BIGINT,
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE ${schema}.restaurant
-(
-    id                   BIGINT GENERATED ALWAYS AS IDENTITY,
-    name                 VARCHAR(255) NOT NULL,
-    description          TEXT,
-    pickup_available     BOOLEAN,
-    pickup_eta_minutes   INT,
-    delivery_available   BOOLEAN      NOT NULL,
-    delivery_eta_minutes INT,
-    delivery_fee         BIGINT, -- cents
-    logo_image_url       VARCHAR(255),
-    hero_image_url       VARCHAR(255),
-    is_active            BOOLEAN      NOT NULL DEFAULT TRUE,
-    address_id           BIGINT       NOT NULL,
-    merchant_profile_id  BIGINT       NOT NULL,
-    PRIMARY KEY (id)
-);
-
 CREATE TABLE ${schema}.address
 (
     id        BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -95,96 +55,98 @@ CREATE TABLE ${schema}.address
     PRIMARY KEY (id)
 );
 
+
+CREATE TABLE ${schema}.customer_profile
+(
+    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name  VARCHAR(255) NOT NULL,
+    address_id BIGINT REFERENCES ${schema}.address (id)
+);
+
+CREATE TABLE ${schema}.merchant_profile
+(
+    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name  VARCHAR(255) NOT NULL,
+    address_id BIGINT REFERENCES ${schema}.address (id)
+);
+
+CREATE TABLE ${schema}.restaurant
+(
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name                 VARCHAR(255) NOT NULL,
+    description          TEXT,
+    pickup_available     BOOLEAN,
+    pickup_eta_minutes   INT,
+    delivery_available   BOOLEAN      NOT NULL,
+    delivery_eta_minutes INT,
+    delivery_fee         BIGINT, -- cents
+    logo_image_url       VARCHAR(255),
+    hero_image_url       VARCHAR(255),
+    is_active            BOOLEAN      NOT NULL DEFAULT TRUE,
+    address_id           BIGINT       NOT NULL REFERENCES ${schema}.address (id),
+    merchant_profile_id  BIGINT       NOT NULL REFERENCES ${schema}.merchant_profile (id)
+);
+
+
 CREATE TABLE ${schema}.operating_hours
 (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     close_time    TIME WITH TIME ZONE NOT NULL,
     open_time     TIME WITH TIME ZONE NOT NULL,
     day_of_week   ISO_DOW             NOT NULL,
-    restaurant_id BIGINT              NOT NULL,
-    PRIMARY KEY (id)
+    restaurant_id BIGINT              NOT NULL REFERENCES ${schema}.restaurant (id)
 );
 
 CREATE TABLE ${schema}.menu_item
 (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name          VARCHAR(50) NOT NULL,
     description   VARCHAR(255),
     price         BIGINT      NOT NULL, --cents
     image_url     VARCHAR(255),
     is_available  BOOLEAN     NOT NULL DEFAULT TRUE,
-    restaurant_id BIGINT      NOT NULL,
-    PRIMARY KEY (id)
+    restaurant_id BIGINT      NOT NULL REFERENCES ${schema}.restaurant (id)
 );
 
 CREATE TABLE ${schema}.orders
 (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY,
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     date_time           TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
     tip                 BIGINT, -- cents
     is_completed        BOOLEAN                  NOT NULL DEFAULT FALSE,
     payment_method      PAYMENT_METHOD           NOT NULL,
     is_delivery         BOOLEAN                  NOT NULL,
     delivery_fee        BIGINT, -- cents
-    restaurant_id       BIGINT                   NOT NULL,
-    customer_profile_id BIGINT                   NOT NULL,
-    PRIMARY KEY (id)
+    restaurant_id       BIGINT                   NOT NULL REFERENCES ${schema}.restaurant (id),
+    customer_profile_id BIGINT                   NOT NULL REFERENCES ${schema}.customer_profile (id)
 );
 
 CREATE TABLE ${schema}.order_line
 (
-    id           BIGINT GENERATED ALWAYS AS IDENTITY,
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     quantity     INT    NOT NULL,
     price_each   BIGINT NOT NULL, --cents
-    menu_item_id BIGINT NOT NULL,
-    order_id     BIGINT NOT NULL,
-    PRIMARY KEY (id)
+    menu_item_id BIGINT NOT NULL REFERENCES ${schema}.menu_item (id),
+    order_id     BIGINT NOT NULL REFERENCES ${schema}.orders (id)
 );
 
 CREATE TABLE ${schema}.cuisine
 (
-    id       INT GENERATED ALWAYS AS IDENTITY,
-    category VARCHAR(30) UNIQUE NOT NULL,
-    PRIMARY KEY (id)
+    id       INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    category VARCHAR(30) UNIQUE NOT NULL
 );
 
 CREATE TABLE ${schema}.restaurant_cuisine
 (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY,
-    restaurant_id BIGINT   NOT NULL,
-    cuisine_id    INT      NOT NULL,
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    restaurant_id BIGINT   NOT NULL REFERENCES ${schema}.restaurant (id),
+    cuisine_id    INT      NOT NULL REFERENCES ${Schema}.cuisine (id),
     -- priority/order in which restaurant considers itself to be a particular cuisine
     -- i.e. a Pizza restaurant may chose 1 for Pizza, 2 for Italian, and 3 for Salad
     priority      SMALLINT NOT NULL
 );
-
-ALTER TABLE ${schema}.users
-    ADD CONSTRAINT fk_customer_profile FOREIGN KEY (customer_profile_id) REFERENCES ${schema}.customer_profile (id),
-    ADD CONSTRAINT fk_merchant_profile FOREIGN KEY (merchant_profile_id) REFERENCES ${schema}.merchant_profile (id);
-
-ALTER TABLE ${schema}.customer_profile
-    ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES ${schema}.address (id);
-
-ALTER TABLE ${schema}.merchant_profile
-    ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES ${schema}.address (id);
-
-ALTER TABLE ${schema}.operating_hours
-    ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id);
-
-ALTER TABLE ${schema}.menu_item
-    ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id);
-
-ALTER TABLE ${schema}.orders
-    ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id),
-    ADD CONSTRAINT fk_customer_profile FOREIGN KEY (customer_profile_id) REFERENCES ${schema}.customer_profile (id);
-
-ALTER TABLE ${schema}.order_line
-    ADD CONSTRAINT fk_menu_item FOREIGN KEY (menu_item_id) REFERENCES ${schema}.menu_item (id),
-    ADD CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES ${schema}.orders (id);
-
-ALTER TABLE ${schema}.restaurant_cuisine
-    ADD CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES ${schema}.restaurant (id),
-    ADD CONSTRAINT fk_cuisine FOREIGN KEY (cuisine_id) REFERENCES ${schema}.cuisine (id);
 
 CREATE CAST (character varying AS role) WITH INOUT AS ASSIGNMENT;
 CREATE CAST (character varying AS state) WITH INOUT AS ASSIGNMENT;
