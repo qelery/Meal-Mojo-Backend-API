@@ -16,3 +16,9 @@ The <b>frontend</b> portion of this app was built in Angular 13. Check out the [
 * Run `mvn clean install` in the terminal
 * Run `mvn spring-boot:run` in the terminal
 * The web application is accessible via localhost:9092
+
+## Features
+* Endpoints for customer and merchant sign-up and login
+* Endpoints for adding restaurants and menu items
+* Endpoints for querying nearby restaurants and placing orders
+* High test coverage using JUnit5, Mockito, and MockMVC
