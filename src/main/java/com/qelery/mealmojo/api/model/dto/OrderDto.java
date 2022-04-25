@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class OrderDto {
 
-    private Long id;
+    private Long orderId;
     private Long tip; //cents
     private OffsetDateTime dateTime;
     private Boolean isCompleted;

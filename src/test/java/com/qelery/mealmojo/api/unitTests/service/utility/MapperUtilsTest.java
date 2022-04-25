@@ -193,7 +193,7 @@ class MapperUtilsTest {
         assertThat(orderDto.getIsDelivery()).isEqualTo(orderEntity.getIsDelivery());
         assertThat(orderDto.getDeliveryFee()).isEqualTo(orderEntity.getDeliveryFee());
         assertThat(orderDto.getPaymentMethod()).isEqualTo(orderEntity.getPaymentMethod());
-        assertThat(orderDto.getRestaurantId()).isEqualTo(orderEntity.getRestaurant().getId());
+        assertThat(orderDto.getRestaurantId()).isEqualTo(orderEntity.getRestaurant().getRestaurantId());
         assertThat(orderDto.getRestaurantName()).isEqualTo(orderEntity.getRestaurant().getName());
         assertThat(orderDto.getRestaurantLogoImageUrl()).isEqualTo(orderEntity.getRestaurant().getLogoImageUrl());
         assertThat(orderDto.getCustomerProfileFirstName()).isEqualTo(orderEntity.getCustomerProfile().getFirstName());
@@ -284,7 +284,7 @@ class MapperUtilsTest {
         operatingHoursTuesdayEntity.setCloseTime(LocalTime.of(21, 30));
 
         menuItemEntity = new MenuItem();
-        menuItemEntity.setId(1L);
+        menuItemEntity.setMenuItemId(1L);
         menuItemEntity.setName("Burger");
         menuItemEntity.setPrice(599L);
 

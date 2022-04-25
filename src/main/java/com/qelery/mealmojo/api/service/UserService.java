@@ -103,6 +103,17 @@ public class UserService {
         return updatedUserInfo;
     }
 
+    public AddressDto getAddress() {
+        User loggedInUser = getLoggedInUser();
+        Profile profile = loggedInUser.getRole() == Role.CUSTOMER ?
+                loggedInUser.getCustomerProfile() :
+                loggedInUser.getMerchantProfile();
+        if (profile.getAddress() == null) {
+            return null;
+        }
+        return mapperUtils.map(profile.getAddress(), AddressDto.class);
+    }
+
     public UserInfoDto updateAddress(AddressDto updatedAddress) {
         User loggedInUser = getLoggedInUser();
         Profile profile = loggedInUser.getRole() == Role.CUSTOMER ?

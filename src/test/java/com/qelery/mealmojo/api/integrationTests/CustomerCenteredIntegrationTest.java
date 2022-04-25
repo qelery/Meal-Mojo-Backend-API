@@ -114,7 +114,7 @@ class CustomerCenteredIntegrationTest {
             String jsonResponse = httpRequestDispatcher.performGET(url);
             RestaurantDtoOut actualRestaurant = objectMapper.readValue(jsonResponse, RestaurantDtoOut.class);
 
-            assertEquals(expectedRestaurantId, actualRestaurant.getId());
+            assertEquals(expectedRestaurantId, actualRestaurant.getRestaurantId());
             assertEquals(expectedRestaurantName, actualRestaurant.getName());
         }
 
@@ -147,7 +147,7 @@ class CustomerCenteredIntegrationTest {
             String jsonResponse = httpRequestDispatcher.performGET(url);
             MenuItemDto actualMenuItem = objectMapper.readValue(jsonResponse, MenuItemDto.class);
 
-            assertEquals(expectedMenuItemId, actualMenuItem.getId());
+            assertEquals(expectedMenuItemId, actualMenuItem.getMenuItemId());
             assertEquals(expectedMenuItemName, actualMenuItem.getName());
         }
 
@@ -162,9 +162,9 @@ class CustomerCenteredIntegrationTest {
 
             assertEquals(3, actualOrders.size());
 
-            Optional<OrderDto> optionalOrderId1 = actualOrders.stream().filter(order -> order.getId() == 1L).findFirst();
-            Optional<OrderDto> optionalOrderId3 = actualOrders.stream().filter(order -> order.getId() == 3L).findFirst();
-            Optional<OrderDto> optionalOrderId4 = actualOrders.stream().filter(order -> order.getId() == 4L).findFirst();
+            Optional<OrderDto> optionalOrderId1 = actualOrders.stream().filter(order -> order.getOrderId() == 1L).findFirst();
+            Optional<OrderDto> optionalOrderId3 = actualOrders.stream().filter(order -> order.getOrderId() == 3L).findFirst();
+            Optional<OrderDto> optionalOrderId4 = actualOrders.stream().filter(order -> order.getOrderId() == 4L).findFirst();
             assertTrue(optionalOrderId1.isPresent());
             assertTrue(optionalOrderId3.isPresent());
             assertTrue(optionalOrderId4.isPresent());
@@ -196,7 +196,7 @@ class CustomerCenteredIntegrationTest {
 
             assertEquals(1, actualOrderDtos.size());
             OrderDto actualOrder = actualOrderDtos.get(0);
-            assertEquals(1L, actualOrder.getId());
+            assertEquals(1L, actualOrder.getOrderId());
         }
 
         @Test
@@ -209,7 +209,7 @@ class CustomerCenteredIntegrationTest {
 
             OrderDto actualOrderDto = objectMapper.readValue(jsonResponse, OrderDto.class);
 
-            assertEquals(1L, actualOrderDto.getId());
+            assertEquals(1L, actualOrderDto.getOrderId());
         }
 
         @Test

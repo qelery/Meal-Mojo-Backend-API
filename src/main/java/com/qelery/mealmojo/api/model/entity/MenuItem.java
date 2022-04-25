@@ -14,7 +14,7 @@ public class MenuItem {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private Long menuItemId;
     private String name;
     private String description;
     private Long price; // cents
@@ -23,6 +23,6 @@ public class MenuItem {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="restaurant_id", referencedColumnName="id")
+    @JoinColumn(name="restaurant_id")
     private Restaurant restaurant;
 }

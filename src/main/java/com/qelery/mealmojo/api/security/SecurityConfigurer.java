@@ -47,6 +47,8 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/api/users/register").permitAll()
                 .antMatchers("/api/users/login").permitAll()
+                .antMatchers("/api/users/address").permitAll()
+                .antMatchers("/api/restaurants/**").permitAll()
                 .antMatchers("/api/merchant/**").hasAnyAuthority("MERCHANT", "ADMIN")
                 .antMatchers( "/api/order/submit", "/api/order/past").hasAnyAuthority("CUSTOMER", "ADMIN")
                 .antMatchers("/api/order/**").permitAll()

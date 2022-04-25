@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class RestaurantThinDtoOut {
 
-    private Long id;
+    private Long restaurantId;
     private String name;
     private String description;
     private Boolean pickUpAvailable;

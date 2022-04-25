@@ -24,7 +24,7 @@ public abstract class Profile {
     private String lastName;
 
     @OneToOne(cascade= CascadeType.ALL)
-    @JoinColumn(name="address_id", referencedColumnName="id")
+    @JoinColumn(name="address_id")
     @Getter(AccessLevel.PUBLIC)
     @Setter(AccessLevel.PUBLIC)
     private Address address;

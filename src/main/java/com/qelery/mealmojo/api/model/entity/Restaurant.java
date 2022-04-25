@@ -8,17 +8,19 @@ import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
 @ToString(exclude = {"merchantProfile"})
-@Table(name="restaurant")
+@Table(name = "restaurant")
 public class Restaurant {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long restaurantId;
     private String name;
     private String description;
     private Boolean pickupAvailable;
@@ -30,13 +32,13 @@ public class Restaurant {
     private String heroImageUrl;
     private Boolean isActive = true;
 
-    @OneToOne(cascade=CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name="address_id", referencedColumnName="id")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "address_id")
     private Address address;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="merchant_profile_id", referencedColumnName="id")
+    @JoinColumn(name = "merchant_profile_id")
     private MerchantProfile merchantProfile;
 
     @OneToMany(cascade = CascadeType.PERSIST)
@@ -44,11 +46,19 @@ public class Restaurant {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<OperatingHours> operatingHoursList = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.PERSIST, mappedBy="restaurant")
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "restaurant")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<MenuItem> menuItems = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.PERSIST, mappedBy="restaurant")
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "restaurant")
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<Order> orders = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "restaurant_cuisine",
+            joinColumns = @JoinColumn(name = "restaurant_id"),
+            inverseJoinColumns = @JoinColumn(name = "cuisine_id")
+    )
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private Set<Cuisine> cuisines = new HashSet<>();
 }

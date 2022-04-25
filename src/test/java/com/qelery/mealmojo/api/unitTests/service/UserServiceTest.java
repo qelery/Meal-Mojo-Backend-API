@@ -109,9 +109,9 @@ class UserServiceTest {
             assertEquals(userCreationDto.getFirstName(), userSavedToDatabase.getCustomerProfile().getFirstName());
             assertEquals(userCreationDto.getLastName(), userSavedToDatabase.getCustomerProfile().getLastName());
 
-            assertEquals(userCreationDto.getFirstName(), loginResponse.getUserInfo().getFirstName());
-            assertEquals(userCreationDto.getLastName(), loginResponse.getUserInfo().getLastName());
-            assertEquals(userCreationDto.getEmail(), loginResponse.getUserInfo().getEmail());
+            assertEquals(userCreationDto.getFirstName(), loginResponse.getUser().getFirstName());
+            assertEquals(userCreationDto.getLastName(), loginResponse.getUser().getLastName());
+            assertEquals(userCreationDto.getEmail(), loginResponse.getUser().getEmail());
             assertEquals("myJwtToken", loginResponse.getToken());
         }
 
@@ -144,9 +144,9 @@ class UserServiceTest {
             assertEquals(userCreationDto.getFirstName(), userSavedToDatabase.getMerchantProfile().getFirstName());
             assertEquals(userCreationDto.getLastName(), userSavedToDatabase.getMerchantProfile().getLastName());
 
-            assertEquals(userCreationDto.getFirstName(), loginResponse.getUserInfo().getFirstName());
-            assertEquals(userCreationDto.getLastName(), loginResponse.getUserInfo().getLastName());
-            assertEquals(userCreationDto.getEmail(), loginResponse.getUserInfo().getEmail());
+            assertEquals(userCreationDto.getFirstName(), loginResponse.getUser().getFirstName());
+            assertEquals(userCreationDto.getLastName(), loginResponse.getUser().getLastName());
+            assertEquals(userCreationDto.getEmail(), loginResponse.getUser().getEmail());
             assertEquals("myJwtToken", loginResponse.getToken());
         }
 
@@ -184,13 +184,13 @@ class UserServiceTest {
     @DisplayName("Should deactivate a user")
     void changeUserActiveState_deactivate() {
         User activeUser = new User();
-        activeUser.setId(1L);
+        activeUser.setUserId(1L);
         activeUser.setIsActive(true);
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(activeUser));
 
-        userService.changeUserActiveState(activeUser.getId(), false);
+        userService.changeUserActiveState(activeUser.getUserId(), false);
 
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
@@ -201,13 +201,13 @@ class UserServiceTest {
     @DisplayName("Should re-activate a user")
     void changeUserActiveState_activate() {
         User deactivatedUser = new User();
-        deactivatedUser.setId(1L);
+        deactivatedUser.setUserId(1L);
         deactivatedUser.setIsActive(false);
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(deactivatedUser));
 
-        userService.changeUserActiveState(deactivatedUser.getId(), true);
+        userService.changeUserActiveState(deactivatedUser.getUserId(), true);
 
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
@@ -343,6 +343,38 @@ class UserServiceTest {
         addUserToSecurityContext(user);
 
         assertThrows(ProhibitedByRoleException.class, () -> userService.getLoggedInUserMerchantProfile());
+    }
+
+    @Test
+    @DisplayName("Should get user address")
+    void getAddress() {
+        Address expectedAddress = new Address();
+        expectedAddress.setStreet1("123 Maple Lane");
+        CustomerProfile customerProfile = new CustomerProfile();
+        customerProfile.setAddress(expectedAddress);
+        User user = new User();
+        user.setRole(Role.CUSTOMER);
+        user.setCustomerProfile(customerProfile);
+        addUserToSecurityContext(user);
+
+        AddressDto actualAddressDto = userService.getAddress();
+
+        assertEquals(mapperUtils.map(expectedAddress, AddressDto.class), actualAddressDto);
+    }
+
+    @Test
+    @DisplayName("Should get return null is user doesn't have an address")
+    void getAddress_returnNull() {
+        CustomerProfile customerProfile = new CustomerProfile();
+        customerProfile.setAddress(null);
+        User user = new User();
+        user.setRole(Role.CUSTOMER);
+        user.setCustomerProfile(customerProfile);
+        addUserToSecurityContext(user);
+
+        AddressDto actualAddressDto = userService.getAddress();
+
+        assertNull(actualAddressDto);
     }
 
     @Test

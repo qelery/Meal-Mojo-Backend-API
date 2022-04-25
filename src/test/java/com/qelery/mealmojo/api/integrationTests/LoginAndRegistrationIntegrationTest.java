@@ -73,7 +73,7 @@ public class LoginAndRegistrationIntegrationTest {
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto);
             LoginResponse actualLoginResponse = objectMapper.readValue(jsonResponse, LoginResponse.class);
 
-            assertThat(actualLoginResponse.getUserInfo())
+            assertThat(actualLoginResponse.getUser())
                     .usingRecursiveComparison()
                     .ignoringFields("address")
                     .isEqualTo(userSignUpInfoDto);
@@ -96,7 +96,7 @@ public class LoginAndRegistrationIntegrationTest {
             String jsonResponse = httpRequestDispatcher.performPOST(url, userSignUpInfoDto);
             LoginResponse actualLoginResponse = objectMapper.readValue(jsonResponse, LoginResponse.class);
 
-            assertThat(actualLoginResponse.getUserInfo())
+            assertThat(actualLoginResponse.getUser())
                     .usingRecursiveComparison()
                     .ignoringFields("address")
                     .isEqualTo(userSignUpInfoDto);
@@ -207,7 +207,7 @@ public class LoginAndRegistrationIntegrationTest {
             Address updatedAddressFromDatabase = updatedProfileFromDatabase.getAddress();
             assertThat(updatedAddressFromDatabase)
                     .usingRecursiveComparison()
-                    .ignoringFields("id")
+                    .ignoringFields("addressId")
                     .isEqualTo(updatedUserInfoDto.getAddress());
         }
 
@@ -231,8 +231,31 @@ public class LoginAndRegistrationIntegrationTest {
             Address updatedAddressFromDatabase = updatedProfileFromDatabase.getAddress();
             assertThat(updatedAddressFromDatabase)
                     .usingRecursiveComparison()
-                    .ignoringFields("id")
+                    .ignoringFields("addressId")
                     .isEqualTo(updatedUserInfoDto.getAddress());
+        }
+    }
+
+    @Nested
+    @DisplayName("[Integration Tests - Through All Layers] Should be able to get user address,")
+    class throughAllLayers_user_getUserAddress {
+
+        @Test
+        @WithUserDetails("alice_customer@example.com")
+        @DisplayName("As a customer")
+        void shouldGetUserAddress_customer() throws Exception {
+            Optional<User> userFromDatabase = userRepository.findByEmailIgnoreCase("alice_customer@example.com");
+            assertTrue(userFromDatabase.isPresent());
+            Address expectedAddress = userFromDatabase.get().getCustomerProfile().getAddress();
+
+            String url = "/api/users/address";
+            String jsonResponse =  httpRequestDispatcher.performGET(url);
+            AddressDto actualAddressDto = objectMapper.readValue(jsonResponse, AddressDto.class);
+
+            assertThat(expectedAddress)
+                    .usingRecursiveComparison()
+                    .ignoringFields("addressId")
+                    .isEqualTo(actualAddressDto);
         }
     }
 
@@ -267,7 +290,7 @@ public class LoginAndRegistrationIntegrationTest {
             Address updatedAddressFromDatabase = userFromDatabase.get().getCustomerProfile().getAddress();
             assertThat(updatedAddressFromDatabase)
                     .usingRecursiveComparison()
-                    .ignoringFields("id")
+                    .ignoringFields("addressId")
                     .isEqualTo(updatedAddressDto);
         }
 
@@ -284,7 +307,7 @@ public class LoginAndRegistrationIntegrationTest {
             Address updatedAddressFromDatabase = userFromDatabase.get().getMerchantProfile().getAddress();
             assertThat(updatedAddressFromDatabase)
                     .usingRecursiveComparison()
-                    .ignoringFields("id")
+                    .ignoringFields("addressId")
                     .isEqualTo(updatedAddressDto);
         }
     }

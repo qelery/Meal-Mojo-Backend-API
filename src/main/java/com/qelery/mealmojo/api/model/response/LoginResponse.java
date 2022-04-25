@@ -9,5 +9,5 @@ import lombok.Data;
 public class LoginResponse {
 
     private String token;
-    private UserInfoDto userInfo;
+    private UserInfoDto user;
 }

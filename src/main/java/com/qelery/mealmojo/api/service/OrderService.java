@@ -115,7 +115,7 @@ public class OrderService {
                 .stream()
                 .map(Restaurant::getOrders)
                 .flatMap(Collection::stream)
-                .filter(o -> o.getId().equals(orderId))
+                .filter(o -> o.getOrderId().equals(orderId))
                 .findFirst();
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
         order.setIsCompleted(true);
@@ -127,7 +127,7 @@ public class OrderService {
         MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
         Optional<Restaurant> optionalRestaurant = merchantProfile.getRestaurantsOwned()
                 .stream()
-                .filter(restaurant -> restaurant.getId().equals(restaurantId))
+                .filter(restaurant -> restaurant.getRestaurantId().equals(restaurantId))
                 .findFirst();
         return optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
     }
@@ -157,7 +157,7 @@ public class OrderService {
         Restaurant restaurant = restaurantService.getRestaurantEntity(restaurantId);
         CustomerProfile customerProfile = userService.getLoggedInCustomerProfile();
         List<Order> orders = customerProfile.getPlacedOrders()
-                .stream().filter(order -> order.getRestaurant().getId().equals(restaurant.getId()))
+                .stream().filter(order -> order.getRestaurant().getRestaurantId().equals(restaurant.getRestaurantId()))
                 .collect(Collectors.toList());
         return mapperUtils.mapAll(orders, OrderDto.class);
     }
@@ -178,7 +178,7 @@ public class OrderService {
                 .stream()
                 .map(Restaurant::getOrders)
                 .flatMap(Collection::stream)
-                .filter(o -> o.getId().equals(orderId))
+                .filter(o -> o.getOrderId().equals(orderId))
                 .findFirst();
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
         return mapperUtils.map(order, OrderDto.class);
@@ -189,7 +189,7 @@ public class OrderService {
         Optional<Order> optionalOrder = customerProfile
                 .getPlacedOrders()
                 .stream()
-                .filter(o -> o.getId().equals(orderId))
+                .filter(o -> o.getOrderId().equals(orderId))
                 .findFirst();
         Order order = optionalOrder.orElseThrow(() -> new OrderNotFoundException(orderId));
         return mapperUtils.map(order, OrderDto.class);

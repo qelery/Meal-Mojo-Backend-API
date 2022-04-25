@@ -14,7 +14,7 @@ public class OperatingHours {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private Long operatingHoursId;
     private LocalTime openTime;
     private LocalTime closeTime;
 

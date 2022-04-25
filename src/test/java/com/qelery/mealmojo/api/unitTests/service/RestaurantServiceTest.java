@@ -62,22 +62,22 @@ class RestaurantServiceTest {
     @BeforeEach
     void setup() {
         this.restaurant1 = new Restaurant();
-        restaurant1.setId(1L);
+        restaurant1.setRestaurantId(1L);
         restaurant1.setName("Restaurant1");
         restaurant1.setDescription("Restaurant1 description.");
         restaurant1.setDeliveryFee(300L);
         this.restaurant2 = new Restaurant();
-        restaurant2.setId(2L);
+        restaurant2.setRestaurantId(2L);
         restaurant2.setName("Restaurant2");
         restaurant2.setDescription("Restaurant2 description.");
         restaurant2.setIsActive(false);
 
         this.menuItem1 = new MenuItem();
-        menuItem1.setId(1L);
+        menuItem1.setMenuItemId(1L);
         menuItem1.setName("Salad 1");
         menuItem1.setPrice(799L);
         this.menuItem2 = new MenuItem();
-        menuItem2.setId(2L);
+        menuItem2.setMenuItemId(2L);
         menuItem2.setName("Salad 2");
         menuItem2.setPrice(860L);
 
@@ -114,7 +114,7 @@ class RestaurantServiceTest {
     void getRestaurantEntity() {
         when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
 
-        Restaurant actualRestaurant = restaurantService.getRestaurantEntity(restaurant1.getId());
+        Restaurant actualRestaurant = restaurantService.getRestaurantEntity(restaurant1.getRestaurantId());
         assertEquals(restaurant1, actualRestaurant);
     }
 
@@ -123,7 +123,7 @@ class RestaurantServiceTest {
     void getRestaurant() {
         when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
 
-        RestaurantDtoOut actualRestaurantDto = restaurantService.getRestaurant(restaurant1.getId());
+        RestaurantDtoOut actualRestaurantDto = restaurantService.getRestaurant(restaurant1.getRestaurantId());
 
         assertEquals(restaurant1.getName(), actualRestaurantDto.getName());
     }
@@ -144,10 +144,10 @@ class RestaurantServiceTest {
         RestaurantDtoOut expectedRestaurantDto = mapperUtils.map(restaurant1, RestaurantDtoOut.class);
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.of(restaurant1));
 
-        RestaurantDtoOut actualRestaurantDto = restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(restaurant2.getId());
+        RestaurantDtoOut actualRestaurantDto = restaurantService.getSingleRestaurantOwnedByLoggedInMerchant(restaurant2.getRestaurantId());
 
         assertEquals(expectedRestaurantDto, actualRestaurantDto);
     }
@@ -156,10 +156,10 @@ class RestaurantServiceTest {
     @DisplayName("Should throw exception when logged in merchant attempting to get restaurant by id that isn't owned by them")
     void getSingleRestaurantUnOwnedByLoggedInMerchant_throwError() {
         MerchantProfile merchantProfile = addMockMerchantProfile();
-        Long unownedRestaurantId = restaurant2.getId();
+        Long unownedRestaurantId = restaurant2.getRestaurantId();
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.empty());
 
         assertThrows(RestaurantNotFoundException.class, () ->
@@ -226,10 +226,10 @@ class RestaurantServiceTest {
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
-        restaurantService.updateRestaurantBasicInformation(restaurant1.getId(), updatedInfoDto);
+        restaurantService.updateRestaurantBasicInformation(restaurant1.getRestaurantId(), updatedInfoDto);
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
         Restaurant savedRestaurant = restaurantCaptor.getValue();
@@ -248,14 +248,14 @@ class RestaurantServiceTest {
         tuesdayHoursDto.setCloseTime(LocalTime.of(20, 0));
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
         when(operatingHoursRepository.save(any(OperatingHours.class)))
                 .thenReturn(new OperatingHours());
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
 
-        restaurantService.updateRestaurantHours(restaurant1.getId(), List.of(tuesdayHoursDto));
+        restaurantService.updateRestaurantHours(restaurant1.getRestaurantId(), List.of(tuesdayHoursDto));
 
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
@@ -289,12 +289,12 @@ class RestaurantServiceTest {
 
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
         ArgumentCaptor<Restaurant> restaurantCaptor = ArgumentCaptor.forClass(Restaurant.class);
 
 
-        restaurantService.updateRestaurantHours(restaurant1.getId(), List.of(updatedTuesdayHoursDto));
+        restaurantService.updateRestaurantHours(restaurant1.getRestaurantId(), List.of(updatedTuesdayHoursDto));
 
 
         verify(restaurantRepository).save(restaurantCaptor.capture());
@@ -331,11 +331,11 @@ class RestaurantServiceTest {
 
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
 
-        RestaurantThinDtoOut restaurantDto = restaurantService.updateRestaurantAddress(restaurant1.getId(), updatedAddressDto);
+        RestaurantThinDtoOut restaurantDto = restaurantService.updateRestaurantAddress(restaurant1.getRestaurantId(), updatedAddressDto);
         AddressDto savedAddress = restaurantDto.getAddress();
 
 
@@ -357,7 +357,7 @@ class RestaurantServiceTest {
         restaurant1.setMenuItems(menuItems);
         when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
 
-        List<MenuItemDto> actualMenuItemDtos = restaurantService.getAllMenuItemsByRestaurant(restaurant1.getId());
+        List<MenuItemDto> actualMenuItemDtos = restaurantService.getAllMenuItemsByRestaurant(restaurant1.getRestaurantId());
 
         for (MenuItem expectedMenuItem : menuItems) {
             assertTrue(actualMenuItemDtos.stream().anyMatch(actualDto -> actualDto.getName().equals(expectedMenuItem.getName())));
@@ -369,7 +369,7 @@ class RestaurantServiceTest {
     void getMenuItemByRestaurant() {
         when(restaurantRepository.findById(anyLong())).thenReturn(Optional.ofNullable(restaurant1));
 
-        MenuItemDto actualMenuItemDto = restaurantService.getMenuItemByRestaurant(restaurant1.getId(), menuItem1.getId());
+        MenuItemDto actualMenuItemDto = restaurantService.getMenuItemByRestaurant(restaurant1.getRestaurantId(), menuItem1.getMenuItemId());
 
         assertEquals(menuItem1.getName(), actualMenuItemDto.getName());
     }
@@ -384,10 +384,10 @@ class RestaurantServiceTest {
         ArgumentCaptor<MenuItem> menuItemCaptor = ArgumentCaptor.forClass(MenuItem.class);
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
-        restaurantService.createMenuItem(restaurant1.getId(), menuItemDto);
+        restaurantService.createMenuItem(restaurant1.getRestaurantId(), menuItemDto);
 
         verify(menuItemRepository).save(menuItemCaptor.capture());
         MenuItem savedMenuItem = menuItemCaptor.getValue();
@@ -400,7 +400,7 @@ class RestaurantServiceTest {
     void updateMenuItem() {
         MerchantProfile merchantProfile = addMockMerchantProfile();
         MenuItem currentMenuItem = new MenuItem();
-        currentMenuItem.setId(5L);
+        currentMenuItem.setMenuItemId(5L);
         currentMenuItem.setName("Pepperoni Pizza");
         currentMenuItem.setPrice(1800L);
         restaurant1.setMenuItems(List.of(currentMenuItem));
@@ -413,11 +413,11 @@ class RestaurantServiceTest {
 
         when(userService.getLoggedInUserMerchantProfile())
                 .thenReturn(merchantProfile);
-        when(restaurantRepository.findByIdAndMerchantProfileId(anyLong(), anyLong()))
+        when(restaurantRepository.findByRestaurantIdAndMerchantProfileId(anyLong(), anyLong()))
                 .thenReturn(Optional.ofNullable(restaurant1));
 
 
-        restaurantService.updateMenuItem(restaurant1.getId(), currentMenuItem.getId(), updatedMenuItemDto);
+        restaurantService.updateMenuItem(restaurant1.getRestaurantId(), currentMenuItem.getMenuItemId(), updatedMenuItemDto);
 
 
         verify(menuItemRepository).save(menuItemCaptor.capture());

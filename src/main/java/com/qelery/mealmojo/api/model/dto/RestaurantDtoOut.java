@@ -3,11 +3,12 @@ package com.qelery.mealmojo.api.model.dto;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class RestaurantDtoOut {
 
-    private Long id;
+    private Long restaurantId;
     private String name;
     private String description;
     private Boolean pickUpAvailable;
@@ -21,4 +22,5 @@ public class RestaurantDtoOut {
     private List<OperatingHoursDto> operatingHoursList;
     private List<MenuItemDto> menuItems;
     private List<OrderDto> orders;
+    private Set<CuisineDto> cuisines;
 }

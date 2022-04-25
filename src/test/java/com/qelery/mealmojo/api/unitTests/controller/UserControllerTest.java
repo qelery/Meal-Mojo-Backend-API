@@ -59,7 +59,7 @@ class UserControllerTest {
                 .thenReturn(expectedUserInfoDto);
 
         UserInfoDto actualUserInfoDto = userController.setUserActiveState(1L, false);
-        assertEquals(actualUserInfoDto, expectedUserInfoDto);
+        assertEquals(expectedUserInfoDto, actualUserInfoDto);
     }
 
     @Test
@@ -70,7 +70,17 @@ class UserControllerTest {
                 .thenReturn(expectedUserInfoDto);
 
         UserInfoDto actualUserInfoDto = userController.updateUser(new UserInfoDto());
-        assertEquals(actualUserInfoDto, expectedUserInfoDto);
+        assertEquals(expectedUserInfoDto, actualUserInfoDto);
+    }
+
+    @Test
+    @DisplayName("Should return from service address dto")
+    void getAddress() {
+        AddressDto expectedAddressDto = new AddressDto();
+        when(userService.getAddress()).thenReturn(expectedAddressDto);
+
+        AddressDto actualAddressDto = userController.getAddress();
+        assertEquals(expectedAddressDto, actualAddressDto);
     }
 
     @Test
@@ -81,6 +91,6 @@ class UserControllerTest {
                 .thenReturn(expectedUserInfoDto);
 
         UserInfoDto actualUserInfoDto = userController.updateAddress(new AddressDto());
-        assertEquals(actualUserInfoDto, expectedUserInfoDto);
+        assertEquals(expectedUserInfoDto, actualUserInfoDto);
     }
 }

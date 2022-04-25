@@ -95,7 +95,7 @@ public class MerchantCenteredIntegrationTest {
             String jsonResponse = httpRequestDispatcher.performGET(url);
             RestaurantDtoOut actualRestaurant = objectMapper.readValue(jsonResponse, RestaurantDtoOut.class);
 
-            assertEquals(expectedRestaurantId, actualRestaurant.getId());
+            assertEquals(expectedRestaurantId, actualRestaurant.getRestaurantId());
             assertEquals(expectedRestaurantName, actualRestaurant.getName());
         }
 
@@ -257,7 +257,7 @@ public class MerchantCenteredIntegrationTest {
 
             assertEquals(3, actualOrderDtos.size());
             List<Long> actualOrderIds =  actualOrderDtos.stream()
-                    .map(OrderDto::getId)
+                    .map(OrderDto::getOrderId)
                     .collect(Collectors.toList());
             assertTrue(actualOrderIds.containsAll(List.of(1L, 3L, 4L)));
         }
@@ -274,7 +274,7 @@ public class MerchantCenteredIntegrationTest {
 
             assertEquals(1, actualOrderDtos.size());
             OrderDto actualOder = actualOrderDtos.get(0);
-            assertEquals(3L, actualOder.getId());
+            assertEquals(3L, actualOder.getOrderId());
         }
 
         @Test
@@ -287,7 +287,7 @@ public class MerchantCenteredIntegrationTest {
 
             OrderDto actualOrderDto = objectMapper.readValue(jsonResponse, OrderDto.class);
 
-            assertEquals(orderId, actualOrderDto.getId());
+            assertEquals(orderId, actualOrderDto.getOrderId());
         }
 
         @Test

@@ -46,6 +46,12 @@ public class UserController {
         return userService.updateUser(updatedUserInfo);
     }
 
+    @GetMapping("/users/address")
+    @ResponseStatus(HttpStatus.OK)
+    public AddressDto getAddress() {
+        return userService.getAddress();
+    }
+
     @PatchMapping("/users/address")
     @ResponseStatus(HttpStatus.OK)
     public UserInfoDto updateAddress(@RequestBody AddressDto addressDto) {

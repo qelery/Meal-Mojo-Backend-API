@@ -11,11 +11,11 @@ public class OrderLine {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private Long orderLineId;
     private Integer quantity;
     private Long priceEach; // cents
 
     @ManyToOne
-    @JoinColumn(name="menu_item_id", referencedColumnName="id")
+    @JoinColumn(name="menu_item_id")
     private MenuItem menuItem;
 }

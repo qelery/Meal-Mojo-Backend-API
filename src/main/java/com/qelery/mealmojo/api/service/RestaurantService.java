@@ -140,7 +140,7 @@ public class RestaurantService {
         RestaurantDtoOut restaurant = getRestaurant(restaurantId);
         Optional<MenuItemDto> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
-                .filter(menuItem -> menuItem.getId().equals(menuItemId))
+                .filter(menuItem -> menuItem.getMenuItemId().equals(menuItemId))
                 .findFirst();
         MenuItemDto menuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
         return mapperUtils.map(menuItem, MenuItemDto.class);
@@ -159,7 +159,7 @@ public class RestaurantService {
         MenuItem newMenuItem = mapperUtils.map(newMenuItemDto, MenuItem.class);
         Optional<MenuItem> optionalMenuItem = restaurant.getMenuItems()
                 .stream()
-                .filter(menuItem -> menuItem.getId().equals(menuItemId))
+                .filter(menuItem -> menuItem.getMenuItemId().equals(menuItemId))
                 .findFirst();
         MenuItem oldMenuItem = optionalMenuItem.orElseThrow(() -> new MenuItemNotFoundException(menuItemId));
         mapperUtils.map(newMenuItem, oldMenuItem);
@@ -169,7 +169,7 @@ public class RestaurantService {
 
     private Restaurant getRestaurantByMerchantProfile(Long restaurantId) {
         MerchantProfile merchantProfile = userService.getLoggedInUserMerchantProfile();
-        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByIdAndMerchantProfileId(restaurantId, merchantProfile.getId());
+        Optional<Restaurant> optionalRestaurant = restaurantRepository.findByRestaurantIdAndMerchantProfileId(restaurantId, merchantProfile.getId());
         return optionalRestaurant.orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
     }
 }

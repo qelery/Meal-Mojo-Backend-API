@@ -65,28 +65,28 @@ class OrderServiceTest {
     @BeforeEach
     void setup() {
         restaurant1 = new Restaurant();
-        restaurant1.setId(1L);
+        restaurant1.setRestaurantId(1L);
         restaurant1.setName("Restaurant1");
         restaurant2 = new Restaurant();
-        restaurant2.setId(2L);
+        restaurant2.setRestaurantId(2L);
         restaurant2.setName("Restaurant2");
         restaurant2.setIsActive(false);
 
         menuItem1 = new MenuItem();
-        menuItem1.setId(1L);
+        menuItem1.setMenuItemId(1L);
         menuItem1.setName("Salad 1");
         menuItem1.setPrice(799L);
         menuItem2 = new MenuItem();
-        menuItem2.setId(2L);
+        menuItem2.setMenuItemId(2L);
         menuItem2.setName("Salad 2");
         menuItem2.setPrice(860L);
 
         order1 = new Order();
-        order1.setId(1L);
+        order1.setOrderId(1L);
         order1.setTip(100L);
         order1.setRestaurant(restaurant1);
         order2 = new Order();
-        order2.setId(2L);
+        order2.setOrderId(2L);
         order2.setTip(200L);
         order2.setRestaurant(restaurant2);
 
@@ -130,7 +130,7 @@ class OrderServiceTest {
             MerchantProfile someOtherMerchantsProfile = new MerchantProfile();
             Long restaurantId = 3L;
             Restaurant restaurant3 = new Restaurant();
-            restaurant3.setId(restaurantId);
+            restaurant3.setRestaurantId(restaurantId);
             someOtherMerchantsProfile.setRestaurantsOwned(List.of(restaurant3));
             when(userService.getLoggedInUserMerchantProfile())
                     .thenReturn(merchantProfile);
@@ -149,8 +149,8 @@ class OrderServiceTest {
 
             List<OrderDto> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            assertTrue(actualOrdersDto.stream().allMatch(order -> order.getRestaurantId().equals(restaurant1.getId()) ||
-                    order.getRestaurantId().equals(restaurant2.getId())));
+            assertTrue(actualOrdersDto.stream().allMatch(order -> order.getRestaurantId().equals(restaurant1.getRestaurantId()) ||
+                    order.getRestaurantId().equals(restaurant2.getRestaurantId())));
         }
 
         @Test
@@ -171,10 +171,10 @@ class OrderServiceTest {
         void getSingleOrderForNonOwnedRestaurant_throwException() {
             MerchantProfile someOtherMerchantsProfile = new MerchantProfile();
             Restaurant restaurant3 = new Restaurant();
-            restaurant3.setId(3L);
+            restaurant3.setRestaurantId(3L);
             Long orderId = 3L;
             Order order3 = new Order();
-            order3.setId(orderId);
+            order3.setOrderId(orderId);
             someOtherMerchantsProfile.setRestaurantsOwned(List.of(restaurant3));
             when(userService.getLoggedInUserMerchantProfile())
                     .thenReturn(merchantProfile);
@@ -222,8 +222,8 @@ class OrderServiceTest {
 
             List<OrderDto> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            List<Long> expectedOrderIds = List.of(order1.getId(), order2.getId());
-            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getId).collect(Collectors.toList());
+            List<Long> expectedOrderIds = List.of(order1.getOrderId(), order2.getOrderId());
+            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getOrderId).collect(Collectors.toList());
             assertEquals(expectedOrderIds.size(), actualOrderIds.size());
             assertTrue(expectedOrderIds.containsAll(actualOrderIds));
         }
@@ -257,16 +257,16 @@ class OrderServiceTest {
         @DisplayName("Should save new order to the database")
         void submitOrder() {
             Map<Long, Integer> quantityMap = new HashMap<>();
-            quantityMap.put(menuItem1.getId(), 3);
-            quantityMap.put(menuItem2.getId(), 5);
+            quantityMap.put(menuItem1.getMenuItemId(), 3);
+            quantityMap.put(menuItem2.getMenuItemId(), 5);
 
             OrderCreationDto orderCreationDto = new OrderCreationDto();
             orderCreationDto.setTip(600L);
             orderCreationDto.setMenuItemQuantitiesMap(quantityMap);
 
             when(userService.getLoggedInCustomerProfile()).thenReturn(customerProfile);
-            when(menuItemRepository.findById(menuItem1.getId())).thenReturn(Optional.ofNullable(menuItem1));
-            when(menuItemRepository.findById(menuItem2.getId())).thenReturn(Optional.ofNullable(menuItem2));
+            when(menuItemRepository.findById(menuItem1.getMenuItemId())).thenReturn(Optional.ofNullable(menuItem1));
+            when(menuItemRepository.findById(menuItem2.getMenuItemId())).thenReturn(Optional.ofNullable(menuItem2));
             ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 
             orderService.submitOrder(orderCreationDto);
@@ -311,8 +311,8 @@ class OrderServiceTest {
 
             List<OrderDto> actualOrdersDto = orderService.getOrders(restaurantId);
 
-            List<Long> expectedOrderIds = restaurant1.getOrders().stream().map(Order::getId).collect(Collectors.toList());
-            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getId).collect(Collectors.toList());
+            List<Long> expectedOrderIds = restaurant1.getOrders().stream().map(Order::getOrderId).collect(Collectors.toList());
+            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getOrderId).collect(Collectors.toList());
             assertEquals(expectedOrderIds.size(), actualOrderIds.size());
             assertTrue(expectedOrderIds.containsAll(actualOrderIds));
         }
@@ -327,8 +327,8 @@ class OrderServiceTest {
             List<OrderDto> actualOrdersDto = orderService.getOrders(restaurantId);
 
 
-            List<Long> expectedOrderIds = List.of(order1.getId(), order2.getId());
-            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getId).collect(Collectors.toList());
+            List<Long> expectedOrderIds = List.of(order1.getOrderId(), order2.getOrderId());
+            List<Long> actualOrderIds = actualOrdersDto.stream().map(OrderDto::getOrderId).collect(Collectors.toList());
             assertEquals(expectedOrderIds.size(), actualOrdersDto.size());
             assertTrue(expectedOrderIds.containsAll(actualOrderIds));
         }
@@ -368,7 +368,7 @@ class OrderServiceTest {
         ArgumentCaptor<Order> orderCaptor = ArgumentCaptor.forClass(Order.class);
 
 
-        orderService.markOrderComplete(order1.getId());
+        orderService.markOrderComplete(order1.getOrderId());
 
         verify(orderRepository).save(orderCaptor.capture());
         Order savedOrder = orderCaptor.getValue();

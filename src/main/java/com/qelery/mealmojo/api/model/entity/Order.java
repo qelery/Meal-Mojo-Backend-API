@@ -21,7 +21,7 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
+    private Long orderId;
     private OffsetDateTime dateTime = OffsetDateTime.now();
     private Long tip; // cents
     private Boolean isCompleted = false;
@@ -44,6 +44,6 @@ public class Order {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="restaurant_id", referencedColumnName="id")
+    @JoinColumn(name="restaurant_id")
     private Restaurant restaurant;
 }
